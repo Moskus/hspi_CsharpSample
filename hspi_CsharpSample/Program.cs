@@ -10,6 +10,22 @@ using HSCF.Communication.Scs.Communication;
 using HSCF.Communication.Scs.Communication.EndPoints.Tcp;
 using HSCF.Communication.ScsServices.Client;
 
+//********************************************************************
+//********************************************************************
+//
+// READ ME:
+// This file is used to set up the communication with HomeSeer 3.
+//
+// The only reasons to change something here is when 
+// 1. you know what you're doing, and
+// 2. you want to add remote plugin capabilities (and stuff like that)
+//
+// This file does contain some messy code
+// (hopefully this comment can be deleted)
+//
+//********************************************************************
+//********************************************************************
+
 namespace hspi_CsharpSample
 {
 	class Program
@@ -20,14 +36,18 @@ namespace hspi_CsharpSample
 		private static string _ip;
 		private static IHSApplication _host;
 		private static IAppCallbackAPI _callback;
+		private static Utils _utils;
 
 		static void Main(string[] args)
 		{
-			_ip = "127.0.0.1";//'"" 'Default is connecting to the local server
+			_ip = "127.0.0.1";//Default ip connecting to the local server
 			_port = 10400;//Default port
+			_utils=new Utils();
+			var plugin=new Plugin();
 
-			//Let's check the startup arguments.Here you can set the server location(IP) if you are running the plugin remotely, and set an optional instance name
-
+			//Let's check the startup arguments.Here you can set the server
+			//location(IP) and port if you are running the plugin remotely,
+			//and set an optional instance name
 			foreach (var argument in args)
 			{
 				var parts = argument.Split('=');
@@ -58,26 +78,27 @@ namespace hspi_CsharpSample
 				}
 			}
 
-			_appApi = new Hspi();
+			_appApi = new Hspi(plugin);
 			Console.WriteLine("Connecting to server at " + _ip + ":" + _port + "...");
 
 			_client = ScsServiceClientBuilder.CreateClient<IHSApplication>(new ScsTcpEndPoint(_ip, _port),
 					_appApi);
-			_callbackClient = ScsServiceClientBuilder.CreateClient<IAppCallbackAPI>(
+			_clientCallback = ScsServiceClientBuilder.CreateClient<IAppCallbackAPI>(
 					new ScsTcpEndPoint(_ip, _port), _appApi);
+			_client.Disconnected += Client_Disconnected;
 
 			var retryAttempts = 1;
-			var isConnected= false;
+			var isConnected = false;
 			do
 			{
 				try
 				{
-					
+
 					_client.Connect();
-					_callbackClient.Connect();
+					_clientCallback.Connect();
 					_host = _client.ServiceProxy;
 					var apiVersion = _host.APIVersion;//will cause an error if not really connected
-					_callback = _callbackClient.ServiceProxy;
+					_callback = _clientCallback.ServiceProxy;
 					apiVersion = _callback.APIVersion;//will cause an error if not really connected
 					isConnected = true;
 				}
@@ -91,135 +112,56 @@ namespace hspi_CsharpSample
 						SleepSeconds(4);
 					}
 
-					if (retryAttempts > 5 && isConnected==false)
+					if (retryAttempts > 5 && isConnected == false)
 					{
 						_client?.Dispose();
 						_client = null;
-						_callbackClient?.Dispose();
-						_callbackClient = null;
+						_clientCallback?.Dispose();
+						_clientCallback = null;
 					}
 				}
 			} while (retryAttempts < 6 && isConnected == false);
 
 			try
 			{
+				//create the user object that is the real plugin, accessed from the pluginAPI wrapper
+				_utils.Callback = _callback;
+				_utils.Hs = _host;
+				// connect to HS so it can register a callback to us
+				_host.Connect(plugin.Name, "");
+				Console.WriteLine("Connected, waiting to be initialized...");
+				do
+				{
+					Thread.Sleep(30);
+				} while (_client.CommunicationState ==
+						 HSCF.Communication.Scs.Communication.CommunicationStates.Connected && !Utils.IsShuttingDown);
+				if(!Utils.IsShuttingDown)
+				{
+					plugin.ShutDownIo();
+					Console.WriteLine("Connection lost, exiting");
+				}
+				else
+				{
+					Console.WriteLine("Shutting down plugin");
+				}
+				//disconnect from server for good here
 
+				_client.Disconnect();
+				_clientCallback.Disconnect();
+				SleepSeconds(2);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex);
-				throw;
+				Console.WriteLine("Cannot connect(2): " + ex.Message);
+				SleepSeconds(2);
+				Environment.Exit(-1);
+				return;
 			}
-			//		appAPI = New hspi
+		}
 
-			//			Console.WriteLine("Connecting to server at " & ip & "...");
-
-			//		client = ScsServiceClientBuilder.CreateClient(Of IHSApplication)(New ScsTcpEndPoint(ip, 10400), appAPI)
-
-			//		clientCallback = ScsServiceClientBuilder.CreateClient(Of IAppCallbackAPI)(New ScsTcpEndPoint(ip, 10400), appAPI)
-
-
-			//		Dim Attempts As Integer = 1
-
-			//TryAgain:
-			//			Try
-
-			//			client.Connect()
-
-			//			clientCallback.Connect()
-
-
-			//			host = client.ServiceProxy
-
-			//			Dim APIVersion As Double = host.APIVersion  ' will cause an error if not really connected
-
-
-			//			callback = clientCallback.ServiceProxy
-
-			//			APIVersion = callback.APIVersion  ' will cause an error if not really connected
-
-			//		Catch ex As Exception
-
-			//			Console.WriteLine("Cannot connect attempt " & Attempts.ToString & ": " & ex.Message)
-
-			//			If ex.Message.ToLower.Contains("timeout occurred.") Then
-			//				Attempts += 1
-
-			//				If Attempts< 6 Then GoTo TryAgain
-			//		   End If
-
-			//		   If client IsNot Nothing Then
-
-			//				client.Dispose()
-
-			//				client = Nothing
-
-			//			End If
-
-			//			If clientCallback IsNot Nothing Then
-
-			//				clientCallback.Dispose()
-
-			//				clientCallback = Nothing
-
-			//			End If
-
-			//			SleepSeconds(4)
-
-			//			Return
-			//		End Try
-
-			//		Try
-
-			//			' create the user object that is the real plugin, accessed from the pluginAPI wrapper
-
-			//			callback = callback
-
-
-			//		hs = host
-
-			//			' connect to HS so it can register a callback to us
-
-			//			host.Connect(plugin.Name, "")
-
-			//			Console.WriteLine("Connected, waiting to be initialized...")
-
-			//			Do
-
-			//				Threading.Thread.Sleep(30)
-
-			//			Loop While client.CommunicationState = HSCF.Communication.Scs.Communication.CommunicationStates.Connected And Not IsShuttingDown
-			//			If Not IsShuttingDown Then
-
-			//				plugin.ShutdownIO()
-
-			//				Console.WriteLine("Connection lost, exiting")
-
-			//			Else
-
-			//				Console.WriteLine("Shutting down plugin")
-
-			//			End If
-
-			//			' disconnect from server for good here
-
-			//			client.Disconnect()
-
-			//			clientCallback.Disconnect()
-
-			//			SleepSeconds(2)
-
-			//			End
-			//		Catch ex As Exception
-
-			//			Console.WriteLine("Cannot connect(2): " & ex.Message)
-
-			//			SleepSeconds(2)
-
-			//			End
-			//			Return
-
-			//		End Try
+		private static void Client_Disconnected(object sender, EventArgs e)
+		{
+			Console.WriteLine("Disconnected from server - client");
 		}
 
 		private static void SleepSeconds(int secondsToSleep)
@@ -227,7 +169,7 @@ namespace hspi_CsharpSample
 			Thread.Sleep(secondsToSleep * 1000);
 		}
 
-		public static IScsServiceClient<IAppCallbackAPI> _callbackClient { get; set; }
+		public static IScsServiceClient<IAppCallbackAPI> _clientCallback { get; set; }
 
 		public static IScsServiceClient<IHSApplication> _client { get; set; }
 	}
