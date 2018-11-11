@@ -131,8 +131,8 @@ namespace hspi_CsharpSample
 				var settings = new Settings(_host);
 				_utils = new Utils(settings);
 				_utils.Callback = _callback;
-				_appApi.Utils = _utils;
 				Utils.Hs = _host;
+				_appApi.Utils = _utils;
 				plugin.Settings = settings;
 				plugin.Utils= _utils;
 				// connect to HS so it can register a callback to us

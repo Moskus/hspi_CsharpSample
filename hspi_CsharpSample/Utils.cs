@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using HomeSeerAPI;
 using Scheduler;
+using Scheduler.Classes;
 
 namespace hspi_CsharpSample
 {
@@ -88,6 +90,21 @@ namespace hspi_CsharpSample
 		public void SaveSettings()
 		{
 			_settings.Save();
+		}
+
+		public List<DeviceClass> Devices()
+		{
+			var ret = new List<Scheduler.Classes.DeviceClass>();
+			DeviceClass device;
+			clsDeviceEnumeration deviceEnumeration;
+			deviceEnumeration = (clsDeviceEnumeration)Hs.GetDeviceEnumerator();
+			while (!deviceEnumeration.Finished)
+			{
+				device = deviceEnumeration.GetNext();
+				if(device.get_Interface(Hs) == Utils.PluginName)
+					ret.Add(device);
+			}
+			return ret;
 		}
 	}
 }

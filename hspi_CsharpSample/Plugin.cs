@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Configuration;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using hspi_CsharpSample.HomeSeerClasses;
+using HomeSeerAPI;
 
 namespace hspi_CsharpSample
 {
@@ -17,8 +19,9 @@ namespace hspi_CsharpSample
 		private HsCollection _actions = new HsCollection();
 		private HsCollection _triggers = new HsCollection();
 
-		private HsTrigger _trigger =new HsTrigger();
-		private HsAction _action = new HsAction();
+		private HsTriggers _trigger = new HsTriggers();
+		private HsActions _action = new HsActions();
+		private IHSApplication _hs;
 
 
 		public Plugin()
@@ -26,13 +29,17 @@ namespace hspi_CsharpSample
 		}
 
 		public Timer UpdateTimer => _updateTimer;
-		
+
 		public string Name => Utils.PluginName;
 
 		public Utils Utils
 		{
 			get => _utils;
-			set => _utils = value;
+			set
+			{
+				_utils = value;
+				_hs = Utils.Hs;
+			}
 		}
 
 		public Settings Settings
@@ -257,22 +264,22 @@ namespace hspi_CsharpSample
 			_utils.RegisterWebPage(ConfigPageName, "Config", "Configuration");
 			_utils.RegisterWebPage(StatusPageName, "", "Demo test");
 
-			//'Adding a trigger 
-			//triggers.Add(CObj(Nothing), "Random value is lower than")
-			//'Adding a second trigger with subtriggers
-			//'... so first let us create the subtriggers
-			//Dim subtriggers As New Trigger
-			//subtriggers.Add(CObj(Nothing), "Random value is lower than")
-			//subtriggers.Add(CObj(Nothing), "Random value is equal to")
-			//subtriggers.Add(CObj(Nothing), "Random value is higher than")
+			//Adding a trigger 
+			_triggers.Add(null, "Random value is lower than");
+			//Adding a second trigger with subtriggers
+			//... so first let us create the subtriggers
+			var subtriggers = new HsTriggers();
+			subtriggers.Add(null, "Random value is lower than");
+			subtriggers.Add(null, "Random value is equal to");
+			subtriggers.Add(null, "Random value is higher than");
 
-			//'... and then the trigger with the subtriggers
-			//triggers.Add(subtriggers, "Random value is...")
-			//'Adding an action
-			//actions.Add(CObj(Nothing), "Send a custom command somewhere")
+			//... and then the trigger with the subtriggers
+			_triggers.Add(subtriggers, "Random value is...");
+			//Adding an action
+			_actions.Add(null, "Send a custom command somewhere");
 
-			//'Checks if plugin devices are present, and create them if not.
-			//	CheckAndCreateDevices()
+			//Checks if plugin devices are present, and create them if not.
+			CheckAndCreateDevices();
 
 			//'Starting the update timer; a timer for fetching updates from the web (for example). However, in this sample, the UpdateTimerTrigger just generates a random value. (Should ideally be placed in its own thread, but I use a Timer here for simplicity).
 			_updateTimer = new System.Threading.Timer(new TimerCallback(UpdateRandomValue), null, Timeout.Infinite,
@@ -284,6 +291,173 @@ namespace hspi_CsharpSample
 
 			return "";
 		}
+
+		///<summary>
+		///Checking if the devices have created by the plugin still exists. If not, let's create them.
+		///</summary>
+		///<remarks>By Moskus</remarks>
+		private void CheckAndCreateDevices()
+		{
+			//Here we wil check if we have all the devices we want or if they should be created.
+			//In this example I have said that we want to have:
+			// - One "Basic" device
+			// - One "Advanced" device with some controls
+			// - One "Root" (or Master) device with two child devices
+
+			//HS usually use the deviceenumerator for this kind of stuff, but I prefer to use Linq.
+			//As HS haven't provided a way to get a list(or "queryable method") for devices, I've made one (Check the function "Devices()" in utils.vb).
+			//Here we are only interessted in the plugin devices for this plugin, so let's do some first hand filtering
+			var deviceList = _utils.Devices();
+
+			//First let's see if we can find any devices belonging to the plugin with device type = "Basic".The device type string should contain "Basic".
+			var basicDevice = deviceList.SingleOrDefault(x => x.get_Device_Type_String(_hs).Contains("Basic"));
+			if (basicDevice == null)
+			{
+				//Apparently we don't have a basic device, so we create one with the name "Test basic device"
+				CreateBasicDevice("Test basic device");
+			}
+
+			//Then let's see if we can find the "Advanced" device, and create it if not
+			var advancedDevice = deviceList.SingleOrDefault(x => x.get_Device_Type_String(_hs).Contains("Advanced"));
+			if (advancedDevice == null)
+			{
+				CreateAdvancedDevice("Test advanced device");
+			}
+
+			//Checking root devices and child devices
+			var rootDevice = deviceList.SingleOrDefault(x => x.get_Device_Type_String(_hs).Contains("Root"));
+			if (rootDevice == null)
+			{
+
+				//There are no root device so let's create one, and keep the device reference
+				var rootDeviceReference = CreateRootDevice("Test Root device");
+				var root = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(rootDeviceReference);
+
+				//The point of a root/parent device is to have children, so let's have some fun creating them *badam tish*
+				for (int i = 0; i < 2; i++)
+				{
+					//Let's create the child device
+					var childDeviceReference = CreateChildDevice("Child " + i);
+					//... and associate it with the root
+					if (childDeviceReference > 0)
+					{
+						root.AssociatedDevice_Add(_hs, childDeviceReference);
+					}
+				}
+			}
+			else
+			{
+				//We have a root device or more, but do we have child devices?
+				var roots = deviceList.Where(x => x.get_Device_Type_String(_hs).Contains("Root"));
+				foreach (var foundRoot in roots)
+				{
+					//If we don't have two root devices...
+					if (foundRoot.get_AssociatedDevices_Count(_hs) != 2)
+					{
+						//...we delete them all
+						foreach (var childDeviceRef in rootDevice.get_AssociatedDevices(_hs))
+						{
+							_hs.DeleteDevice(childDeviceRef);
+						}
+
+						//... and recreate them
+						for (int y = 0; y < 2; y++)
+						{
+							//First create the device and get the reference
+							var childReference = CreateChildDevice("Child " + y);
+							//Then associated that child reference with the root.
+							if (childReference > 0)
+							{
+								foundRoot.AssociatedDevice_Add(_hs, childReference);
+							}
+						}
+						//NOTE:
+						//This could be handled more elegantly, like checking which child devices are missing,
+						//and creating only those.
+					}
+				}
+			}
+		}
+
+
+		///<summary>
+		///Creates a basic device without controls. It can show values, though.
+		///</summary>
+		///<param name="deviceName">The name of the device</param>
+		///<remarks>By Moskus and http://www.homeseer.com/support/homeseer/HS3/HS3Help/scripting_devices_deviceclass1.htm </remarks>
+		private int CreateBasicDevice(string deviceName)
+		{
+			try
+			{
+
+				//Creating a brand new device, and get the actual device from the device reference
+
+				Scheduler.Classes.DeviceClass device =
+					(Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(_hs.NewDeviceRef(deviceName));
+
+				var reference = device.get_Ref(_hs);
+
+
+				//Setting the type to plugin device
+
+				var typeInfo = new DeviceTypeInfo_m.DeviceTypeInfo()
+				{
+					Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
+				};
+
+				device.set_DeviceType_Set(_hs, typeInfo);
+				device.set_Can_Dim(_hs, false);
+
+				device.set_Interface(_hs, Utils.PluginName);//Don't change this, or the device won't be associated with your plugin
+				//Todo: Checkout pluginInstance handling. Should be for each instance. Now for all instances
+				device.set_InterfaceInstance(_hs, Utils.PluginInstance);//Don't change this, or the device won't be associated with that particular instance
+
+				device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Basic");//This you can change to something suitable, though. :)
+
+				//Setting the name and locations
+				device.set_Name(_hs, deviceName);//as approved by input variable
+				device.set_Location(_hs, Settings.Location);
+				device.set_Location2(_hs, Settings.Location2);
+
+				//Misc options
+				device.set_Status_Support(_hs, false);//Set to True if the devices can be polled, False if not. (See PollDevice in hspi.vb)
+				device.MISC_Set(_hs, Enums.dvMISC.SHOW_VALUES);//If not set, device control options will not be displayed
+				device.MISC_Set(_hs, Enums.dvMISC.NO_LOG);//As default, we don't want to log every device value change to the log
+
+				//Committing to the database, clear value-status-pairs and graphic-status pairs
+				_hs.SaveEventsDevices();
+
+				_hs.DeviceVSP_ClearAll(reference, true);
+				_hs.DeviceVGP_ClearAll(reference, true);
+
+				//Return the reference
+				return reference;
+			}
+			catch (Exception ex)
+			{
+				_utils.Log("Unable to create basic device. Error: " + ex.Message, LogType.Warning);
+			}
+
+			return 0; //if anything fails.
+		}
+
+
+		private int CreateChildDevice(object p0)
+		{
+			throw new NotImplementedException();
+		}
+
+		private int CreateRootDevice(string testRootDevice)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void CreateAdvancedDevice(string testAdvancedDevice)
+		{
+			throw new NotImplementedException();
+		}
+
+
 
 		///<summary>
 		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
@@ -300,7 +474,7 @@ namespace hspi_CsharpSample
 				_settings.TimerInterval);
 
 			//Find the difference in milliseconds
-			var diff =(int)nextWhole.Subtract(timeNow).TotalMilliseconds;
+			var diff = (int)nextWhole.Subtract(timeNow).TotalMilliseconds;
 			Console.WriteLine("RestartTimer, timeNow: " + timeNow.ToString());
 			Console.WriteLine("RestartTimer, nextWhole: " + nextWhole.ToString());
 			Console.WriteLine("RestartTimer, diff: " + diff);

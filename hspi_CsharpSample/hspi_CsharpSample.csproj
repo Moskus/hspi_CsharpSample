@@ -68,7 +68,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HomeSeerClasses\Class1.cs" />
+    <Compile Include="HomeSeerClasses\SampleClass.cs" />
+    <Compile Include="HomeSeerClasses\HsAction.cs" />
+    <Compile Include="HomeSeerClasses\HsCollection.cs" />
+    <Compile Include="HomeSeerClasses\HsTriggers.cs" />
     <Compile Include="Hspi.cs" />
     <Compile Include="LogType.cs" />
     <Compile Include="Plugin.cs" />
