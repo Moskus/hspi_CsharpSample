@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HomeSeerClasses\Class1.cs" />
     <Compile Include="Hspi.cs" />
     <Compile Include="LogType.cs" />
     <Compile Include="Plugin.cs" />

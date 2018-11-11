@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using hspi_CsharpSample.HomeSeerClasses;
 
 namespace hspi_CsharpSample
 {
@@ -13,6 +14,12 @@ namespace hspi_CsharpSample
 		private readonly string StatusPageName = Utils.PluginName + "Status";
 		private int _lastRandomNumber;
 		private Timer _updateTimer;
+		private HsCollection _actions = new HsCollection();
+		private HsCollection _triggers = new HsCollection();
+
+		private HsTrigger _trigger =new HsTrigger();
+		private HsAction _action = new HsAction();
+
 
 		public Plugin()
 		{
