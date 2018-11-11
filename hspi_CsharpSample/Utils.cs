@@ -83,27 +83,11 @@ namespace hspi_CsharpSample
 					Hs.WriteLog(Utils.PluginName + " ERROR", message);
 					break;
 			}
+		}
 
-			//Select Case Log_Level
-			//	Case LogType.Debug
-			//	If plugin.Settings.DebugLog Then hs.WriteLog(plugin.Name & " Debug", Message)
-
-
-			//Case LogType.Normal
-
-			//hs.WriteLog(plugin.Name, Message)
-
-
-			//Case LogType.Warning
-
-			//hs.WriteLog(plugin.Name & " Warning", Message)
-
-
-			//Case LogType.Error
-
-			//hs.WriteLog(plugin.Name & " ERROR", Message)
-
-			//End Select
+		public void SaveSettings()
+		{
+			_settings.Save();
 		}
 	}
 }

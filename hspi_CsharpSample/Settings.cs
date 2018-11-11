@@ -20,7 +20,7 @@ namespace hspi_CsharpSample
 			get => _debugLog;
 			set
 			{
-				_debugLog=value;
+				_debugLog = value;
 				_hs.SaveINISetting("Settings", "DebugLog", _debugLog.ToString(), Utils.IniFile);
 			}
 		}
@@ -40,7 +40,7 @@ namespace hspi_CsharpSample
 			get => _location2;
 			set
 			{
-				_location2=value;
+				_location2 = value;
 				_hs.SaveINISetting("Settings", "Location2", _location2, Utils.IniFile);
 			}
 		}
@@ -67,11 +67,11 @@ namespace hspi_CsharpSample
 
 		public void Load()
 		{
-			this.TimerInterval = int.Parse(_hs.GetINISetting("Settings", "TimerInterval", "60000", Utils.IniFile));//Default value is a refresh every minute
-			this.Location = _hs.GetINISetting("Settings", "Location", Utils.PluginName, Utils.IniFile);//I Like it When I can Set a Default location myself
-			this.Location2 = _hs.GetINISetting("Settings", "Location2", Utils.PluginName, Utils.IniFile);
-			this.LogTimerElapsed = bool.Parse(_hs.GetINISetting("Settings", "LogTimerElapsed", "false", Utils.IniFile));
-			this.DebugLog = bool.Parse(_hs.GetINISetting("Settings", "DebugLog", "false", Utils.IniFile));
+			TimerInterval = int.Parse(_hs.GetINISetting("Settings", "TimerInterval", "60000", Utils.IniFile));//Default value is a refresh every minute
+			Location = _hs.GetINISetting("Settings", "Location", Utils.PluginName, Utils.IniFile);//I Like it When I can Set a Default location myself
+			Location2 = _hs.GetINISetting("Settings", "Location2", Utils.PluginName, Utils.IniFile);
+			LogTimerElapsed = bool.Parse(_hs.GetINISetting("Settings", "LogTimerElapsed", "false", Utils.IniFile));
+			DebugLog = bool.Parse(_hs.GetINISetting("Settings", "DebugLog", "false", Utils.IniFile));
 		}
 
 		public void Save()
