@@ -42,9 +42,7 @@ namespace hspi_CsharpSample
 		{
 			_ip = "127.0.0.1";//Default ip connecting to the local server
 			_port = 10400;//Default port
-			_utils=new Utils();
-			var plugin=new Plugin();
-
+			
 			//Let's check the startup arguments.Here you can set the server
 			//location(IP) and port if you are running the plugin remotely,
 			//and set an optional instance name
@@ -78,6 +76,11 @@ namespace hspi_CsharpSample
 				}
 			}
 
+			//var settings = new Settings();
+			//_utils = new Utils(settings);
+
+			//var plugin = new Plugin(_utils);
+			var plugin = new Plugin();
 			_appApi = new Hspi(plugin);
 			Console.WriteLine("Connecting to server at " + _ip + ":" + _port + "...");
 
@@ -124,11 +127,15 @@ namespace hspi_CsharpSample
 
 			try
 			{
-				//create the user object that is the real plugin, accessed from the pluginAPI wrapper
+				//create the user objects that is the real plugin, accessed from the pluginAPI wrapper
+				var settings = new Settings(_host);
+				_utils = new Utils(settings);
 				_utils.Callback = _callback;
-				_utils.Hs = _host;
+				Utils.Hs = _host;
+				plugin.Settings = settings;
+				plugin.Utils= _utils;
 				// connect to HS so it can register a callback to us
-				_host.Connect(plugin.Name, "");
+				_host.Connect(Utils.PluginName, "");
 				Console.WriteLine("Connected, waiting to be initialized...");
 				do
 				{
@@ -145,7 +152,6 @@ namespace hspi_CsharpSample
 					Console.WriteLine("Shutting down plugin");
 				}
 				//disconnect from server for good here
-
 				_client.Disconnect();
 				_clientCallback.Disconnect();
 				SleepSeconds(2);

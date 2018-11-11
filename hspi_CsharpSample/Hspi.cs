@@ -12,6 +12,7 @@ namespace hspi_CsharpSample
 	public class Hspi : IPlugInAPI
 	{
 		private Plugin _plugin;
+		private Utils _utils;
 
 		public Hspi(Plugin plugin)
 		{
@@ -280,7 +281,7 @@ namespace hspi_CsharpSample
 			}
 			catch (Exception ex)
 			{
-				//Log("Error in PluginProc: " & ex.Message, LogType.Error)
+				_utils.Log("Error in PluginProc: " + ex.Message, LogType.Error);
 			}
 			return null;
 		}
@@ -308,7 +309,7 @@ namespace hspi_CsharpSample
 			}
 			catch (Exception ex)
 			{
-				//Log("Error in PluginPropertyGet: " & ex.Message, LogType.Error)
+				_utils.Log("Error in PluginPropertyGet: " + ex.Message, LogType.Error);
 			}
 			return null;
 		}
