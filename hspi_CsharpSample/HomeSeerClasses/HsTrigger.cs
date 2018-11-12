@@ -3,12 +3,12 @@
 namespace hspi_CsharpSample.HomeSeerClasses
 {
 	[Serializable()]
-	public class HsTriggers : HsCollection
+	public class HsTrigger : HsCollection
 	{
-		public HsTriggers()
+		public HsTrigger()
 		{}
 
-		protected HsTriggers(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+		protected HsTrigger(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
 		{ }
 	}
 }

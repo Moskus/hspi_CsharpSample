@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using HomeSeerAPI;
 using Scheduler;
 using Scheduler.Classes;
@@ -119,109 +121,105 @@ namespace hspi_CsharpSample
 		///<param name="PEDName">The key to look for. Moskus: I only use the pl</param>
 		///<param name="PEDValue"></param>
 		///<remarks></remarks>
-		public void PedAdd(ByRef ped As clsPlugExtraData, ByVal pedName As String, ByVal pedValue As Object) { }
-		Public Sub PEDAdd(ByRef PED As clsPlugExtraData, ByVal PEDName As String, ByVal PEDValue As Object)
+		public void PedAdd(ref PlugExtraData.clsPlugExtraData ped, string pedName, object pedValue)
+		{
+			byte[] byteObject = null;
+			if (ped == null)
+			{
+				ped = new PlugExtraData.clsPlugExtraData();
+			}
+			SerializeObject(ref pedValue, ref byteObject);
+			if (!ped.AddNamed(pedName, byteObject)) //'AddNamed will return False if "PEDName" it already exists
+			{
+				ped.RemoveNamed(pedName);
+				ped.AddNamed(pedName, byteObject);
+			}
+		}
 
-		Dim ByteObject() As Byte = Nothing
-
-		If PED Is Nothing Then PED = New clsPlugExtraData
-		SerializeObject(PEDValue, ByteObject)
 
 
-		If Not PED.AddNamed(PEDName, ByteObject) Then 'AddNamed will return False if "PEDName" it already exists
+		///<summary>
+		///Returns serialized pluginExtraData from a device
+		///</summary>
+		///<param name="ped"></param>
+		///<param name="pedName"></param>
+		///<returns></returns>
+		///<remarks></remarks>
+		public object PedGet(ref PlugExtraData.clsPlugExtraData ped, string pedName)
+		{
+			var returnValue = new object();
 
-			PED.RemoveNamed(PEDName)
-			PED.AddNamed(PEDName, ByteObject)
+			byte[] byteObject = ped.GetNamed(pedName);
 
-		End If
+			if (byteObject == null) return null;
 
-	End Sub
+			DeSerializeObject(byteObject, returnValue);
 
-    ''' <summary>
-    ''' Returns serialized pluginExtraData from a device
-    ''' </summary>
-    ''' <param name="PED"></param>
-    ''' <param name="PEDName"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
+			return returnValue;
 
-	Function PEDGet(ByRef PED As clsPlugExtraData, ByVal PEDName As String) As Object
+		}
 
-		Dim ReturnValue As New Object
+		///<summary>
+		///Used to serialize an object to a bytestream, which can be stored in a device ("PDE" or "clsPlugExtraData"), Action or Trigger
+		///</summary>
+		///<param name="objIn">Input object</param>
+		///<param name="byteOut">Output bytes</param>
+		///<returns>True/False success</returns>
+		///<remarks>By HomeSeer</remarks>
+		public bool SerializeObject(ref object objIn, ref byte[] byteOut)
+		{
+			if (objIn == null)
+				return false;
+			var memStream = new MemoryStream();
+			var formatter = new BinaryFormatter();
 
-		Dim ByteObject() As Byte = PED.GetNamed(PEDName)
+			try
+			{
 
-		If ByteObject Is Nothing Then Return Nothing
+				formatter.Serialize(memStream, objIn);
+				byteOut = new byte[memStream.Length - 1];
 
-		DeSerializeObject(ByteObject, ReturnValue)
+				byteOut = memStream.ToArray();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				if (Hs != null)
+					Log("Serializing object " + objIn.ToString() + " :" + ex.Message, LogType.Error);
+				return false;
+			}
+		}
 
-		Return ReturnValue
+		///<summary>
+		///Used to deserialze bytestream to an object, stored in a device ("PDE" or "clsPlugExtraData"), Action or Trigger
+		///</summary>
+		///<param name="byteIn">Input bytes</param>
+		///<param name="objOut">Output object</param>
+		///<returns>True/False success</returns>
+		///<remarks>By HomeSeer</remarks>
+		public bool DeSerializeObject(ref byte[] byteIn, ref object objOut)
+		{
+			//The following is a comment from HST. Make of it what you want:
+			//   "Almost immediately there is a test to see if ObjOut is NOTHING.  The reason for this
+			//   when the ObjOut is suppose to be where the deserialized object is stored, is that 
+			//   I could find no way to test to see if the deserialized object and the variable to 
+			//   hold it was of the same type.  If you try to get the type of a null object, you get
+			//   only a null reference exception!  If I do not test the object type beforehand and 
+			//   there is a difference, then the InvalidCastException is thrown back in the CALLING
+			//   procedure, not here, because the cast is made when the ByRef object is cast when this
+			//   procedure returns, not earlier.  In order to prevent a cast exception in the calling
+			//   procedure that may or may not be handled, I made it so that you have to at least 
+			//   provide an initialized ObjOut when you call this - ObjOut is set to nothing after it 
+			//   is typed."
+			//Did that make sense to you?
 
-	End Function
+			//If input and/or output is nothing then it failed (we need some objects to work with), so return False
+			if (byteIn == null) return false;
+			if (byteIn.Length < 1) return false;
+			if (ObjOut == null) return false;
 
-    ''' <summary>
-    ''' Used to serialize an object to a bytestream, which can be stored in a device ("PDE" or "clsPlugExtraData"), Action or Trigger
-    ''' </summary>
-    ''' <param name="ObjIn">Input object</param>
-    ''' <param name="bteOut">Output bytes</param>
-    ''' <returns>True/False success</returns>
-    ''' <remarks>By HomeSeer</remarks>
-
-	Public Function SerializeObject(ByRef ObjIn As Object, ByRef bteOut() As Byte) As Boolean
-
-		If ObjIn Is Nothing Then Return False
-		Dim memStream As New MemoryStream
-
-		Dim formatter As New Binary.BinaryFormatter
-
-		Try
-
-			formatter.Serialize(memStream, ObjIn)
-			ReDim bteOut(CInt(memStream.Length - 1))
-            bteOut = memStream.ToArray
-			Return True
-		Catch ex As Exception
-			Log("Serializing object " & ObjIn.ToString & " :" & ex.Message, LogType.Error)
-
-			Return False
-
-		End Try
-
-	End Function
-
-    ''' <summary>
-    ''' Used to deserialze bytestream to an object, stored in a device ("PDE" or "clsPlugExtraData"), Action or Trigger
-    ''' </summary>
-    ''' <param name="bteIn">Input bytes</param>
-    ''' <param name="ObjOut">Output object</param>
-    ''' <returns>True/False success</returns>
-    ''' <remarks>By HomeSeer</remarks>
-
-	Public Function DeSerializeObject(ByRef bteIn() As Byte, ByRef ObjOut As Object) As Boolean
-        'The following is a comment from HST. Make of it what you want:
-        '   "Almost immediately there is a test to see if ObjOut is NOTHING.  The reason for this
-        '   when the ObjOut is suppose to be where the deserialized object is stored, is that 
-        '   I could find no way to test to see if the deserialized object and the variable to 
-        '   hold it was of the same type.  If you try to get the type of a null object, you get
-        '   only a null reference exception!  If I do not test the object type beforehand and 
-        '   there is a difference, then the InvalidCastException is thrown back in the CALLING
-        '   procedure, not here, because the cast is made when the ByRef object is cast when this
-        '   procedure returns, not earlier.  In order to prevent a cast exception in the calling
-        '   procedure that may or may not be handled, I made it so that you have to at least 
-        '   provide an initialized ObjOut when you call this - ObjOut is set to nothing after it 
-        '   is typed."
-        'Did that make sense to you?
-
-        'If input and/or output is nothing then it failed (we need some objects to work with), so return False
-
-		If bteIn Is Nothing Then Return False
-		If bteIn.Length< 1 Then Return False
-
-		If ObjOut Is Nothing Then Return False
-
-        'Else: Let's deserialize the bytes
-
-		Dim memStream As MemoryStream
+		//Else: Let's deserialize the bytes
+			var memStream = new MemoryStream();
 
 		Dim formatter As New Binary.BinaryFormatter
 
@@ -243,7 +241,8 @@ namespace hspi_CsharpSample
 
 			If ObjTest Is Nothing Then Return False
 			TType = ObjTest.GetType
-            'If Not TType.Equals(OType) Then Return False
+
+			'If Not TType.Equals(OType) Then Return False
 
 
 			ObjOut = ObjTest
@@ -264,7 +263,7 @@ namespace hspi_CsharpSample
 		End Try
 
 
-	End Function
+		}
 
     ''' <summary>
     ''' Deletes all devices associated with the plugin.
@@ -346,8 +345,8 @@ namespace hspi_CsharpSample
 
 	Sub InitHSDevice(ByRef dv As Scheduler.Classes.DeviceClass, Optional ByVal Name As String = "Optional_Sample_device_name")
 
-		Dim DT As New DeviceTypeInfo
-		DT.Device_Type = DeviceTypeInfo.eDeviceAPI.Plug_In
+		Dim DT As New DeviceTypeInfo_m.DeviceTypeInfo
+		DT.Device_Type = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
 		dv.DeviceType_Set(hs) = DT
 
 		dv.Interface(hs) = plugin.Name

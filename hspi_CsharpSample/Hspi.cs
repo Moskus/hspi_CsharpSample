@@ -142,46 +142,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/initialization_-_when_used.htm</remarks>
 		public void ShutdownIO()
 		{
-			try
-			{
-				// * *********************
-				//For debugging only, this will delete all devices accociated by the plugin at shutdown, so new devices will be created on startup:
-				//DeleteDevices()
-				// * *********************
-
-				//Setting a flag that states that we are shutting down, this can be used to abort ongoing commands
-				Utils.IsShuttingDown = true;
-
-				//Write any changes in the settings to the ini file
-				
-				//_utils.SaveSettings();
-				//2018-11-11 Removed since I got error when doing a disconnect due to HS-object not available any more and giving an error 
-
-				//Stopping the timer if it exists and runs
-				if (_plugin.UpdateTimer != null)
-				{
-					_plugin.UpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
-					_plugin.UpdateTimer.Dispose();
-				}
-
-				//Save all device changes on plugin shutdown
-				//2018-11-11 Removed since it will always fail on disconnect. HS connection gone so no way to save
-				//try
-				//{
-				//	Utils.Hs.SaveEventsDevices();
-				//}
-				//catch (Exception ex)
-				//{
-				//	_utils.Log("could not save devices :"+ex.Message, LogType.Error);
-
-				//}
-			}
-			catch (Exception ex)
-			{
-				//_utils.Log("Error ending " + Utils.PluginName + " Plug-In :"+ex.Message, LogType.Error);
-				Console.WriteLine("Error ending " + Utils.PluginName + " Plug-In :" + ex.Message);
-			}
-			Console.WriteLine("ShutdownIO complete.");
+			_plugin.ShutDownIo();
 		}
 
 		///<summary>

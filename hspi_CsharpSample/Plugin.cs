@@ -94,6 +94,46 @@ namespace hspi_CsharpSample
 			set => _settings = value;
 		}
 
+		#region "Init"
+
+		public string InitIO(string port)
+		{
+			Console.WriteLine("Starting initializiation.");
+			//Loading settings before we do anything else
+			_settings.Load();
+			//Registering two pages
+			_utils.RegisterWebPage(ConfigPageName, "Config", "Configuration");
+			_utils.RegisterWebPage(StatusPageName, "", "Demo test");
+
+			//Adding a trigger 
+			_triggers.Add(null, "Random value is lower than");
+			//Adding a second trigger with subtriggers
+			//... so first let us create the subtriggers
+			var subtriggers = new HsTriggers();
+			subtriggers.Add(null, "Random value is lower than");
+			subtriggers.Add(null, "Random value is equal to");
+			subtriggers.Add(null, "Random value is higher than");
+
+			//... and then the trigger with the subtriggers
+			_triggers.Add(subtriggers, "Random value is...");
+			//Adding an action
+			_actions.Add(null, "Send a custom command somewhere");
+
+			//Checks if plugin devices are present, and create them if not.
+			CheckAndCreateDevices();
+
+			//'Starting the update timer; a timer for fetching updates from the web (for example). However, in this sample, the UpdateTimerTrigger just generates a random value. (Should ideally be placed in its own thread, but I use a Timer here for simplicity).
+			_updateTimer = new System.Threading.Timer(new TimerCallback(UpdateRandomValue), null, Timeout.Infinite,
+				_settings.TimerInterval);
+			RestartTimer();
+
+			Console.WriteLine("Initializing done! Ready...");
+
+			return "";
+		}
+
+		#endregion
+
 		///<summary>
 		///Generate a new random value, check which triggers should be triggered, and update device values.
 		///</summary>
@@ -107,7 +147,7 @@ namespace hspi_CsharpSample
 
 			//Let's make a nice random number between 0 and 100
 			Random rnd = new Random(DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second +
-									 DateTime.Now.Millisecond);
+			                        DateTime.Now.Millisecond);
 
 			var randomValue = rnd.Next(100);
 
@@ -298,45 +338,120 @@ namespace hspi_CsharpSample
 
 		public void ShutDownIo()
 		{
-			throw new System.NotImplementedException();
+			try
+			{
+				// * *********************
+				//For debugging only, this will delete all devices accociated by the plugin at shutdown, so new devices will be created on startup:
+				//DeleteDevices()
+				// * *********************
+
+				//Setting a flag that states that we are shutting down, this can be used to abort ongoing commands
+				Utils.IsShuttingDown = true;
+
+				//Write any changes in the settings to the ini file
+
+				//_utils.SaveSettings();
+				//2018-11-11 Removed since I got error when doing a disconnect due to HS-object not available any more and giving an error 
+
+				//Stopping the timer if it exists and runs
+				if (_updateTimer != null)
+				{
+					_updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+					_updateTimer.Dispose();
+				}
+
+				//Save all device changes on plugin shutdown
+				//2018-11-11 Removed since it will always fail on disconnect. HS connection gone so no way to save
+				//try
+				//{
+				//	Utils.Hs.SaveEventsDevices();
+				//}
+				//catch (Exception ex)
+				//{
+				//	_utils.Log("could not save devices :"+ex.Message, LogType.Error);
+
+				//}
+			}
+			catch (Exception ex)
+			{
+				//_utils.Log("Error ending " + Utils.PluginName + " Plug-In :"+ex.Message, LogType.Error);
+				Console.WriteLine("Error ending " + Utils.PluginName + " Plug-In :" + ex.Message);
+			}
+
+			Console.WriteLine("ShutdownIO complete.");
 		}
 
-		public string InitIO(string port)
+
+
+
+		///<summary>
+		///Get the actual value to check from a trigger
+		///</summary>
+		///<param name = "key" > The key stored in the trigger, like "SomeValue"</param>
+		///<param name = "trigInfo" > The trigger information to check</param>
+		///<returns>Object of whatever is stored</returns>
+		///<remarks>By Moskus</remarks>
+		private object GetTriggerValue(string key, IPlugInAPI.strTrigActInfo trigInfo)
 		{
-			Console.WriteLine("Starting initializiation.");
-			//Loading settings before we do anything else
-			_settings.Load();
-			//Registering two pages
-			_utils.RegisterWebPage(ConfigPageName, "Config", "Configuration");
-			_utils.RegisterWebPage(StatusPageName, "", "Demo test");
 
-			//Adding a trigger 
-			_triggers.Add(null, "Random value is lower than");
-			//Adding a second trigger with subtriggers
-			//... so first let us create the subtriggers
-			var subtriggers = new HsTriggers();
-			subtriggers.Add(null, "Random value is lower than");
-			subtriggers.Add(null, "Random value is equal to");
-			subtriggers.Add(null, "Random value is higher than");
+			var trigger = new HsTrigger();
 
-			//... and then the trigger with the subtriggers
-			_triggers.Add(subtriggers, "Random value is...");
-			//Adding an action
-			_actions.Add(null, "Send a custom command somewhere");
+		//Loads the trigger from the serialized object (if it exists, and it should)
+			if (!(trigInfo.DataIn == null))
+			{
+				_utils.DeSerializeObject(trigInfo.DataIn, trigger);
+			}
+			
 
-			//Checks if plugin devices are present, and create them if not.
-			CheckAndCreateDevices();
+		End If
 
-			//'Starting the update timer; a timer for fetching updates from the web (for example). However, in this sample, the UpdateTimerTrigger just generates a random value. (Should ideally be placed in its own thread, but I use a Timer here for simplicity).
-			_updateTimer = new System.Threading.Timer(new TimerCallback(UpdateRandomValue), null, Timeout.Infinite,
+		'A trigger has "keys" with different stored values, let's go through them all.
+		'In my sample we only have one key, which is "SomeValue"
+		For Each key In _trigger.Keys
+			Select Case True
+
+		Case key.Contains(key_to_find & "_" & TrigInfo.UID)
+			'We found the correct key, so let's just return the value:
+
+		Return _trigger(key)
+
+		End Select
+
+		Next
+
+		'Apparently we didn't find any matching keys in the trigger, so that's all we have to return
+		Return Nothing
+
+		End Function
+	}
+
+
+	///<summary>
+		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
+		///</summary>
+		///<remarks>By Moskus</remarks>
+		private void RestartTimer()
+		{
+			//Get now time
+			var timeNow = DateTime.Now.TimeOfDay;
+
+			//Round time to the nearest whole trigger (if Me.Settings.TimerInterval is set to 5 minutes, the trigger will be exectued 10:00, 10:05, 10:10, etc
+			var nextWhole = TimeSpan.FromMilliseconds(
+				Math.Ceiling((timeNow.TotalMilliseconds) / _settings.TimerInterval) *
 				_settings.TimerInterval);
-			RestartTimer();
 
+			//Find the difference in milliseconds
+			var diff = (int)nextWhole.Subtract(timeNow).TotalMilliseconds;
+			Console.WriteLine("RestartTimer, timeNow: " + timeNow.ToString());
+			Console.WriteLine("RestartTimer, nextWhole: " + nextWhole.ToString());
+			Console.WriteLine("RestartTimer, diff: " + diff);
 
-			Console.WriteLine("Initializing done! Ready...");
-
-			return "";
+			_updateTimer.Change(diff, _settings.TimerInterval);
 		}
+
+
+
+		#region "Device creation and management"
 
 		///<summary>
 		///Checking if the devices have created by the plugin still exists. If not, let's create them.
@@ -424,7 +539,6 @@ namespace hspi_CsharpSample
 				}
 			}
 		}
-
 
 		///<summary>
 		///Creates a basic device without controls. It can show values, though.
@@ -612,32 +726,8 @@ namespace hspi_CsharpSample
 			return device.get_Ref(_hs);
 		}
 
-		///<summary>
-		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
-		///</summary>
-		///<remarks>By Moskus</remarks>
-		private void RestartTimer()
-		{
-			//Get now time
-			var timeNow = DateTime.Now.TimeOfDay;
-
-			//Round time to the nearest whole trigger (if Me.Settings.TimerInterval is set to 5 minutes, the trigger will be exectued 10:00, 10:05, 10:10, etc
-			var nextWhole = TimeSpan.FromMilliseconds(
-				Math.Ceiling((timeNow.TotalMilliseconds) / _settings.TimerInterval) *
-				_settings.TimerInterval);
-
-			//Find the difference in milliseconds
-			var diff = (int)nextWhole.Subtract(timeNow).TotalMilliseconds;
-			Console.WriteLine("RestartTimer, timeNow: " + timeNow.ToString());
-			Console.WriteLine("RestartTimer, nextWhole: " + nextWhole.ToString());
-			Console.WriteLine("RestartTimer, diff: " + diff);
-
-			_updateTimer.Change(diff, _settings.TimerInterval);
-		}
-
-		public void SaveSettings()
-		{
-			_settings.Save();
-		}
+		#endregion
 	}
+
+
 }
