@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace hspi_CsharpSample.HomeSeerClasses
 {
@@ -19,6 +20,11 @@ namespace hspi_CsharpSample.HomeSeerClasses
 
 		protected HsCollection(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
 		{
+		}
+
+		public List<string> GetAllKeys()
+		{
+			return base.Keys.ToList();
 		}
 
 		public void Add(object value, string key)
@@ -49,6 +55,7 @@ namespace hspi_CsharpSample.HomeSeerClasses
 			base.Remove(KeyIndex[index]);
 			KeyIndex.RemoveAt(index);
 		}
+		
 
 		public new Object Keys(int index)
 		{

@@ -65,8 +65,8 @@ namespace hspi_CsharpSample
 		private HsCollection _actions = new HsCollection();
 		private HsCollection _triggers = new HsCollection();
 
-		private HsTriggers _trigger = new HsTriggers();
-		private HsActions _action = new HsActions();
+		private HsTrigger _trigger = new HsTrigger();
+		private HsAction _action = new HsAction();
 		private IHSApplication _hs;
 
 
@@ -109,7 +109,7 @@ namespace hspi_CsharpSample
 			_triggers.Add(null, "Random value is lower than");
 			//Adding a second trigger with subtriggers
 			//... so first let us create the subtriggers
-			var subtriggers = new HsTriggers();
+			var subtriggers = new HsTrigger();
 			subtriggers.Add(null, "Random value is lower than");
 			subtriggers.Add(null, "Random value is equal to");
 			subtriggers.Add(null, "Random value is higher than");
@@ -147,7 +147,7 @@ namespace hspi_CsharpSample
 
 			//Let's make a nice random number between 0 and 100
 			Random rnd = new Random(DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second +
-			                        DateTime.Now.Millisecond);
+									DateTime.Now.Millisecond);
 
 			var randomValue = rnd.Next(100);
 
@@ -396,37 +396,28 @@ namespace hspi_CsharpSample
 
 			var trigger = new HsTrigger();
 
-		//Loads the trigger from the serialized object (if it exists, and it should)
+			//Loads the trigger from the serialized object (if it exists, and it should)
 			if (!(trigInfo.DataIn == null))
 			{
-				_utils.DeSerializeObject(trigInfo.DataIn, trigger);
+				object deserializedTrigger = null;
+				_utils.DeSerializeObject(ref trigInfo.DataIn, ref deserializedTrigger);
+				if (deserializedTrigger != null)
+				{
+					trigger = (HsTrigger)deserializedTrigger;
+				}
 			}
-			
 
-		End If
+			//A trigger has "keys" with different stored values, let's go through them all.
+			//In my sample we only have one key, which is "SomeValue"
+			var foundKey = trigger.GetAllKeys().SingleOrDefault(x => x.Contains(key + "_" + trigInfo.UID));
+			if (foundKey != null) return trigger[foundKey];
+			//Apparently we didn't find any matching keys in the trigger, so that's all we have to return
+			return null;
 
-		'A trigger has "keys" with different stored values, let's go through them all.
-		'In my sample we only have one key, which is "SomeValue"
-		For Each key In _trigger.Keys
-			Select Case True
-
-		Case key.Contains(key_to_find & "_" & TrigInfo.UID)
-			'We found the correct key, so let's just return the value:
-
-		Return _trigger(key)
-
-		End Select
-
-		Next
-
-		'Apparently we didn't find any matching keys in the trigger, so that's all we have to return
-		Return Nothing
-
-		End Function
-	}
+		}
 
 
-	///<summary>
+		///<summary>
 		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
 		///</summary>
 		///<remarks>By Moskus</remarks>
@@ -468,7 +459,7 @@ namespace hspi_CsharpSample
 			//HS usually use the deviceenumerator for this kind of stuff, but I prefer to use Linq.
 			//As HS haven't provided a way to get a list(or "queryable method") for devices, I've made one (Check the function "Devices()" in utils.vb).
 			//Here we are only interessted in the plugin devices for this plugin, so let's do some first hand filtering
-			var deviceList = _utils.Devices();
+			var deviceList = _utils.DevicesOnlyForPlugin();
 
 			//First let's see if we can find any devices belonging to the plugin with device type = "Basic".The device type string should contain "Basic".
 			var basicDevice = deviceList.SingleOrDefault(x => x.get_Device_Type_String(_hs).Contains("Basic"));
