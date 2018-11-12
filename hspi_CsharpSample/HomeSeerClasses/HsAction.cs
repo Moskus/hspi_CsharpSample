@@ -3,12 +3,12 @@
 namespace hspi_CsharpSample.HomeSeerClasses
 {
 	[Serializable()]
-	public class HsActions : HsCollection
+	public class HsAction : HsCollection
 	{
-		public HsActions()
+		public HsAction()
 		{}
 
-		protected HsActions(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+		protected HsAction(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
 		{ }
 	}
 }

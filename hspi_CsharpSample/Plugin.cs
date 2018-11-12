@@ -6,6 +6,52 @@ using System.Threading;
 using hspi_CsharpSample.HomeSeerClasses;
 using HomeSeerAPI;
 
+//***************************************************************
+//***************************************************************
+//
+//READ ME:
+// In this file most of the magic happens, and a great place to start reading. :)
+//
+//FAQ
+// Q: "What does this plugin do?"
+// A: Nothing very useful, it just does "something" to get you started. Here's a quick summary:
+//    1. It generates a random value every X minutes or seconds (this Is user changeable by a settings page). This is used to show how triggers and conditions work. See the region "Trigger Interface".
+//
+//   2. It generates different types of devices, just to show how that could be done and how the plugin reacts to usage of the different controls (CAPI).  See the sub "CheckAndCreateDevices".
+//
+//   3. It shows how text, values and even custom objects can be stored in a device, and how you create your own "Tab" on the device settings. See subs "ConfigDevice" and "ConfigDevicePost"
+//
+//   4. It has a simple settings page that demonstrate how you can update settings for your plugin.
+//
+//
+// Q: "What do I need?"
+// A: You need Visual Studio (Visual Studio Community Edition should work just fine), HomeSeer 3 running either locally Or On a remote computer, some spare time (the more, the better), And an appetite For coding.
+//
+//
+// Q: "Where do I start?"
+// A: 1. Copy "HomeSeerAPI.dll", "HSCF.dll" and "Scheduler.dll" from your HS3 dir to into the dir of this project
+//    2. Just start HS3 if it's not running, and Debug this solution.Then you'll see what's going on
+//    1. Do some customization, I suggest start by naming your plugin. this is done several places:
+//         a. In "utils.vb", see variables "IFACE_NAME" and "INIFILE".
+//         b. See in "My Project" in the Solution, and change both
+//         c. If you, like me, don't want the solution and project named "MoskusSample" you can edit the .vbproj and .sln files in notepad (but close Visual Studio first).
+//    2. Then look into the "Plugin.vb" file. A good place like any other is to start by finding the sub "InitIO", what's where the plugin is initialized.
+//    3. However, if you REALLY want to dive right in to it, find the "UpdateTimerTrigger" sub and read to the end.
+//
+//
+// Good luck! And ask a question if you want to! :)
+// See the this thread: http://board.homeseer.com/showthread.php?p=1204792
+//
+// Best regards,
+// Moskus
+//
+//
+// If you want, you can always "tip" me via Paypal to "moskus a_t gmail d_o_t com" (where "a_t" = "@" and "d_o_t" = ".")
+// It is not expected or required, but highly appreciated. :)
+//***************************************************************
+//***************************************************************
+
+
 namespace hspi_CsharpSample
 {
 	public class Plugin
@@ -389,27 +435,21 @@ namespace hspi_CsharpSample
 		{
 			try
 			{
-
 				//Creating a brand new device, and get the actual device from the device reference
-
 				Scheduler.Classes.DeviceClass device =
 					(Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(_hs.NewDeviceRef(deviceName));
-
 				var reference = device.get_Ref(_hs);
 
-
 				//Setting the type to plugin device
-
 				var typeInfo = new DeviceTypeInfo_m.DeviceTypeInfo()
 				{
 					Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
 				};
-
 				device.set_DeviceType_Set(_hs, typeInfo);
 				device.set_Can_Dim(_hs, false);
 
 				device.set_Interface(_hs, Utils.PluginName);//Don't change this, or the device won't be associated with your plugin
-				//Todo: Checkout pluginInstance handling. Should be for each instance. Now for all instances
+															//Todo: Checkout pluginInstance handling. Should be for each instance. Now for all instances
 				device.set_InterfaceInstance(_hs, Utils.PluginInstance);//Don't change this, or the device won't be associated with that particular instance
 
 				device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Basic");//This you can change to something suitable, though. :)
@@ -441,23 +481,136 @@ namespace hspi_CsharpSample
 			return 0; //if anything fails.
 		}
 
-
-		private int CreateChildDevice(object p0)
+		///<summary>
+		///Creates a "advanced" device with some control examples.
+		///Based on the device from CreateBasicDevice
+		///</summary>
+		///<param name="deviceName">The name of the device</param>
+		///<remarks>By Moskus and http://www.homeseer.com/support/homeseer/HS3/HS3Help/scripting_devices_deviceclass1.htm </remarks>
+		private int CreateAdvancedDevice(string deviceName)
 		{
-			throw new NotImplementedException();
+			//Creating BASIC device and getting its device reference
+			var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(CreateBasicDevice(deviceName));
+			var reference = device.get_Ref(_hs);
+
+			//This device type is not Basic, it's Advanced
+			device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Advanced");
+
+			//Commit to the database
+			_hs.SaveEventsDevices();
+
+			//We'll create three controls, a button with the value 0, a slider for values 1 to 9, and yet another button for the value 10
+
+			//=========
+			//Value = 0
+			//=========
+			//Status pair
+			var svPair = new VSVGPairs.VSPair(HomeSeerAPI.ePairStatusControl.Both);
+			svPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
+			svPair.Value = 0;
+			svPair.Status = "Value " + svPair.Value;
+			svPair.ControlUse = ePairControlUse._Off; //For IFTTT/HStouch support
+			svPair.Render = Enums.CAPIControlType.Button;
+			svPair.IncludeValues = true;
+			_hs.DeviceVSP_AddPair(reference, svPair);
+
+			//... and some graphics
+			var vgPair = new VSVGPairs.VGPair();
+			vgPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
+			vgPair.Set_Value = 0;
+			vgPair.Graphic = "images/checkbox_disabled_on.png";
+			_hs.DeviceVGP_AddPair(reference, vgPair);
+
+			//============
+			//Value 1 to 9
+			//============
+			//Status pair
+			svPair = new VSVGPairs.VSPair(HomeSeerAPI.ePairStatusControl.Both);
+			svPair.PairType = VSVGPairs.VSVGPairType.Range;
+			svPair.RangeStart = 1;
+			svPair.RangeEnd = 9;
+			svPair.RangeStatusPrefix = "Value ";
+			svPair.ControlUse = ePairControlUse._Dim; //For HStouch support
+			svPair.Render = Enums.CAPIControlType.ValuesRangeSlider;
+			svPair.IncludeValues = true;
+			_hs.DeviceVSP_AddPair(reference, svPair);
+
+			//... and some graphics
+			vgPair = new VSVGPairs.VGPair();
+			vgPair.PairType = VSVGPairs.VSVGPairType.Range;
+			vgPair.RangeStart = 1;
+			vgPair.RangeEnd = 9;
+			vgPair.Graphic = "images/checkbox_on.png";
+			_hs.DeviceVGP_AddPair(reference, vgPair);
+
+			//==========
+			//Value = 10
+			//==========
+			//Status pair
+			svPair = new VSVGPairs.VSPair(HomeSeerAPI.ePairStatusControl.Both);
+			svPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
+			svPair.Value = 10;
+			svPair.Status = "Value " + svPair.Value;
+			svPair.ControlUse = ePairControlUse._On; //For IFTTT/HStouch support
+			svPair.Render = Enums.CAPIControlType.Button;
+			svPair.IncludeValues = true;
+			_hs.DeviceVSP_AddPair(reference, svPair);
+
+			//... and some graphics
+			vgPair = new VSVGPairs.VGPair();
+			vgPair.PairType = VSVGPairs.VSVGPairType.SingleValue;
+			vgPair.Set_Value = 10;
+			vgPair.Graphic = "images/checkbox_hvr.png";
+			_hs.DeviceVGP_AddPair(reference, vgPair);
+
+			//return the reference
+			return reference;
 		}
 
-		private int CreateRootDevice(string testRootDevice)
+		///<summary>
+		///Creates a root/parent device based on the basic device
+		///</summary>
+		///<param name="rootName"></param>
+		///<returns></returns>
+		///<remarks></remarks>
+		private int CreateRootDevice(string rootName)
 		{
-			throw new NotImplementedException();
+			//Creating BASIC device and getting its device reference
+			var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(CreateBasicDevice(rootName));
+
+			//This device type is not Basic, it's Advanced
+			device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Root");
+
+			//Setting it as a root device
+			device.set_Relationship(_hs, HomeSeerAPI.Enums.eRelationship.Parent_Root);
+
+			//Committing to the database and return the reference
+			_hs.SaveEventsDevices();
+			return device.get_Ref(_hs);
 		}
 
-		private void CreateAdvancedDevice(string testAdvancedDevice)
+		///<summary>
+		///Creates a child device based on the basic device
+		///</summary>
+		///<param name="childName"></param>
+		///<returns></returns>
+		///<remarks></remarks>
+		private int CreateChildDevice(string childName)
 		{
-			throw new NotImplementedException();
+			//Creating BASIC device and getting its device reference
+			var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(CreateBasicDevice(childName));
+
+			//This device type is not Basic, it's Advanced
+			device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Child");
+
+			//Setting it as a child device
+			device.set_Relationship(_hs, HomeSeerAPI.Enums.eRelationship.Child);
+
+			//Committing to the database and return the reference
+			_hs.SaveEventsDevices();
+
+			return device.get_Ref(_hs);
 		}
-
-
 
 		///<summary>
 		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
