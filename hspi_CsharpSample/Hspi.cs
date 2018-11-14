@@ -14,6 +14,7 @@ namespace hspi_CsharpSample
 	{
 		private Plugin _plugin;
 		private Utils _utils;
+		private bool _actionAdvancedMode;
 
 		public Utils Utils
 		{
@@ -44,7 +45,7 @@ namespace hspi_CsharpSample
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/accesslevel.htm</remarks>
 		public int AccessLevel()
 		{
-			return 1;
+			return _plugin.AccessLevel;
 		}
 
 		/// <summary>
@@ -353,7 +354,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actioncount.htm</remarks>
 		public int ActionCount()
 		{
-			return 1;
+			return _plugin.ActionCount();
 		}
 
 		///<summary>
@@ -364,7 +365,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionconfigured.htm</remarks>
 		public bool ActionConfigured(IPlugInAPI.strTrigActInfo ActInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.ActionConfigured(ActInfo);
 		}
 
 		///<summary>
@@ -378,7 +379,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionbuildui.htm</remarks>
 		public string ActionBuildUI(string sUnique, IPlugInAPI.strTrigActInfo ActInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.ActionBuildUI(sUnique, ActInfo);
 		}
 
 		///<summary>
@@ -390,7 +391,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionprocesspostui.htm</remarks>
 		public IPlugInAPI.strMultiReturn ActionProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.ActionProcessPostUI(PostData, TrigInfoIN);
 		}
 
 		///<summary>
@@ -402,7 +403,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionformatui.htm</remarks>
 		public string ActionFormatUI(IPlugInAPI.strTrigActInfo ActInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.ActionFormatUI(ActInfo);
 		}
 
 		///<summary>
@@ -414,7 +415,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionreferencesdevice.htm</remarks>
 		public bool ActionReferencesDevice(IPlugInAPI.strTrigActInfo ActInfo, int dvRef)
 		{
-			throw new System.NotImplementedException();
+			return false;
 		}
 
 		///<summary>
@@ -425,7 +426,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/handleaction.htm</remarks>
 		public bool HandleAction(IPlugInAPI.strTrigActInfo ActInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.HandleAction(ActInfo);
 		}
 
 		///<summary>
@@ -436,7 +437,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerbuildui.htm</remarks>
 		public string TriggerBuildUI(string sUnique, IPlugInAPI.strTrigActInfo TrigInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerBuildUI(sUnique, TrigInfo);
 		}
 
 		///<summary>
@@ -448,7 +449,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerprocesspostui.htm</remarks>
 		public IPlugInAPI.strMultiReturn TriggerProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerProcessPostUI(PostData, TrigInfoIN);
 		}
 
 		///<summary>
@@ -513,6 +514,7 @@ namespace hspi_CsharpSample
 		{
 			throw new System.NotImplementedException();
 		}
+
 		/// <summary>
 		/// Returns the name of your plug-in. This is used to identify your plug-in to HomeSeer and your users. Keep the name to 16 characters or less.
 		/// Do not access any hardware in this function as HomeSeer will call this function.
@@ -520,21 +522,30 @@ namespace hspi_CsharpSample
 		/// </summary>
 		/// <returns>Plugin name</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/name.htm</remarks>
-		public string Name { get; }
+		public string Name
+		{
+			get { return Utils.PluginName; }
+		}
 
 		///<summary>
 		///Determines if this plugin uses a COM port as configured on "Plug-ins -> Managepage" page, /interfaces
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hscomport.htm</remarks>
-		public bool HSCOMPort { get; }
+		public bool HSCOMPort
+		{
+			get { return false; }
+		}
 
 		///<summary>
 		///The HomeSeer events page has an option to set the editing mode to "Advanced Mode". This is typically used to enable options that may only be of interest to advanced users or programmers. The Set in this function is called when advanced mode is enabled. Your plug-in can also enable this mode if an advanced selection was saved and needs to be displayed.
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionadvancedmode.htm</remarks>
-		public bool ActionAdvancedMode { get; set; }
+		public bool ActionAdvancedMode {
+			get { return _actionAdvancedMode; }
+			set { _actionAdvancedMode = value; }
+		}
 
 		///<summary>
 		///Return the name of the action given an action number. The name of the action will be displayed in the HomeSeer events actions list.

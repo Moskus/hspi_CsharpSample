@@ -146,7 +146,7 @@ namespace hspi_CsharpSample
 				ped = new PlugExtraData.clsPlugExtraData();
 			}
 
-			SerializeObject(ref pedValue, ref byteObject);
+			SerializeObject(pedValue, ref byteObject);
 			if (!ped.AddNamed(pedName, byteObject)) //'AddNamed will return False if "PEDName" it already exists
 			{
 				ped.RemoveNamed(pedName);
@@ -184,7 +184,7 @@ namespace hspi_CsharpSample
 		///<param name="byteOut">Output bytes</param>
 		///<returns>True/False success</returns>
 		///<remarks>By HomeSeer</remarks>
-		public bool SerializeObject(ref object objIn, ref byte[] byteOut)
+		public bool SerializeObject(object objIn, ref byte[] byteOut)
 		{
 			if (objIn == null)
 				return false;
@@ -412,5 +412,18 @@ namespace hspi_CsharpSample
 			}
 			return ret;
 		}
+
+		///<summary>
+		///List of all events in HomeSeer. Used to enable Linq queries on events.
+		///</summary>
+		///<returns>Generic.List() of all EventData</returns>
+		///<remarks>By Moskus</remarks>
+		public List<HomeSeerAPI.strEventData> Events1()
+		{
+			var ret = new List<HomeSeerAPI.strEventData>();
+			var allEvents = Hs.Event_Info_All().ToList();
+			return allEvents;
+		}
+
 	}
 }
