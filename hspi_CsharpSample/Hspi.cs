@@ -154,7 +154,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/raisesgenericcallbacks.htm</remarks>
 		public bool RaisesGenericCallbacks()
 		{
-			throw new System.NotImplementedException();
+			return true;
 		}
 
 		///<summary>
@@ -167,7 +167,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/setio.htm</remarks>
 		public void SetIOMulti(List<CAPI.CAPIControl> colSend)
 		{
-			throw new System.NotImplementedException();
+			_plugin.SetIOMulti(colSend);
 		}
 
 		///<summary>
@@ -228,10 +228,9 @@ namespace hspi_CsharpSample
 		/// CallbackTimer = 5          Your plugin ConfigDevice is called and a page timer is called so ConfigDevicePost is called back every 2 seconds
 		/// </returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevicepost.htm</remarks>
-		public Enums.ConfigDevicePostReturn ConfigDevicePost(int @ref, string data, string user, int userRights)
+		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data, string user, int userRights)
 		{
-			throw new System.NotImplementedException();
-			//Return plugin.ConfigDevicePost(ref, data, user, userRights)
+			return _plugin.ConfigDevicePost(reference, data, user, userRights);
 		}
 
 		/// <summary>
@@ -247,10 +246,9 @@ namespace hspi_CsharpSample
 		/// <param name="newDevice">True if this a new device being created for the first time. In this case, the device configuration dialog may present different information than when simply editing an existing device.</param>
 		/// <returns>A string containing HTML to be displayed. Return an empty string if there is not configuration needed.</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevice.htm</remarks>
-		public string ConfigDevice(int @ref, string user, int userRights, bool newDevice)
+		public string ConfigDevice(int reference, string user, int userRights, bool newDevice)
 		{
-			throw new System.NotImplementedException();
-			//Return plugin.ConfigDevice(ref, user, userRights, newDevice)
+			return _plugin.ConfigDevice(reference, user, userRights, newDevice);
 		}
 
 		/// <summary>
@@ -458,9 +456,9 @@ namespace hspi_CsharpSample
 		///<param name="TrigInfo">Information of the trigger</param>
 		///<returns>Text describing the trigger</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerformatui.htm</remarks>
-		public string TriggerFormatUI(IPlugInAPI.strTrigActInfo TrigInfo)
+		public string TriggerFormatUI(IPlugInAPI.strTrigActInfo trigInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerFormatUI(trigInfo);
 		}
 
 		///<summary>
@@ -470,9 +468,9 @@ namespace hspi_CsharpSample
 		///<param name="TrigInfo">The trigger information</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggertrue.htm</remarks>
-		public bool TriggerTrue(IPlugInAPI.strTrigActInfo TrigInfo)
+		public bool TriggerTrue(IPlugInAPI.strTrigActInfo trigInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerTrue(trigInfo);
 		}
 
 		///<summary>

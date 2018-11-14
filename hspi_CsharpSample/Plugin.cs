@@ -298,6 +298,302 @@ namespace hspi_CsharpSample
 			}
 		}
 
+		#region "Device Config Interface"
+
+ ///<summary>
+ ///If SupportsConfigDevice returns TRUE, this function will be called when the device properties are displayed for your device. This functions creates a tab for each plug-in that controls the device.
+ ///
+ ///If the newDevice parameter is TRUE, the user is adding a new device from the HomeSeer user interface.
+ ///If you return TRUE from your SupportsAddDevice then ConfigDevice will be called when a user is creating a new device.
+ ///Your tab will appear and you can supply controls for the user to create a new device for your plugin. When your ConfigDevicePost is called you will need to get a reference to the device using the past ref number and then take ownership of the device by setting the interface property of the device to the name of your plugin. You can also set any other properties on the device as needed.
+ ///</summary>
+ ///<param name="ref">The device reference number</param>
+ ///<param name="user">The user that is logged into the server and viewing the page</param>
+ ///<param name="userRights">The rights of the logged in user</param>
+ ///<param name="newDevice">True if this a new device being created for the first time. In this case, the device configuration dialog may present different information than when simply editing an existing device.</param>
+ ///<returns>A string containing HTML to be displayed. Return an empty string if there is not configuration needed.</returns>
+ ///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevice.htm</remarks>
+ public string ConfigDevice(int reference, string user , int userRights , bool newDevice ) {
+
+			//	Dim device As Scheduler.Classes.DeviceClass = Nothing
+			//	Dim stb As New StringBuilder
+
+
+			//	device = hs.GetDeviceByRef(ref)
+
+
+			//	Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+
+			//	Dim PEDname As String = Me.Name
+
+			//       'We'll use the device type string to determine how we should handle the device in the plugin
+
+			//	Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
+			//		Case ""
+			//               '======================================================
+			//               'It's a device created by the HSPI_SAMPLE_BASIC setting, and is included for reference only.
+			//               'Its not used by this sample. See further down for "Basic" and "Advanced".
+			//               '======================================================
+
+			//               Dim sample As SampleClass = PEDGet(PED, PEDname)
+
+			//			Dim houseCodeDropDownList As New clsJQuery.jqDropList("HouseCode", "", False)
+
+			//			Dim unitCodeDropDownList As New clsJQuery.jqDropList("DeviceCode", "", False)
+			//               Dim saveButton As New clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
+			//               Dim houseCode As String = ""
+
+			//			Dim deviceCode As String = ""
+
+
+
+			//			If sample Is Nothing Then
+			//				Console.WriteLine("ConfigDevice, sample is nothing")
+			//                   ' Set the defaults
+			//                   sample = New SampleClass
+
+			//				InitHSDevice(device, device.Name(hs))
+
+			//				sample.houseCode = "A"
+			//                   sample.deviceCode = "1"
+			//                   PEDAdd(PED, PEDname, sample)
+
+			//				device.PlugExtraData_Set(hs) = PED
+			//			End If
+
+			//			houseCode = sample.houseCode
+
+			//			deviceCode = sample.deviceCode
+
+			//			For Each l In "ABCDEFGHIJKLMNOP"
+			//                   houseCodeDropDownList.AddItem(l, l, l = houseCode)
+			//               Next
+			//			For i = 1 To 16
+			//                   unitCodeDropDownList.AddItem(i.ToString, i.ToString, i.ToString = deviceCode)
+			//               Next
+
+			//			Try
+
+			//				stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
+			//                   stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>")
+			//                   stb.Append("  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Select a houseCode and Unitcode that matches one of the devices HomeSeer will be communicating with.</td></tr>")
+			//                   stb.Append("  <tr>")
+			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>House<br>Code</td>")
+			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Unit<br>Code</td>")
+			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>")
+			//                   stb.Append("  </tr>")
+			//                   stb.Append("  <tr>")
+			//                   stb.Append("   <td class='tablerowodd' align='center'>" & houseCodeDropDownList.Build & "</td>")
+			//                   stb.Append("   <td class='tablerowodd' align='center'>" & unitCodeDropDownList.Build & "</td>")
+			//                   stb.Append("   <td class='tablerowodd' align='left'>" & saveButton.Build & "</td>")
+			//                   stb.Append("  </tr>")
+			//                   stb.Append(" </table>")
+			//                   stb.Append("</form>")
+			//                   Return stb.ToString
+
+			//			Catch ex As Exception
+
+			//				Return "ConfigDevice ERROR: " & ex.Message 'Original is too old school: "Return Err.Description"
+
+			//			End Try
+
+
+
+			//		Case "Basic"
+
+			//			stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
+
+			//			stb.Append("Nothing special to configure for the basic device. :-)")
+			//               stb.Append("</form>")
+			//               Return stb.ToString
+
+
+			//		Case "Advanced"
+
+			//			Dim savedString As String = PEDGet(PED, PEDname)
+
+			//			If savedString = String.Empty Then 'The pluginextradata is not configured for this device
+
+			//				savedString = "The text in this textbox is saved with the actual device"
+
+			//			End If
+
+
+			//			Dim savedTextbox As New clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, False)
+
+			//			Dim saveButton As New clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
+
+			//               stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
+			//               stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>")
+			//               stb.Append("  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Text to be saved with the device.</td></tr>")
+			//               stb.Append("  <tr>")
+			//               stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Text:</td>")
+			//               stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>")
+			//               stb.Append("  </tr>")
+			//               stb.Append("  <tr>")
+			//               stb.Append("   <td class='tablerowodd' align='center'>" & savedTextbox.Build & "</td>")
+			//               stb.Append("   <td class='tablerowodd' align='left'>" & saveButton.Build & "</td>")
+			//               stb.Append("  </tr>")
+			//               stb.Append(" </table>")
+	 //               stb.Append("</form>")
+
+	 //               Return stb.ToString
+
+	 //	End Select
+
+
+	 return string.Empty;
+ }
+
+		//   ''' <summary>
+		//   ''' This function is called when a user posts information from your plugin tab on the device utility page
+		//   ''' </summary>
+		//   ''' <param name="ref">The device reference</param>
+		//   ''' <param name="data">query string data posted to the web server (name/value pairs from controls on the page)</param>
+		//   ''' <param name="user">The user that is logged into the server and viewing the page</param>
+		//   ''' <param name="userRights">The rights of the logged in user</param>
+		//   ''' <returns>
+		//   ''' DoneAndSave = 1            Any changes to the config are saved and the page is closed and the user it returned to the device utility page
+		//   ''' DoneAndCancel = 2          Changes are not saved and the user is returned to the device utility page
+		//   ''' DoneAndCancelAndStay = 3   No action is taken, the user remains on the plugin tab
+		//   ''' CallbackOnce = 4           Your plugin ConfigDevice is called so your tab can be refereshed, the user stays on the plugin tab
+		//   ''' CallbackTimer = 5          Your plugin ConfigDevice is called and a page timer is called so ConfigDevicePost is called back every 2 seconds
+		//   ''' </returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevicepost.htm</remarks>
+
+		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data , string user , int userRights )
+		{
+			//	Dim ReturnValue As Integer = Enums.ConfigDevicePostReturn.CallbackOnce
+
+
+			//	Try
+			//		Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(ref)
+
+			//		Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+
+			//		Dim PEDname As String = Me.Name
+
+			//		Dim parts As Collections.Specialized.NameValueCollection = HttpUtility.ParseQueryString(data)
+
+			//           'We'll use the device type string to determine how we should handle the device in the plugin
+
+			//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
+			//			Case ""
+			//                   '===============================================================================
+			//                   'It's a device created by HSPI_SAMPLE_BASIC(the old code), kept as a reference.
+			//                   '===============================================================================
+			//                   Dim sample As SampleClass = PEDGet(PED, PEDname)
+
+			//			   If sample Is Nothing Then
+			//				   InitHSDevice(device)
+			//			   End If
+
+			//			   sample.houseCode = parts("HouseCode")
+
+			//			   sample.deviceCode = parts("DeviceCode")
+
+
+			//			   PED = device.PlugExtraData_Get(hs)
+
+			//			   PEDAdd(PED, PEDname, sample)
+			//			   device.PlugExtraData_Set(hs) = PED
+
+			//			   hs.SaveEventsDevices()
+
+			//		   Case "Basic"
+			//                   'Nothing to store as this device doesn't have any extra data to save
+
+			//		   Case "Advanced"
+			//                   'We'll get the string to save from the postback values
+			//			   Dim savedString As String = parts("savedTextbox")
+
+			//                   'We'll save this to the pluginextradata storage
+
+			//			   PED = device.PlugExtraData_Get(hs)
+
+			//			   PEDAdd(PED, PEDname, savedString) 'Adds the saveString to the plugin if it doesn't exist, and removes and adds it if it does.
+
+			//			   device.PlugExtraData_Set(hs) = PED
+
+			//                   'And then finally save the device
+
+			//			   hs.SaveEventsDevices()
+
+			//	   End Select
+
+			//	   Return ReturnValue
+			//   Catch ex As Exception
+			//	   Log("ConfigDevicePost: " & ex.Message, LogType.Error)
+
+			//	End Try
+
+			//	Return ReturnValue
+			return Enums.ConfigDevicePostReturn.DoneAndSave;
+		}
+
+		//   ''' <summary>
+		//   ''' SetIOMulti is called by HomeSeer when a device that your plug-in owns is controlled.
+		//   ''' Your plug-in owns a device when it's INTERFACE property is set to the name of your plug
+		//   ''' </summary>
+		//   ''' <param name="colSend">
+		//   ''' A collection of CAPIControl objects, one object for each device that needs to be controlled.
+		//   ''' Look at the ControlValue property to get the value that device needs to be set to.</param>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/setio.htm</remarks>
+		//   Public Sub SetIOMulti(ByVal colSend As List(Of HomeSeerAPI.CAPI.CAPIControl))
+		//       'Multiple CAPIcontrols might be sent at the same time, so we need to check each one
+		//       For Each CC In colSend
+		//		Console.WriteLine("SetIOMulti triggered, checking CAPI '" & CC.Label & "' on device " & CC.Ref)
+
+		//           'CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
+		//           '  The status of the device migth depend on some hardware giving the response that it has received the command,
+		//           '  and perhaps with an other value (indicating a status equal to "Error" or whatever). In that case; send the command,
+		//           '  wait for the answer (in a new thread, for example) and THEN update the device value
+		//           'But here, we just update the value for the device
+
+		//		hs.SetDeviceValueByRef(CC.Ref, CC.ControlValue, False)
+
+		//           'Get the device sending the CAPIcontrol
+		//           Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CC.Ref)
+
+		//           'We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
+
+		//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
+		//			Case ""
+		//                   '****************************************************************
+		//                   'Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
+		//                   '****************************************************************
+
+		//				Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+
+		//				Dim sample As SampleClass = PEDGet(PED, "Sample")
+
+		//				If sample IsNot Nothing Then
+		//					Dim houseCode As String = sample.houseCode
+		//					Dim Devicecode As String = sample.deviceCode
+		//					SendCommand(houseCode, Devicecode) 'The HSPI_SAMPE control, in utils.vb as an example (but it doesn't do anything)
+		//                   End If
+
+
+
+		//			Case "Basic"
+		//                   'There's nothing stored in the basic device
+
+		//			Case "Advanced"
+		//                   'Here we could choose to do something with the text string stored in the device
+
+
+		//			Case Else
+		//                   'Nothing to do at the moment
+
+		//		End Select
+
+
+		//	Next
+		//End Sub
+
+		#endregion
+
+
 		#region "Trigger Interface"
 
 		///<summary>
@@ -355,8 +651,7 @@ namespace hspi_CsharpSample
 		///<param name="TrigInfo">The trigger information</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggertrue.htm</remarks>
-
-		private bool TriggerTrue(IPlugInAPI.strTrigActInfo trigInfo)
+		public bool TriggerTrue(IPlugInAPI.strTrigActInfo trigInfo)
 		{
 			//Let's specify the key name of the value we are looking for
 			var key = "SomeValue";
@@ -746,64 +1041,65 @@ namespace hspi_CsharpSample
 		///<param name="ActInfo">Use the ActInfo parameter to determine what action needs to be executed then execute this action.</param>
 		///<returns>Return TRUE if the action was executed successfully, else FALSE if there was an error.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/handleaction.htm</remarks>
-		public bool HandleAction(IPlugInAPI.strTrigActInfo actInfo ) {
+		public bool HandleAction(IPlugInAPI.strTrigActInfo actInfo)
+		{
+			var houseCode = "";
+			var deviceCode = "";
+			var uid = actInfo.UID.ToString();
+			try
+			{
+				HsAction hsAction = null;
+				object hsActionObject = null;
+				if (actInfo.DataIn != null)
+				{
+					_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
+					if (hsActionObject != null)
+					{
+						hsAction = (HsAction)hsActionObject;
+					}
+					else
+					{
+						//Todo - Fix this extra return
+						return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
 
-			//		Dim houseCode As String = ""
-
-			//		Dim deviceCode As String = ""
-
-			//		Dim UID As String = ActInfo.UID.ToString
-
-
-			//		Try
-			//			If Not(ActInfo.DataIn Is Nothing) Then
-			//			   DeSerializeObject(ActInfo.DataIn, action)
-
-			//			Else
-			//				Return False
-			//			End If
-
-			//			For Each key As String In action.Keys
-
-			//				Select Case True
-			//					Case key.Contains("HouseCodes_" & UID)
-
-			//						houseCode = action(key)
-
-			//					Case key.Contains("DeviceCodes_" & UID)
-
-			//						deviceCode = action(key)
-
-			//				End Select
-
-			//			Next
-
-			//			Console.WriteLine("HandleAction, Command received with data: " & houseCode & ", " & deviceCode)
-
-			//			SendCommand(houseCode, deviceCode) 'This could also return a value True/False if it was successful or not
-
-			//        Catch ex As Exception
-
-			//			Log("Error executing action: " & ex.Message, LogType.Error)
-
-			//		End Try
-
-			//		Return True
+				foreach (var key in hsAction.GetAllKeys())
+				{
+					if (key.Contains($"HouseCodes_{uid}"))
+					{
+						houseCode = (string)hsAction[key];
+					}
+					else if (key.Contains($"HouseCodes_{uid}"))
+					{
+						houseCode = (string)hsAction[key];
+					}
+				}
+				Console.WriteLine("HandleAction, Command received with data: " + houseCode + ", " + deviceCode);
+				_utils.SendCommand(houseCode, deviceCode);//This could also return a value True/False if it was successful or not
+			}
+			catch (Exception ex)
+			{
+				_utils.Log("Error executing action: " + ex.Message, LogType.Error);
+			}
+			return true;
 
 		}
 
-		///summary>
-		///eturn TRUE if the given action is configured properly. There may be times when a user can select invalid selections for the action and in this case you would return FALSE so HomeSeer will not allow the action to be saved.
-		////summary>
-		///param name="ActInfo">Object that contains information about the action like current selections.</param>
-		///returns>Return TRUE if the given action is configured properly.</returns>
-		///remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionconfigured.htm</remarks>
-		public bool ActionConfigured(IPlugInAPI.strTrigActInfo actInfo )
+		///<summary>
+		///return TRUE if the given action is configured properly. There may be times when a user can select invalid selections for the action and in this case you would return FALSE so HomeSeer will not allow the action to be saved.
+		///</summary>
+		///<param name="actInfo">Object that contains information about the action like current selections.</param>
+		///<returns>Return TRUE if the given action is configured properly.</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionconfigured.htm</remarks>
+		public bool ActionConfigured(IPlugInAPI.strTrigActInfo actInfo)
 		{
 
-
-
-			//		Dim Configured As Boolean = False
+			var configured = false;
 
 			//		Dim itemsConfigured As Integer = 0
 
@@ -827,7 +1123,7 @@ namespace hspi_CsharpSample
 			//			Next
 			//			If itemsConfigured = itemsToConfigure Then Configured = True
 			//		End If
-			//		Return Configured
+			return configured;
 		}
 
 		///<summary>
@@ -839,12 +1135,11 @@ namespace hspi_CsharpSample
 		///<param name="ActInfo">Object that contains information about the action like current selections</param>
 		///<returns> HTML controls that need to be displayed so the user can select the action parameters.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionbuildui.htm</remarks>
-		public string ActionBuildUI(string uniqueString, HomeSeerAPI.IPlugInAPI.strTrigActInfo actInfo ) {
+		public string ActionBuildUI(string uniqueString, HomeSeerAPI.IPlugInAPI.strTrigActInfo actInfo)
+		{
 
-			//		Dim UID As String
-
-			//		UID = ActInfo.UID.ToString
-			//		Dim stb As New StringBuilder
+			var uid = actInfo.UID.ToString();
+			var stb = new StringBuilder();
 
 			//		Dim Housecode As String = ""
 
@@ -904,7 +1199,7 @@ namespace hspi_CsharpSample
 
 			//		stb.Append(dd1.Build)
 
-			//		Return stb.ToString
+			return stb.ToString();
 		}
 
 		///<summary>
@@ -914,9 +1209,10 @@ namespace hspi_CsharpSample
 		///<param name="ActInfo">Object that contains information about the action as "strTrigActInfo" (which is funny, as it isn't a string at all)</param>
 		///<returns>Object the holds the parsed information for the action. HomeSeer will save this information for you in the database.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionprocesspostui.htm</remarks>
-		public IPlugInAPI.strMultiReturn ActionProcessPostUI(NameValueCollection postData , IPlugInAPI.strTrigActInfo actInfo ) {
-			//		Dim ret As New HomeSeerAPI.IPlugInAPI.strMultiReturn
-			//		Dim UID As String = ActInfo.UID.ToString
+		public IPlugInAPI.strMultiReturn ActionProcessPostUI(NameValueCollection postData, IPlugInAPI.strTrigActInfo actInfo)
+		{
+			var ret = new HomeSeerAPI.IPlugInAPI.strMultiReturn();
+			var uid = actInfo.UID.ToString();
 
 
 			//		ret.sResult = ""
@@ -973,7 +1269,7 @@ namespace hspi_CsharpSample
 
 			//		ret.sResult = ""
 
-			//		Return ret
+			return ret;
 
 		}
 
@@ -984,50 +1280,37 @@ namespace hspi_CsharpSample
 		///<param name="ActInfo">Information from the current activity as "strTrigActInfo" (which is funny, as it isn't a string at all)</param>
 		///<returns>Simple string. Possibly HTML-formated.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionformatui.htm</remarks>
-		public string ActionFormatUI(IPlugInAPI.strTrigActInfo actInfo ) {
+		public string ActionFormatUI(IPlugInAPI.strTrigActInfo actInfo)
+		{
 
-			//		Dim stb As New StringBuilder
+			var stb = new StringBuilder();
 			//		Dim houseCode As String = ""
 			//        Dim deviceCode As String = ""
-
 			//		Dim UID As String = ActInfo.UID.ToString
 
 
 			//		If Not(ActInfo.DataIn Is Nothing) Then
 			//		   DeSerializeObject(ActInfo.DataIn, action)
-
 			//		End If
 
 
 			//		For Each key As String In action.Keys
 			//			Select Case True
-
 			//				Case key.Contains("HouseCodes_" & UID)
-
 			//					houseCode = action(key)
-
 			//				Case key.Contains("DeviceCodes_" & UID)
-
 			//					deviceCode = action(key)
-
 			//			End Select
-
 			//		Next
 
 			//		stb.Append(" the system will do 'something' to a device with ")
-
 			//		stb.Append("HouseCode " & houseCode & " ")
 			//        If deviceCode = "ALL" Then
 			//			stb.Append("for all Unitcodes")
-
 			//		Else
 			//			stb.Append("and Unitcode " & deviceCode)
-
 			//		End If
-
-
-			//		Return stb.ToString
-
+			return stb.ToString();
 		}
 
 		#endregion
