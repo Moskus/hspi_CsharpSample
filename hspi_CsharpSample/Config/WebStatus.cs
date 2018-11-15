@@ -94,7 +94,7 @@ namespace hspi_CsharpSample.Config
 
 		//Public Function GetPagePlugin(ByVal pageName As String, ByVal user As String, ByVal userRights As Integer, ByVal queryString As String) As String
 
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 		//	Dim instancetext As String = ""
 		//       Try
 
@@ -143,7 +143,7 @@ namespace hspi_CsharpSample.Config
 
 		//Function BuildContent() As String
 
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 		//	stb.Append("<script>function userConfirm() {  confirm(""hey - are you sure??"");  }</script>")
 
 		//	stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='1000'>")
@@ -156,7 +156,7 @@ namespace hspi_CsharpSample.Config
 
 
 		//Public Function BuildTabs() As String
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 
 		//	Dim tabs As clsJQuery.jqTabs = New clsJQuery.jqTabs("oTabs", Me.PageName)
 
@@ -208,7 +208,7 @@ namespace hspi_CsharpSample.Config
 
 		//Function BuildTabLB(Optional ByVal Rebuilding As Boolean = False) As String
 
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 		//	Dim lb As New clsJQuery.jqListBox("lb", Me.PageName)
 
 		//	Dim ms1 As New clsJQuery.jqMultiSelect("ms1", Me.PageName, True)
@@ -242,7 +242,7 @@ namespace hspi_CsharpSample.Config
 
 
 		//Function BuildTabCB() As String
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 
 		//	Dim cb1 As New clsJQuery.jqCheckBox("CB1", "check 1", Me.PageName, True, False)
 
@@ -269,7 +269,7 @@ namespace hspi_CsharpSample.Config
 
 		//Function BuildTabDD(Optional ByVal Rebuilding As Boolean = False) As String
 
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 		//	stb.Append(clsPageBuilder.FormStart("frmTab3", "DropDown", "Post"))
 		//       stb.Append(BuildDD("dd1") & " ")
 		//       stb.Append(BuildDD("dd2") & " ")
@@ -286,7 +286,7 @@ namespace hspi_CsharpSample.Config
 
 
 		//Function BuildTabSL() As String
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 
 		//	stb.Append(BuildSlider("Slider"))
 		//       Return stb.ToString
@@ -297,7 +297,7 @@ namespace hspi_CsharpSample.Config
 
 		//Function BuildTabST(Optional ByVal Rebuilding As Boolean = False) As String
 
-		//	Dim stb As New StringBuilder
+		//	var stb =new StringBuilder();
 		//	Dim st As New clsJQuery.jqSlidingTab("myslide1ID", Me.PageName, False)
 
 		//	st.initiallyOpen = True

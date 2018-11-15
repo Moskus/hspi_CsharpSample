@@ -325,18 +325,15 @@ namespace hspi_CsharpSample
 		public string ConfigDevice(int reference, string user, int userRights, bool newDevice)
 		{
 
-			//	Dim device As Scheduler.Classes.DeviceClass = Nothing
-			//	Dim stb As New StringBuilder
+			Scheduler.Classes.DeviceClass device = null;
+			var stb =new StringBuilder();
 
+			device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(reference);
 
-			//	device = hs.GetDeviceByRef(ref)
+			var ped = device.get_PlugExtraData_Get(_hs);
+			var pedName = Utils.PluginName;
 
-
-			//	Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
-
-			//	Dim PEDname As String = Me.Name
-
-			//       'We'll use the device type string to determine how we should handle the device in the plugin
+			//We'll use the device type string to determine how we should handle the device in the plugin
 
 			//	Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
 			//		Case ""
