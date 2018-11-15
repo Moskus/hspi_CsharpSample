@@ -68,6 +68,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\WebConfig.cs" />
+    <Compile Include="Config\WebStatus.cs" />
     <Compile Include="HomeSeerClasses\SampleClass.cs" />
     <Compile Include="HomeSeerClasses\HsAction.cs" />
     <Compile Include="HomeSeerClasses\HsCollection.cs" />

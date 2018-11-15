@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using hspi_CsharpSample.Config;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -65,10 +67,15 @@ namespace hspi_CsharpSample
 		private Settings _settings;
 		private readonly string ConfigPageName = Utils.PluginName + "Config";
 		private readonly string StatusPageName = Utils.PluginName + "Status";
+
+		private WebConfig _configPage;
+		private WebStatus _statusPage;
+
 		private int _lastRandomNumber;
 		private Timer _updateTimer;
 		private HsCollection _actions = new HsCollection();
 		private HsCollection _triggers = new HsCollection();
+
 
 		private HsTrigger _trigger = new HsTrigger();
 		private HsAction _action = new HsAction();
@@ -77,6 +84,8 @@ namespace hspi_CsharpSample
 
 		public Plugin()
 		{
+			_configPage= new WebConfig(ConfigPageName);
+			_statusPage = new WebStatus(StatusPageName);
 		}
 
 		public Timer UpdateTimer => _updateTimer;
@@ -300,20 +309,21 @@ namespace hspi_CsharpSample
 
 		#region "Device Config Interface"
 
- ///<summary>
- ///If SupportsConfigDevice returns TRUE, this function will be called when the device properties are displayed for your device. This functions creates a tab for each plug-in that controls the device.
- ///
- ///If the newDevice parameter is TRUE, the user is adding a new device from the HomeSeer user interface.
- ///If you return TRUE from your SupportsAddDevice then ConfigDevice will be called when a user is creating a new device.
- ///Your tab will appear and you can supply controls for the user to create a new device for your plugin. When your ConfigDevicePost is called you will need to get a reference to the device using the past ref number and then take ownership of the device by setting the interface property of the device to the name of your plugin. You can also set any other properties on the device as needed.
- ///</summary>
- ///<param name="ref">The device reference number</param>
- ///<param name="user">The user that is logged into the server and viewing the page</param>
- ///<param name="userRights">The rights of the logged in user</param>
- ///<param name="newDevice">True if this a new device being created for the first time. In this case, the device configuration dialog may present different information than when simply editing an existing device.</param>
- ///<returns>A string containing HTML to be displayed. Return an empty string if there is not configuration needed.</returns>
- ///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevice.htm</remarks>
- public string ConfigDevice(int reference, string user , int userRights , bool newDevice ) {
+		///<summary>
+		///If SupportsConfigDevice returns TRUE, this function will be called when the device properties are displayed for your device. This functions creates a tab for each plug-in that controls the device.
+		///
+		///If the newDevice parameter is TRUE, the user is adding a new device from the HomeSeer user interface.
+		///If you return TRUE from your SupportsAddDevice then ConfigDevice will be called when a user is creating a new device.
+		///Your tab will appear and you can supply controls for the user to create a new device for your plugin. When your ConfigDevicePost is called you will need to get a reference to the device using the past ref number and then take ownership of the device by setting the interface property of the device to the name of your plugin. You can also set any other properties on the device as needed.
+		///</summary>
+		///<param name="ref">The device reference number</param>
+		///<param name="user">The user that is logged into the server and viewing the page</param>
+		///<param name="userRights">The rights of the logged in user</param>
+		///<param name="newDevice">True if this a new device being created for the first time. In this case, the device configuration dialog may present different information than when simply editing an existing device.</param>
+		///<returns>A string containing HTML to be displayed. Return an empty string if there is not configuration needed.</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevice.htm</remarks>
+		public string ConfigDevice(int reference, string user, int userRights, bool newDevice)
+		{
 
 			//	Dim device As Scheduler.Classes.DeviceClass = Nothing
 			//	Dim stb As New StringBuilder
@@ -435,15 +445,15 @@ namespace hspi_CsharpSample
 			//               stb.Append("   <td class='tablerowodd' align='left'>" & saveButton.Build & "</td>")
 			//               stb.Append("  </tr>")
 			//               stb.Append(" </table>")
-	 //               stb.Append("</form>")
+			//               stb.Append("</form>")
 
-	 //               Return stb.ToString
+			//               Return stb.ToString
 
-	 //	End Select
+			//	End Select
 
 
-	 return string.Empty;
- }
+			return string.Empty;
+		}
 
 		//   ''' <summary>
 		//   ''' This function is called when a user posts information from your plugin tab on the device utility page
@@ -461,7 +471,7 @@ namespace hspi_CsharpSample
 		//   ''' </returns>
 		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevicepost.htm</remarks>
 
-		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data , string user , int userRights )
+		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data, string user, int userRights)
 		{
 			//	Dim ReturnValue As Integer = Enums.ConfigDevicePostReturn.CallbackOnce
 
@@ -539,57 +549,60 @@ namespace hspi_CsharpSample
 		//   ''' A collection of CAPIControl objects, one object for each device that needs to be controlled.
 		//   ''' Look at the ControlValue property to get the value that device needs to be set to.</param>
 		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/setio.htm</remarks>
-		//   Public Sub SetIOMulti(ByVal colSend As List(Of HomeSeerAPI.CAPI.CAPIControl))
-		//       'Multiple CAPIcontrols might be sent at the same time, so we need to check each one
-		//       For Each CC In colSend
-		//		Console.WriteLine("SetIOMulti triggered, checking CAPI '" & CC.Label & "' on device " & CC.Ref)
+		public void SetIOMulti(List<CAPI.CAPIControl> colSend)
+		{
+			//       'Multiple CAPIcontrols might be sent at the same time, so we need to check each one
+			//       For Each CC In colSend
+			//		Console.WriteLine("SetIOMulti triggered, checking CAPI '" & CC.Label & "' on device " & CC.Ref)
 
-		//           'CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
-		//           '  The status of the device migth depend on some hardware giving the response that it has received the command,
-		//           '  and perhaps with an other value (indicating a status equal to "Error" or whatever). In that case; send the command,
-		//           '  wait for the answer (in a new thread, for example) and THEN update the device value
-		//           'But here, we just update the value for the device
+			//           'CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
+			//           '  The status of the device migth depend on some hardware giving the response that it has received the command,
+			//           '  and perhaps with an other value (indicating a status equal to "Error" or whatever). In that case; send the command,
+			//           '  wait for the answer (in a new thread, for example) and THEN update the device value
+			//           'But here, we just update the value for the device
 
-		//		hs.SetDeviceValueByRef(CC.Ref, CC.ControlValue, False)
+			//		hs.SetDeviceValueByRef(CC.Ref, CC.ControlValue, False)
 
-		//           'Get the device sending the CAPIcontrol
-		//           Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CC.Ref)
+			//           'Get the device sending the CAPIcontrol
+			//           Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CC.Ref)
 
-		//           'We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
+			//           'We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
 
-		//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
-		//			Case ""
-		//                   '****************************************************************
-		//                   'Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
-		//                   '****************************************************************
+			//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
+			//			Case ""
+			//                   '****************************************************************
+			//                   'Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
+			//                   '****************************************************************
 
-		//				Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+			//				Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
 
-		//				Dim sample As SampleClass = PEDGet(PED, "Sample")
+			//				Dim sample As SampleClass = PEDGet(PED, "Sample")
 
-		//				If sample IsNot Nothing Then
-		//					Dim houseCode As String = sample.houseCode
-		//					Dim Devicecode As String = sample.deviceCode
-		//					SendCommand(houseCode, Devicecode) 'The HSPI_SAMPE control, in utils.vb as an example (but it doesn't do anything)
-		//                   End If
-
-
-
-		//			Case "Basic"
-		//                   'There's nothing stored in the basic device
-
-		//			Case "Advanced"
-		//                   'Here we could choose to do something with the text string stored in the device
+			//				If sample IsNot Nothing Then
+			//					Dim houseCode As String = sample.houseCode
+			//					Dim Devicecode As String = sample.deviceCode
+			//					SendCommand(houseCode, Devicecode) 'The HSPI_SAMPE control, in utils.vb as an example (but it doesn't do anything)
+			//                   End If
 
 
-		//			Case Else
-		//                   'Nothing to do at the moment
 
-		//		End Select
+			//			Case "Basic"
+			//                   'There's nothing stored in the basic device
+
+			//			Case "Advanced"
+			//                   'Here we could choose to do something with the text string stored in the device
 
 
-		//	Next
-		//End Sub
+			//			Case Else
+			//                   'Nothing to do at the moment
+
+			//		End Select
+
+
+			//	Next
+			//End Sub
+		}
+
 
 		#endregion
 
@@ -1919,5 +1932,45 @@ namespace hspi_CsharpSample
 		//End Function
 		#endregion
 
+		#region "Web Page Processing"
+		//private object SelectPage(ByVal pageName As String)
+		//{
+
+		//	switch (pageName)
+		//	{
+		//		case configPage.PageName:
+		//			return _configPage;
+		//			break;
+		//		case statusPage.PageName:
+		//			return _statusPage;
+		//			break;
+		//		default:
+		//			return _configPage;
+		//			break;
+		//	}
+
+		//	return null;
+		//}
+
+		public string PostBackProc(string pageName , string data , string user , int userRights ) {
+			if (pageName==_statusPage.PageName)
+			{
+				return _statusPage.postBackProc(pageName, data, user, userRights);
+			}
+			//Default choice
+			return _configPage.postBackProc(pageName, data, user, userRights);
+		}
+
+		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
+		{
+			if (pageName == _statusPage.PageName)
+			{
+				return _statusPage.GetPagePlugin(pageName, user, userRights, queryString);
+			}
+			//Default choice
+			return _configPage.GetPagePlugin(pageName, user, userRights, queryString);
+
+		}
+		#endregion
 	}
 }

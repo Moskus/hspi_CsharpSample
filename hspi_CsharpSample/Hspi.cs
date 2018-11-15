@@ -18,7 +18,7 @@ namespace hspi_CsharpSample
 
 		public Utils Utils
 		{
-			set=>_utils=value;
+			set => _utils = value;
 		}
 
 		public Hspi(Plugin plugin)
@@ -329,7 +329,23 @@ namespace hspi_CsharpSample
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/custom_functions.htm</remarks>
 		public void PluginPropertySet(string procName, object value)
 		{
-			throw new System.NotImplementedException();
+			try
+			{
+				Type type = this.GetType();
+				var propertyInfo = type.GetProperty(procName);
+				if (propertyInfo == null)
+				{
+					_utils.Log("Property " + procName + " does not exist in this plugin.", LogType.Error);
+				}
+				else
+				{
+					propertyInfo.SetValue(this, value, null);
+				}
+			}
+			catch (Exception ex)
+			{
+				_utils.Log("Error in PluginPropertySet: " + ex.Message, LogType.Error);
+			}
 		}
 
 		/// <summary>
@@ -342,7 +358,7 @@ namespace hspi_CsharpSample
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/speakin.htm</remarks>
 		public void SpeakIn(int device, string txt, bool w, string host)
 		{
-			throw new System.NotImplementedException();
+			//Nothing here
 		}
 
 		///<summary>
@@ -481,7 +497,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerreferencesdevice.htm</remarks>
 		public bool TriggerReferencesDevice(IPlugInAPI.strTrigActInfo TrigInfo, int dvRef)
 		{
-			throw new System.NotImplementedException();
+			return false;
 		}
 
 		///<summary>
@@ -493,9 +509,9 @@ namespace hspi_CsharpSample
 		///<param name="queryString">Extra URI queries (?)</param>
 		///<returns></returns>
 		///<remarks></remarks>
-		public string GetPagePlugin(string page, string user, int userRights, string queryString)
+		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.GetPagePlugin(pageName, user, userRights, queryString);
 		}
 
 		/// <summary>
@@ -540,7 +556,8 @@ namespace hspi_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionadvancedmode.htm</remarks>
-		public bool ActionAdvancedMode {
+		public bool ActionAdvancedMode
+		{
 			get { return _actionAdvancedMode; }
 			set { _actionAdvancedMode = value; }
 		}
@@ -581,7 +598,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
 		public int TriggerCount { get; }
 
-		
+
 		///<summary>
 		///Return the name of the given trigger based on the trigger number passed.
 		///</summary>
