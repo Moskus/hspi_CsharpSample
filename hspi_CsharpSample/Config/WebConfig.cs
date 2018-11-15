@@ -7,14 +7,15 @@ namespace hspi_CsharpSample.Config
 	public class WebConfig : PageBuilderAndMenu.clsPageBuilder
 	{
 		private bool _timerEnabled;
+		private Settings _settings;
 
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
-		public WebConfig(string pageName) : base(pageName)
+		public WebConfig(string pageName,Settings settings) : base(pageName)
 		{
-
+			_settings = settings;
 		}
 
 
@@ -384,7 +385,7 @@ namespace hspi_CsharpSample.Config
 			//       Next
 
 
-			string ret=string.Empty;
+			string ret = string.Empty;
 			//	If Rebuilding Then
 
 			//		ret = ddl.Build
@@ -427,22 +428,26 @@ namespace hspi_CsharpSample.Config
 
 		public string BuildTimespan(string name, bool rebuilding = false, string label = "")
 		{
-			//	Dim timespan As New clsJQuery.jqTimeSpanPicker(Name, label, Me.PageName, False)
-			//	timespan.id = "o" & Name
-			//	timespan.showDays = False
+			var timespan = new clsJQuery.jqTimeSpanPicker(name, label, this.PageName, false);
+			timespan.id = "o" + name;
+			timespan.showDays = false;
 
-			//	Select Case Name
-			//		Case "TimespanTimer"
-			//			timespan.defaultTimeSpan = New TimeSpan(0, 0, plugin.Settings.TimerInterval / 1000)
-			//	End Select
+			if(name=="TimespanTimer")
+			{
+				timespan.defaultTimeSpan = new TimeSpan(0, 0, _settings.TimerInterval / 1000);
+			}
 
 			var ret = String.Empty;
-			//	If Rebuilding Then
-			//		ret = timespan.Build
-			//		Me.divToUpdate.Add(Name & "_div", ret)
-			//       Else
-			//		ret = "<div style='float: left;'  id='" & Name & "_div'>" & timespan.Build & "</div>"
-			//	End If
+			if (rebuilding)
+			{
+				ret = timespan.Build();
+				this.divToUpdate.Add(name + "_div", ret);
+			}
+			else
+			{
+				ret = "<div style='float: left;'  id='" + name + "_div'>" + timespan.Build() + "</div>";
+			}
+
 			return ret;
 		}
 	}

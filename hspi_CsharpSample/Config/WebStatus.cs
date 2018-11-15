@@ -12,12 +12,16 @@ namespace hspi_CsharpSample.Config
 		private bool _timerEnabled;
 		private List<string> lbList = new List<string>();
 		private DataTable ddTable = null;
+		private Settings _settings;
+
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
-		public WebStatus(string pageName) : base(pageName)
-		{}
+		public WebStatus(string pageName, Settings settings) : base(pageName)
+		{
+			_settings = settings;
+		}
 
 		internal string GetPagePlugin(string pageName, string user, int userRights, string queryString)
 		{

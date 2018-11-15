@@ -84,8 +84,8 @@ namespace hspi_CsharpSample
 
 		public Plugin()
 		{
-			_configPage= new WebConfig(ConfigPageName);
-			_statusPage = new WebStatus(StatusPageName);
+			_configPage= new WebConfig(ConfigPageName, _settings);
+			_statusPage = new WebStatus(StatusPageName, _settings);
 		}
 
 		public Timer UpdateTimer => _updateTimer;
