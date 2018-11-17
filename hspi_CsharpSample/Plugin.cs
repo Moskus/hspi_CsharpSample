@@ -107,7 +107,10 @@ namespace hspi_CsharpSample
 			get => _settings;
 			set => _settings = value;
 		}
-		public int AccessLevel { get; internal set; }
+		public int AccessLevel
+		{
+			get { return 1;}
+		} 
 
 		#region "Init"
 
@@ -1017,7 +1020,9 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actioncount.htm</remarks>
 		public int ActionCount()
 		{
-			return _actions.Count;
+			if (_actions != null)
+				return _actions.Count;
+			return 0;
 
 		}
 
