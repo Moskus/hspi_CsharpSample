@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using HomeSeerAPI;
 using Scheduler;
+using System.Web;
+using System.Collections.Specialized;
 using System.Data;
+using System.Text;
 
 namespace hspi_CsharpSample.Config
 {
@@ -10,8 +13,8 @@ namespace hspi_CsharpSample.Config
 	public class WebStatus : PageBuilderAndMenu.clsPageBuilder
 	{
 		private bool _timerEnabled;
-		private List<string> lbList = new List<string>();
-		private DataTable ddTable = null;
+		private List<string> _lbList = new List<string>();
+		private DataTable _ddTable = null;
 		private Settings _settings;
 
 		///<summary>
@@ -28,73 +31,74 @@ namespace hspi_CsharpSample.Config
 			throw new NotImplementedException();
 		}
 
-		//	Public Overrides Function postBackProc(page As String, data As String, user As String, userRights As Integer) As String
+		public override string postBackProc(string page, string data, string user, int userRights)
+		{
+			NameValueCollection parts;
+			string value = "";
+			var name = "";
 
+			parts = HttpUtility.ParseQueryString(data);
 
-		//	Dim parts As Collections.Specialized.NameValueCollection
+			switch (parts["id"])
+			{
+				case "oTabLB":
+					PostMessage("The Listbox tab was selected.");
+					break;
 
-		//	Dim value As String = ""
+				case "oTabCB":
+					PostMessage("The Checkbox tab was selected.");
+					break;
 
-		//	Dim name As String = ""
+				case "oTabDD":
+					PostMessage("The Dropdown tab was selected.");
+					break;
 
-		//	parts = HttpUtility.ParseQueryString(data)
+				case "oButtonLB":
+					_lbList.Add(parts["TextboxLB"]);
+					PostMessage("'" + parts["TextboxLB"] + "' has been added.");
+					BuildTabLB(true);
+					break;
+				case "oButtonDD1":
+					_ddTable.Rows.Add("DD1", parts["tb1"], parts["tb2"]);
+					PostMessage("'" + parts["tb1"] + "' with a value of " + parts["tb2"] + " has been added.");
+					BuildTabDD(true);
+					break;
 
+				case "oButtonDD2":
+					_ddTable.Rows.Add("DD2", parts["tb1"], parts["tb2"]);
+					PostMessage("'" + parts["tb1"] + "' with a value of " + parts["tb2"] + " has been added.");
+					BuildTabDD(true);
+					break;
 
-		//	Select Case parts("id")
+				case "oCB1":
+				case "oCB2":
+					name = parts["id"];
 
-		//		Case "oTabLB"
-		//               PostMessage("The Listbox tab was selected.")
+					name = name.Substring(1); //strip the 'o' off the ID to get the name
+					value = parts[name];
+					PostMessage("Something was " + value + ".");
+					break;
 
-		//		Case "oTabCB"
-		//               PostMessage("The Checkbox tab was selected.")
+				case "oSlider":
+					value = parts["Slider"];
+					PostMessage("Value is " + value + ".");
+					break;
 
-		//		Case "oTabDD"
-		//               PostMessage("The Dropdown tab was selected.")
+				case "timer": //this stops the timer and clears the message
+					if (_timerEnabled) //this handles the initial timer post that occurs immediately upon enabling the timer.
+					{
+						_timerEnabled = false;
+					}
+					else
+					{
+						this.pageCommands.Add("stoptimer", "");
+						this.divToUpdate.Add("message", "&nbsp;");
+					}
+					break;
+			}
 
-		//		Case "oButtonLB"
-		//               lbList.Add(parts("TextboxLB"))
-		//               PostMessage("'" & parts("TextboxLB") & "' has been added.")
-		//               BuildTabLB(True)
-
-		//		Case "oButtonDD1"
-		//               ddTable.Rows.Add("DD1", parts("tb1"), parts("tb2"))
-		//               PostMessage("'" & parts("tb1") & "' with a value of " & parts("tb2") & " has been added.")
-		//               BuildTabDD(True)
-
-		//		Case "oButtonDD2"
-		//               ddTable.Rows.Add("DD2", parts("tb1"), parts("tb2"))
-		//               PostMessage("'" & parts("tb1") & "' with a value of " & parts("tb2") & " has been added.")
-		//               BuildTabDD(True)
-
-		//		Case "oCB1", "oCB2"
-		//               name = parts("id")
-
-		//			name = Right(name, name.Length - 1) 'strip the 'o' off the ID to get the name
-		//               value = parts(name)
-
-		//			PostMessage("Something was " & value & ".")
-
-		//		Case "oSlider"
-		//               value = parts("Slider")
-
-		//			PostMessage("Value is " & value & ".")
-
-		//		Case "timer" 'this stops the timer and clears the message
-		//               If TimerEnabled Then 'this handles the initial timer post that occurs immediately upon enabling the timer.
-		//                   TimerEnabled = False
-		//			Else
-
-		//				Me.pageCommands.Add("stoptimer", "")
-		//                   Me.divToUpdate.Add("message", "&nbsp;")
-		//               End If
-
-		//	End Select
-
-
-		//	Return MyBase.postBackProc(page, data, user, userRights)
-
-		//End Function
-
+			return base.postBackProc(page, data, user, userRights);
+		}
 
 		//Public Function GetPagePlugin(ByVal pageName As String, ByVal user As String, ByVal userRights As Integer, ByVal queryString As String) As String
 
@@ -115,11 +119,11 @@ namespace hspi_CsharpSample.Config
 
 		//		stb.Append(hs.GetPageHeader(pageName, plugin.Name & instancetext, "", "", False, False))
 
-		//           stb.Append(clsPageBuilder.DivStart("pluginpage", ""))
+		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""))
 
 		//           ' a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
-		//           stb.Append(clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
-		//           stb.Append(clsPageBuilder.DivEnd)
+		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
+		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
 
 		//		Me.RefreshIntervalMilliSeconds = 3000
 		//           stb.Append(Me.AddAjaxHandlerPost("id=timer", pageName))
@@ -128,7 +132,7 @@ namespace hspi_CsharpSample.Config
 
 		//           stb.Append(BuildContent)
 
-		//		stb.Append(clsPageBuilder.DivEnd)
+		//		stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
 
 		//           ' add the body html to the page
 		//           Me.AddBody(stb.ToString)
@@ -164,7 +168,7 @@ namespace hspi_CsharpSample.Config
 
 		//	Dim tabs As clsJQuery.jqTabs = New clsJQuery.jqTabs("oTabs", Me.PageName)
 
-		//	Dim tab As New clsJQuery.Tab
+		//	Dim tab=new clsJQuery.Tab
 
 		//	tabs.postOnTabClick = True
 		//	tab.tabTitle = "Listbox"
@@ -210,84 +214,87 @@ namespace hspi_CsharpSample.Config
 		//	Return tabs.Build
 		//End Function
 
-		//Function BuildTabLB(Optional ByVal Rebuilding As Boolean = False) As String
+		private string BuildTabLB(bool rebuilding = false)
+		{
+			var stb = new StringBuilder();
+			var lb = new clsJQuery.jqListBox("lb", this.PageName);
 
-		//	var stb =new StringBuilder();
-		//	Dim lb As New clsJQuery.jqListBox("lb", Me.PageName)
+			var ms1 = new clsJQuery.jqMultiSelect("ms1", this.PageName, true);
+			var ms2 = new clsJQuery.jqMultiSelect("ms2", this.PageName, false);
+			var sel = new clsJQuery.jqSelector("sel", this.PageName, false);
+			var sel2 = new clsJQuery.jqSelector("sel2", this.PageName, false);
+			ms2.width = 300;
+			ms2.Size = 6;
+			lb.style = "height:100px;width:300px;";
 
-		//	Dim ms1 As New clsJQuery.jqMultiSelect("ms1", Me.PageName, True)
-		//       Dim ms2 As New clsJQuery.jqMultiSelect("ms2", Me.PageName, False)
-		//       Dim sel As New clsJQuery.jqSelector("sel", Me.PageName, False)
-		//       Dim sel2 As New clsJQuery.jqSelector("sel2", Me.PageName, False)
-		//       ms2.width = 300
-		//       ms2.Size = 6
-		//       lb.style = "height:100px;width:300px;"
-		//       Dim item As Object
+			foreach (var item in _lbList)
+			{
+				lb.items.Add(item);
+				ms1.AddItem(item, item, false);
+				ms2.AddItem(item, item, false);
+				sel.AddItem(item, item, false);
+			}
 
-		//	For Each item In lbList
-		//		lb.items.Add(item)
 
-		//		ms1.AddItem(item, item, False)
-		//		ms2.AddItem(item, item, False)
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("frmTab1", "ListBox", "Post"));
+			stb.Append(sel.Build() + ms1.Build() + ms2.Build() + "<br>");
+			stb.Append(lb.Build() + " " + BuildTextbox("TextboxLB") + " " + BuildButton("ButtonLB"));
+			stb.Append(sel2.Build() + "<br>");
 
-		//		sel.AddItem(item, item, False)
-		//	Next
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd());
+			if (rebuilding)
+			{
+				this.divToUpdate.Add("TabLB_div", stb.ToString());
+			}
+			return stb.ToString();
 
-		//	stb.Append(clsPageBuilder.FormStart("frmTab1", "ListBox", "Post"))
-		//       stb.Append(sel.Build & ms1.Build & ms2.Build & "<br>")
-		//       stb.Append(lb.Build & " " & BuildTextbox("TextboxLB") & " " & BuildButton("ButtonLB"))
-		//       stb.Append(sel2.Build & "<br>")
-		//       stb.Append(clsPageBuilder.FormEnd())
-		//       If Rebuilding Then Me.divToUpdate.Add("TabLB_div", stb.ToString)
-
-		//	Return stb.ToString
-
-		//End Function
-
+		}
 
 		//Function BuildTabCB() As String
 		//	var stb =new StringBuilder();
 
-		//	Dim cb1 As New clsJQuery.jqCheckBox("CB1", "check 1", Me.PageName, True, False)
+		//	Dim cb1=new clsJQuery.jqCheckBox("CB1", "check 1", Me.PageName, True, False)
 
-		//	Dim cb2 As New clsJQuery.jqCheckBox("CB2", "check 2", Me.PageName, True, True)
-		//       Dim cb3 As New clsJQuery.jqCheckBox("CB3", "check 3", Me.PageName, False, True)
-		//       Dim cb4 As New clsJQuery.jqCheckBox("CB4", "check 4", Me.PageName, False, False)
+		//	Dim cb2=new clsJQuery.jqCheckBox("CB2", "check 2", Me.PageName, True, True)
+		//       Dim cb3=new clsJQuery.jqCheckBox("CB3", "check 3", Me.PageName, False, True)
+		//       Dim cb4=new clsJQuery.jqCheckBox("CB4", "check 4", Me.PageName, False, False)
 
 		//       cb1.id = "oCB1"
 		//       cb2.id = "oCB2"
 		//       cb3.id = "oCB3"
 		//       cb4.id = "oCB4"
 
-		//       stb.Append(clsPageBuilder.FormStart("frmTab2", "checkbox", "Post"))
+		//       stb.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("frmTab2", "checkbox", "Post"))
 		//       stb.Append(cb1.Build())
 		//       stb.Append(cb2.Build())
 		//       stb.Append(cb3.Build())
 		//       stb.Append(cb4.Build())
 		//       stb.Append(BuildButton("ButtonCB1") & " ")
-		//       stb.Append(clsPageBuilder.FormEnd())
+		//       stb.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd())
 		//       Return stb.ToString
 
 		//End Function
 
 
-		//Function BuildTabDD(Optional ByVal Rebuilding As Boolean = False) As String
+		private string BuildTabDD(bool rebuilding = false)
+		{
+			var stb = new StringBuilder();
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("frmTab3", "DropDown", "Post"));
+			stb.Append(BuildDD("dd1") + " ");
+			stb.Append(BuildDD("dd2") + " ");
+			stb.Append("Name:" + BuildTextbox("tb1") + " ");
+			stb.Append("Value:" + BuildTextbox("tb2") + " ");
+			stb.Append(BuildButton("ButtonDD1") + " ");
+			stb.Append(BuildButton("ButtonDD2") + " ");
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd());
+			if (rebuilding)
+			{
+				this.divToUpdate.Add("TabDD_div", stb.ToString());
+			}
 
-		//	var stb =new StringBuilder();
-		//	stb.Append(clsPageBuilder.FormStart("frmTab3", "DropDown", "Post"))
-		//       stb.Append(BuildDD("dd1") & " ")
-		//       stb.Append(BuildDD("dd2") & " ")
-		//       stb.Append("Name:" & BuildTextbox("tb1") & " ")
-		//       stb.Append("Value:" & BuildTextbox("tb2") & " ")
-		//       stb.Append(BuildButton("ButtonDD1") & " ")
-		//       stb.Append(BuildButton("ButtonDD2") & " ")
-		//       stb.Append(clsPageBuilder.FormEnd())
-		//       If Rebuilding Then Me.divToUpdate.Add("TabDD_div", stb.ToString)
+			return stb.ToString();
 
-		//	Return stb.ToString
-
-		//End Function
-
+		}
 
 		//Function BuildTabSL() As String
 		//	var stb =new StringBuilder();
@@ -302,7 +309,7 @@ namespace hspi_CsharpSample.Config
 		//Function BuildTabST(Optional ByVal Rebuilding As Boolean = False) As String
 
 		//	var stb =new StringBuilder();
-		//	Dim st As New clsJQuery.jqSlidingTab("myslide1ID", Me.PageName, False)
+		//	Dim st=new clsJQuery.jqSlidingTab("myslide1ID", Me.PageName, False)
 
 		//	st.initiallyOpen = True
 		//	st.callGetOnOpenClose = False
@@ -322,90 +329,82 @@ namespace hspi_CsharpSample.Config
 
 		//Function BuildSlider(ByVal Name As String, Optional ByVal value As Integer = 0) As String
 
-		//	Dim slider As New clsJQuery.jqSlider(Name, 0, 100, value, clsJQuery.jqSlider.jqSliderOrientation.horizontal, 200, Me.PageName, True)
+		//	Dim slider=new clsJQuery.jqSlider(Name, 0, 100, value, clsJQuery.jqSlider.jqSliderOrientation.horizontal, 200, Me.PageName, True)
 		//       slider.id = "o" & Name
 		//	Return slider.build
 		//End Function
 
-		//Function BuildTextbox(ByVal Name As String) As String
-
-		//	Dim tb As New clsJQuery.jqTextBox(Name, "", "", Me.PageName, 20, True)
-		//       tb.id = "o" & Name
-		//	tb.editable = True
-		//	Return tb.Build
-		//End Function
-
-		//Function BuildDD(Name As String, Optional ByVal SelectedValue As String = "")
-
-		//	Dim dd As New clsJQuery.jqDropList("dd", Me.PageName, False)
-		//       Dim sel As Boolean
-
-		//	Dim Rows() As DataRow
-
-		//	Dim Row As DataRow
+		private string BuildTextbox(string name)
+		{
+			var tb = new clsJQuery.jqTextBox(name, "", "", this.PageName, 20, true);
+			tb.id = "o" + name;
+			tb.editable = true;
+			return tb.Build();
+		}
 
 
-		//	dd.id = "o" & Name
-		//	dd.autoPostBack = True
+		private string BuildDD(string name, string selectedValue = "")
+		{
+			var dd = new clsJQuery.jqDropList("dd", this.PageName, false);
+			bool sel;
+			DataRow[] rows;
 
-		//	dd.AddItem("", "", False)
+			dd.id = "o" + name;
+			dd.autoPostBack = true;
+			dd.AddItem("", "", false);
+			//save the visible text of the options for later use
+			if (_ddTable == null)
+			{
+				_ddTable = new DataTable();
+				_ddTable.Columns.Add("ObjectName", typeof(string));
+				_ddTable.Columns.Add("OptionName", typeof(string));
+				_ddTable.Columns.Add("OptionValue", typeof(string));
+			}
 
-		//       'save the visible text of the options for later use
-		//       If(ddTable Is Nothing) Then
-		//	   ddTable = New DataTable
-		//	   ddTable.Columns.Add("ObjectName", GetType(String))
-
-		//		ddTable.Columns.Add("OptionName", GetType(String))
-		//           ddTable.Columns.Add("OptionValue", GetType(String))
-		//       End If
-
-
-		//	Rows = ddTable.Select("ObjectName='" & Name & "'")
-
-		//       For Each Row In Rows
-		//		If Row.Item("OptionValue") = SelectedValue Then
-
-		//			sel = True
-		//		Else
-
-		//			sel = False
-		//		End If
-		//		dd.AddItem(Row.Item("OptionName"), Row.Item("OptionValue"), sel)
-		//       Next
-
-		//	ddTable.AcceptChanges()
-
-
-		//	Return dd.Build
-
-		//End Function
-
-
-		//Function BuildButton(ByVal Name As String) As String
-
-		//	Dim ButtonText As String = "Submit"
-
-		//	Dim b As New clsJQuery.jqButton(Name, "", Me.PageName, True)
-
-		//       Select Case Name
-		//		Case "ButtonLB"
-
-		//			ButtonText = "Add to Listbox"
-		//           Case "ButtonDD1"
-		//               ButtonText = "Add to Dropdown 1"
-		//           Case "ButtonDD2"
-		//               ButtonText = "Add to Dropdown 2"
-		//       End Select
+			rows = _ddTable.Select("ObjectName='" + name + "'");
+			foreach (var row in rows)
+			{
+				if ((string)row["OptionValue"] == selectedValue)
+				{
+					sel = true;
+				}
+				else
+				{
+					sel = false;
+				}
+				dd.AddItem((string)row["OptionName"], (string)row["OptionValue"], sel);
+			}
+			_ddTable.AcceptChanges();
+			return dd.Build();
+		}
 
 
-		//	b.functionToCallOnClick = "userConfirm()"
-		//       b.includeClickFunction = True
-		//	b.id = "o" & Name
-		//	b.label = ButtonText
+		private string BuildButton(string name)
+		{
+			var ButtonText = "Submit";
+			var b = new clsJQuery.jqButton(name, "", this.PageName, true);
+			switch (name)
+			{
+				case "ButtonLB":
+					ButtonText = "Add to Listbox";
+					break;
 
+				case "ButtonDD1":
+					ButtonText = "Add to Dropdown 1";
+					break;
 
-		//	Return b.Build()
-		//End Function
+				case "ButtonDD2":
+					ButtonText = "Add to Dropdown 2";
+					break;
+			}
+
+			b.functionToCallOnClick = "userConfirm()";
+			b.includeClickFunction = true;
+			b.id = "o" + name;
+			b.label = ButtonText;
+
+			return b.Build();
+		}
 
 		//Public Function DDText(ByVal DDName As String, DDValue As String) As String
 
@@ -439,12 +438,12 @@ namespace hspi_CsharpSample.Config
 		//	Return ReturnValue
 		//End Function
 
-		//Sub PostMessage(ByVal sMessage As String)
-
-		//	Me.divToUpdate.Add("message", sMessage)
-		//       Me.pageCommands.Add("starttimer", "")
-		//       TimerEnabled = True
-		//End Sub
+		private void PostMessage(string message)
+		{
+			this.divToUpdate.Add("message", message);
+			this.pageCommands.Add("starttimer", "");
+			_timerEnabled = true;
+		}
 
 
 

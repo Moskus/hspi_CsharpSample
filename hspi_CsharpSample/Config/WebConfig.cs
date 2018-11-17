@@ -197,11 +197,11 @@ namespace hspi_CsharpSample.Config
 				//           stb.Append(hs.GetPageHeader(pageName, plugin.Name & " " & pageName.Replace(plugin.Name, "") & instancetext, "", "", False, False))
 
 				//           'Adds the div for the plugin page
-				//           stb.Append(clsPageBuilder.DivStart("pluginpage", ""))
+				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""))
 
 				//           ' a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
-				//           stb.Append(clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
-				//           stb.Append(clsPageBuilder.DivEnd)
+				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
+				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
 
 				//           'Configures the timer that all pages apparently has
 				//           Me.RefreshIntervalMilliSeconds = 3000
@@ -211,7 +211,7 @@ namespace hspi_CsharpSample.Config
 				//           stb.Append(BuildContent)
 
 				//           'Ends the div end tag for the plugin page
-				//           stb.Append(clsPageBuilder.DivEnd)
+				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
 
 				//           ' add the body html to the page
 				//           Me.AddBody(stb.ToString)
@@ -350,7 +350,7 @@ namespace hspi_CsharpSample.Config
 
 			//Get the items we want to have in the drop down list
 
-			//	Dim items As New List(Of String)
+			//	Dim items=new List(Of String)
 			//	Dim selecteditem As String = String.Empty
 
 			//	Select Case Name
@@ -401,7 +401,7 @@ namespace hspi_CsharpSample.Config
 
 		public string BuildCheckbox(string name, bool rebuilding = false, string label = "")
 		{
-			//	Dim checkbox As New clsJQuery.jqCheckBox(Name, label, Me.PageName, True, False)
+			//	Dim checkbox=new clsJQuery.jqCheckBox(Name, label, Me.PageName, True, False)
 			//	checkbox.id = "o" & Name
 
 			//	Select Case Name

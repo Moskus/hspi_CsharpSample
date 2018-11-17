@@ -339,7 +339,7 @@ namespace hspi_CsharpSample
 			//We'll use the device type string to determine how we should handle the device in the plugin
 
 			//	Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
-			//		Case ""
+			//case ""
 			//               '======================================================
 			//               'It's a device created by the HSPI_SAMPLE_BASIC setting, and is included for reference only.
 			//               'Its not used by this sample. See further down for "Basic" and "Advanced".
@@ -347,10 +347,10 @@ namespace hspi_CsharpSample
 
 			//               Dim sample As SampleClass = PEDGet(PED, PEDname)
 
-			//			Dim houseCodeDropDownList As New clsJQuery.jqDropList("HouseCode", "", False)
+			//			Dim houseCodeDropDownList=new clsJQuery.jqDropList("HouseCode", "", False)
 
-			//			Dim unitCodeDropDownList As New clsJQuery.jqDropList("DeviceCode", "", False)
-			//               Dim saveButton As New clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
+			//			Dim unitCodeDropDownList=new clsJQuery.jqDropList("DeviceCode", "", False)
+			//               Dim saveButton=new clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
 			//               Dim houseCode As String = ""
 
 			//			Dim deviceCode As String = ""
@@ -409,7 +409,7 @@ namespace hspi_CsharpSample
 
 
 
-			//		Case "Basic"
+			//case "Basic"
 
 			//			stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
 
@@ -418,7 +418,7 @@ namespace hspi_CsharpSample
 			//               Return stb.ToString
 
 
-			//		Case "Advanced"
+			//case "Advanced"
 
 			//			Dim savedString As String = PEDGet(PED, PEDname)
 
@@ -429,9 +429,9 @@ namespace hspi_CsharpSample
 			//			End If
 
 
-			//			Dim savedTextbox As New clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, False)
+			//			Dim savedTextbox=new clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, False)
 
-			//			Dim saveButton As New clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
+			//			Dim saveButton=new clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
 
 			//               stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
 			//               stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>")
@@ -553,7 +553,7 @@ namespace hspi_CsharpSample
 		{
 			//       'Multiple CAPIcontrols might be sent at the same time, so we need to check each one
 			//       For Each CC In colSend
-			//		Console.WriteLine("SetIOMulti triggered, checking CAPI '" & CC.Label & "' on device " & CC.Ref)
+			//console.WriteLine("SetIOMulti triggered, checking CAPI '" + CC.Label + "' on device " + CC.Ref);
 
 			//           'CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
 			//           '  The status of the device migth depend on some hardware giving the response that it has received the command,
@@ -1160,8 +1160,8 @@ namespace hspi_CsharpSample
 
 			//		Dim DeviceCode As String = ""
 
-			//		Dim dd As New clsJQuery.jqDropList("HouseCodes_" & UID & sUnique, Pagename, True)
-			//        Dim dd1 As New clsJQuery.jqDropList("DeviceCodes_" & UID & sUnique, Pagename, True)
+			//		Dim dd=new clsJQuery.jqDropList("HouseCodes_" & UID & sUnique, Pagename, True)
+			//        Dim dd1=new clsJQuery.jqDropList("DeviceCodes_" & UID & sUnique, Pagename, True)
 			//        Dim key As String
 
 
@@ -1272,8 +1272,7 @@ namespace hspi_CsharpSample
 
 			//			End If
 
-			//		Catch ex As Exception
-
+			//catch (Exception ex )
 			//			ret.sResult = "ERROR, Exception in Action UI of " & Me.Name & ": " & ex.Message
 
 			//			Return ret
@@ -1719,7 +1718,7 @@ namespace hspi_CsharpSample
 		//		Dim reference As Integer = device.Ref(hs)
 
 		//           'Setting the type to plugin device
-		//           Dim typeInfo As New DeviceTypeInfo
+		//           Dim typeInfo=new DeviceTypeInfo
 		//		typeInfo.Device_Type = DeviceTypeInfo.eDeviceAPI.Plug_In
 		//		device.DeviceType_Set(hs) = typeInfo
 
@@ -1796,7 +1795,7 @@ namespace hspi_CsharpSample
 		//       ' Value = 0
 		//       ' =========
 		//       'Status pair
-		//       Dim SVpair As New HomeSeerAPI.VSPair(HomeSeerAPI.ePairStatusControl.Both)
+		//       Dim SVpair=new HomeSeerAPI.VSPair(HomeSeerAPI.ePairStatusControl.Both)
 		//	SVpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
 		//	SVpair.Value = 0
 
@@ -1812,7 +1811,7 @@ namespace hspi_CsharpSample
 
 		//       '... and some graphics
 
-		//	Dim VGpair As New HomeSeerAPI.VGPair
+		//	Dim VGpair=new HomeSeerAPI.VGPair
 		//	VGpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
 
 		//	VGpair.Set_Value = 0
@@ -1940,10 +1939,10 @@ namespace hspi_CsharpSample
 
 		//	switch (pageName)
 		//	{
-		//		case configPage.PageName:
+		//case configPage.PageName:
 		//			return _configPage;
 		//			break;
-		//		case statusPage.PageName:
+		//case statusPage.PageName:
 		//			return _statusPage;
 		//			break;
 		//		default:
