@@ -84,8 +84,6 @@ namespace hspi_CsharpSample
 
 		public Plugin()
 		{
-			_configPage= new WebConfig(ConfigPageName, _settings);
-			_statusPage = new WebStatus(StatusPageName, _settings);
 		}
 
 		public Timer UpdateTimer => _updateTimer;
@@ -99,6 +97,9 @@ namespace hspi_CsharpSample
 			{
 				_utils = value;
 				_hs = Utils.Hs;
+
+				_configPage = new WebConfig(ConfigPageName, _settings,_hs,this);
+				_statusPage = new WebStatus(StatusPageName, _settings,_hs);
 			}
 		}
 
@@ -991,7 +992,7 @@ namespace hspi_CsharpSample
 		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
 		///</summary>
 		///<remarks>By Moskus</remarks>
-		private void RestartTimer()
+		public void RestartTimer()
 		{
 			//Get now time
 			var timeNow = DateTime.Now.TimeOfDay;

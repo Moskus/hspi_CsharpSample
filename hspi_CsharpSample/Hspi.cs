@@ -524,9 +524,9 @@ namespace hspi_CsharpSample
 		/// <param name="userRights">The associated user rights</param>
 		/// <returns></returns>
 		/// <remarks></remarks>
-		public string PostBackProc(string page, string data, string user, int userRights)
+		public string PostBackProc(string pageName, string data, string user, int userRights)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.PostBackProc(pageName, data, user, userRights);
 		}
 
 		/// <summary>

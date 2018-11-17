@@ -9,28 +9,24 @@ using System.Text;
 
 namespace hspi_CsharpSample.Config
 {
-
 	public class WebStatus : PageBuilderAndMenu.clsPageBuilder
 	{
 		private bool _timerEnabled;
 		private List<string> _lbList = new List<string>();
 		private DataTable _ddTable = null;
 		private Settings _settings;
+		private IHSApplication _hs;
 
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
-		public WebStatus(string pageName, Settings settings) : base(pageName)
+		public WebStatus(string pageName, Settings settings,IHSApplication hs) : base(pageName)
 		{
 			_settings = settings;
+			_hs = hs;
 		}
-
-		internal string GetPagePlugin(string pageName, string user, int userRights, string queryString)
-		{
-			throw new NotImplementedException();
-		}
-
+		
 		public override string postBackProc(string page, string data, string user, int userRights)
 		{
 			NameValueCollection parts;
@@ -100,54 +96,50 @@ namespace hspi_CsharpSample.Config
 			return base.postBackProc(page, data, user, userRights);
 		}
 
-		//Public Function GetPagePlugin(ByVal pageName As String, ByVal user As String, ByVal userRights As Integer, ByVal queryString As String) As String
+		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
+		{
+			var stb = new StringBuilder();
+			var instancetext = "";
+			try
+			{
+				this.reset();
+				// handle any queries like mode=something
+				NameValueCollection parts = null;
+				if (!string.IsNullOrEmpty(queryString))
+				{
+					parts = HttpUtility.ParseQueryString(queryString);
+				}
 
-		//	var stb =new StringBuilder();
-		//	Dim instancetext As String = ""
-		//       Try
+				if (!string.IsNullOrEmpty(Utils.PluginInstance))
+				{
+					instancetext = " - " + Utils.PluginInstance;
+				}
 
-		//		Me.reset()
+				stb.Append(_hs.GetPageHeader(pageName, Utils.PluginName + instancetext, "", "", false, false));
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""));
+				// a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"));
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd());
 
-		//           ' handle any queries like mode=something
-		//           Dim parts As Collections.Specialized.NameValueCollection = Nothing
-		//		If (queryString<> "") Then
-		//		   parts = HttpUtility.ParseQueryString(queryString)
+				this.RefreshIntervalMilliSeconds = 3000;
+				stb.Append(this.AddAjaxHandlerPost("id=timer", pageName));
 
-		//		End If
+				// specific page starts here
+				stb.Append(BuildContent());
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd());
 
-		//		If instance<> "" Then instancetext = " - " & instance
+				// add the body html to the page
+				this.AddBody(stb.ToString());
 
-		//		stb.Append(hs.GetPageHeader(pageName, plugin.Name & instancetext, "", "", False, False))
-
-		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""))
-
-		//           ' a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
-		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
-		//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
-
-		//		Me.RefreshIntervalMilliSeconds = 3000
-		//           stb.Append(Me.AddAjaxHandlerPost("id=timer", pageName))
-
-		//           ' specific page starts here
-
-		//           stb.Append(BuildContent)
-
-		//		stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
-
-		//           ' add the body html to the page
-		//           Me.AddBody(stb.ToString)
-
-		//           ' return the full page
-		//           Return Me.BuildPage()
-
-		//	Catch ex As Exception
-		//           'WriteMon("Error", "Building page: " & ex.Message)
-
-		//		Return "error - " & ex.Message 'Err.Description
-		//       End Try
-
-		//End Function
-
+				// return the full page
+				return this.BuildPage();
+			}
+			catch (Exception ex)
+			{
+				//WriteMon("Error", "Building page: " & ex.Message)
+				return "error - " + ex.Message; //Err.Description
+			}
+		}
 
 		private string BuildContent()
 		{
@@ -161,57 +153,41 @@ namespace hspi_CsharpSample.Config
 			return stb.ToString();
 		}
 
-
 		public string BuildTabs()
 		{
-
-
-			var stb =new StringBuilder();
-
+			var stb = new StringBuilder();
 			var tabs = new clsJQuery.jqTabs("oTabs", this.PageName);
 
-			//	Dim tab=new clsJQuery.Tab
+			var tab = new clsJQuery.Tab();
+			tabs.postOnTabClick = true;
+			tab.tabTitle = "Listbox";
+			tab.tabDIVID = "oTabLB";
+			tab.tabContent = "<div id='TabLB_div'>" + BuildTabLB() + "</div>";
+			tabs.tabs.Add(tab);
 
-			//	tabs.postOnTabClick = True
-			//	tab.tabTitle = "Listbox"
+			tab = new clsJQuery.Tab();
+			tab.tabTitle = "Checkbox";
+			tab.tabDIVID = "oTabCB";
+			tab.tabContent = "<div id='TabCB_div'>" + BuildTabCB() + "</div>";
+			tabs.tabs.Add(tab);
 
-			//	tab.tabDIVID = "oTabLB"
+			tab = new clsJQuery.Tab();
+			tab.tabTitle = "Drop Down";
+			tab.tabDIVID = "oTabDD";
+			tab.tabContent = "<div id='TabDD_div'>" + BuildTabDD() + "</div>";
+			tabs.tabs.Add(tab);
 
-			//	tab.tabContent = "<div id='TabLB_div'>" & BuildTabLB() & "</div>"
+			tab = new clsJQuery.Tab();
+			tab.tabTitle = "Slider";
+			tab.tabDIVID = "oTabSL";
+			tab.tabContent = "<div id='TabSL_div'>" + BuildTabSL() + "</div>";
+			tabs.tabs.Add(tab);
 
-			//	tabs.tabs.Add(tab)
-			//	tab = New clsJQuery.Tab
-			//	tab.tabTitle = "Checkbox"
-
-			//	tab.tabDIVID = "oTabCB"
-
-			//	tab.tabContent = "<div id='TabCB_div'>" & BuildTabCB() & "</div>"
-
-			//	tabs.tabs.Add(tab)
-			//	tab = New clsJQuery.Tab
-			//	tab.tabTitle = "Drop Down"
-
-			//	tab.tabDIVID = "oTabDD"
-
-			//	tab.tabContent = "<div id='TabDD_div'>" & BuildTabDD() & "</div>"
-
-			//	tabs.tabs.Add(tab)
-			//	tab = New clsJQuery.Tab
-			//	tab.tabTitle = "Slider"
-
-			//	tab.tabDIVID = "oTabSL"
-
-			//	tab.tabContent = "<div id='TabSL_div'>" & BuildTabSL() & "</div>"
-
-			//	tabs.tabs.Add(tab)
-			//	tab = New clsJQuery.Tab
-			//	tab.tabTitle = "Sliding Tab"
-
-			//	tab.tabDIVID = "oTabST"
-
-			//	tab.tabContent = "<div id='TabST_div'>" & BuildTabST() & "</div>"
-
-			//	tabs.tabs.Add(tab)
+			tab = new clsJQuery.Tab();
+			tab.tabTitle = "Sliding Tab";
+			tab.tabDIVID = "oTabST";
+			tab.tabContent = "<div id='TabST_div'>" + BuildTabST() + "</div>";
+			tabs.tabs.Add(tab);
 
 			return tabs.Build();
 		}

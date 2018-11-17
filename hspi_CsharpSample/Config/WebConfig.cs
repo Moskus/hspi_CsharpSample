@@ -1,29 +1,34 @@
 ﻿using System;
 using System.Text;
+using HomeSeerAPI;
 using Scheduler;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Text;
+using System.Web;
+using Scheduler.Classes;
 
 namespace hspi_CsharpSample.Config
 {
 	public class WebConfig : PageBuilderAndMenu.clsPageBuilder
 	{
 		private bool _timerEnabled;
+		private Plugin _plugin;
 		private Settings _settings;
+		private IHSApplication _hs;
 
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
-		public WebConfig(string pageName,Settings settings) : base(pageName)
+		///<param name="settings"></param>
+		///<param name="hs"></param>
+		public WebConfig(string pageName, Settings settings, IHSApplication hs, Plugin plugin) : base(pageName)
 		{
+			_plugin = plugin;
 			_settings = settings;
+			_hs = hs;
 		}
-
-
-
-		//Public Sub New(ByVal pagename As String)
-
-		//	MyBase.New(pagename)
-		//End Sub
 
 		///<summary>
 		///This handles data
@@ -35,141 +40,111 @@ namespace hspi_CsharpSample.Config
 		///<returns></returns>
 		public string PostBackProc(string page, string data, string user, int userRights)
 		{
-			//	Dim parts As Collections.Specialized.NameValueCollection = HttpUtility.ParseQueryString(data)
+			NameValueCollection parts = HttpUtility.ParseQueryString(data);
 
-			//       ''Useful for debugging. :)
-			//       'Console.WriteLine("Postback parts:")
-			//       'For Each p In parts
-			//       '    Console.WriteLine(p.ToString & vbTab & parts(p))
-			//       'Next
-
-
-			//       'Gets the control that caused the postback and handles accordingly
-			//       Select Case parts("id")
+			//Useful for debugging. :)
+			//Console.WriteLine("Postback parts:")
+			//foreach(var p In parts)
+			//{
+			//    Console.WriteLine(p.ToString + "\t" + parts[p]);
+			//}
 
 
-			//		Case "oTextbox1"
-			//               'This gets the value that was entered in the specified textbox
-			//               Dim message As String = parts("Textbox1")
+			//Gets the control that caused the postback and handles accordingly
+			string location;
+			switch (parts["id"])
+			{
+				case "oTextbox1":
+					//This gets the value that was entered in the specified textbox
+					var message = parts["Textbox1"];
+					//... posts it to the page
+					PostMessage(message);
+					//... and rebuilds the viewed textbox to contain the message
+					BuildTextBox("Textbox1", true, message);
+					break;
 
-			//               '... posts it to the page
+				case "oCheckboxLogTimer":
+					Console.WriteLine("oCheckboxLogTimer: " + parts["CheckboxLogTimer"]);
+					bool logtimer = (parts["CheckboxLogTimer"] == "checked") ? true : false; //Why HST just couldn't return the strings "True" or "False" as .NET does I really don't know
+					_settings.LogTimerElapsed = logtimer;
+					BuildCheckbox("CheckboxLogTimer", true);
+					PostMessage("Log timer: " + logtimer);
+					break;
 
-			//			PostMessage(message)
+				case "oCheckboxDebugLogging":
+					Console.WriteLine("oCheckboxDebugLogging: " + parts["CheckboxDebugLogging"]);
+					bool log = (parts["CheckboxDebugLogging"] == "checked") ? true : false;
+					_settings.DebugLog = log;
+					BuildCheckbox("CheckboxDebugLogging", true);
+					PostMessage("Log timer: " + log);
+					break;
 
-			//               '... and rebuilds the viewed textbox to contain the message
-			//               BuildTextBox("Textbox1", True, message)
+				case "oDropListLocation":
+					location = parts["DropListLocation"];
+					_settings.Location = location;
+					BuildTextBox("TextboxLocation", true, location);
+					BuildDropList("DropListLocation", true);
+					PostMessage("New location: " + location);
+					break;
 
+				case "oTextboxLocation":
+					location = parts["TextboxLocation"];
+					_settings.Location = location;
+					BuildTextBox("TextboxLocation", true, location);
+					BuildDropList("DropListLocation", true);
+					PostMessage("New location: " + location);
+					break;
 
-			//		Case "oCheckboxLogTimer"
-			//               Console.WriteLine("oCheckboxLogTimer: " & parts("CheckboxLogTimer"))
-			//               Dim logtimer As Boolean = IIf(parts("CheckboxLogTimer") = "checked", True, False) 'Why HST just couldn't return the strings "True" or "False" as .NET does I really don't know.
-			//               plugin.Settings.LogTimerElapsed = logtimer
-			//			BuildCheckbox("CheckboxLogTimer", True)
+				case "oDropListLocation2":
+					location = parts["DropListLocation2"];
+					_settings.Location2 = location;
+					BuildTextBox("TextboxLocation2", true, location);
+					BuildDropList("DropListLocation2", true);
+					PostMessage("New location2: " + location);
+					break;
 
+				case "oTextboxLocation2":
+					location = parts["TextboxLocation2"];
+					_settings.Location2 = location;
+					BuildTextBox("TextboxLocation2", true, location);
+					BuildDropList("DropListLocation2", true);
+					PostMessage("New location2: " + location);
+					break;
 
-			//			PostMessage("Log timer: " & logtimer)
+				case "oButton1":
+					//This button navigates to the sample status page.
+					this.pageCommands.Add("newpage", Utils.PluginName + "Status");
+					break;
 
+				case "timer":
+					//This stops the timer and clears the message
+					if (_timerEnabled) //'this handles the initial timer post that occurs immediately upon enabling the timer.
+					{
+						_timerEnabled = false;
+					}
+					else
+					{
+						this.pageCommands.Add("stoptimer", "");
+						this.divToUpdate.Add("message", "&nbsp;");
+					}
+					break;
+			}
 
-			//		Case "oCheckboxDebugLogging"
-			//               Console.WriteLine("oCheckboxDebugLogging: " & parts("CheckboxDebugLogging"))
-			//               Dim log As Boolean = IIf(parts("CheckboxDebugLogging") = "checked", True, False)
-
-			//			plugin.Settings.DebugLog = log
-			//			BuildCheckbox("CheckboxDebugLogging", True)
-
-
-			//			PostMessage("Log timer: " & log)
-
-			//		Case "oDropListLocation"
-			//               Dim location As String = parts("DropListLocation")
-
-			//			plugin.Settings.Location = location
-			//			BuildTextBox("TextboxLocation", True, location)
-
-			//			BuildDropList("DropListLocation", True)
-
-
-			//			PostMessage("New location: " & location)
-
-
-			//		Case "oTextboxLocation"
-			//               Dim location As String = parts("TextboxLocation")
-
-			//			plugin.Settings.Location = location
-			//			BuildTextBox("TextboxLocation", True, location)
-
-			//			BuildDropList("DropListLocation", True)
-
-
-			//			PostMessage("New location: " & location)
-
-
-			//		Case "oDropListLocation2"
-			//               Dim location As String = parts("DropListLocation2")
-
-			//			plugin.Settings.Location2 = location
-			//			BuildTextBox("TextboxLocation2", True, location)
-
-			//			BuildDropList("DropListLocation2", True)
-
-
-			//			PostMessage("New location2: " & location)
-
-
-			//		Case "oTextboxLocation2"
-			//               Dim location As String = parts("TextboxLocation2")
-
-			//			plugin.Settings.Location2 = location
-			//			BuildTextBox("TextboxLocation2", True, location)
-
-			//			BuildDropList("DropListLocation2", True)
-
-
-			//			PostMessage("New location2: " & location)
-
-
-			//		Case "oButton1"
-			//               'This button navigates to the sample status page.
-			//               Me.pageCommands.Add("newpage", plugin.Name & "Status")
-
-			//           Case "timer"
-			//               'This stops the timer and clears the message
-			//               If TimerEnabled Then 'this handles the initial timer post that occurs immediately upon enabling the timer.
-			//                   TimerEnabled = False
-			//			Else
-
-			//				Me.pageCommands.Add("stoptimer", "")
-			//                   Me.divToUpdate.Add("message", "&nbsp;")
-			//               End If
-
-			//	End Select
-
-
-			//       'For some reason I can't figure out, the timespan control doesn't submit it's ID when performing postback, so we need to take special care of it
-			//	If parts.Item("oTimespanTimer") IsNot Nothing Then
-			//		Dim span As String = parts("oTimespanTimer")
-
-			//		Console.WriteLine("oTimespanTimer: " & span)
-
-			//           'The timespan is a string on this format: days.hours:minutes:seconds, and can be parsed to a .NET timespan. :)
-			//           Dim timespan As TimeSpan = timespan.Parse(span)
-
-			//           'Saving the new timer interval and restarting the timer
-
-			//		plugin.Settings.TimerInterval = timespan.TotalSeconds* 1000
-			//           plugin.RestartTimer()
-
-			//           '.. and since this doesn't "auto save" (see "Settings.vb") we need to save the settings.
-			//		plugin.Settings.Save()
-
-
-			//		BuildTimespan("TimespanTimer", True)
-
-			//		PostMessage("New timer: " & timespan.ToString)
-
-
-			//	End If
-
+			//For some reason I can't figure out, the timespan control doesn't submit it's ID when performing postback, so we need to take special care of it
+			if (!string.IsNullOrEmpty(parts["oTimespanTimer"]))
+			{
+				var span = parts["oTimespanTimer"];
+				Console.WriteLine("oTimespanTimer: " + span);
+				//The timespan is a string on this format: days.hours:minutes:seconds, and can be parsed to a .NET timespan. :)
+				var timespan = TimeSpan.Parse(span);
+				//Saving the new timer interval and restarting the timer
+				_settings.TimerInterval = (int)timespan.TotalSeconds * 1000;
+				_plugin.RestartTimer();
+				//.. and since this doesn't "auto save" (see "Settings.vb") we need to save the settings.
+				_settings.Save();
+				BuildTimespan("TimespanTimer", true);
+				PostMessage("New timer: " + timespan.ToString());
+			}
 			return base.postBackProc(page, data, user, userRights);
 		}
 
@@ -401,28 +376,28 @@ namespace hspi_CsharpSample.Config
 
 		public string BuildCheckbox(string name, bool rebuilding = false, string label = "")
 		{
-			//	Dim checkbox=new clsJQuery.jqCheckBox(Name, label, Me.PageName, True, False)
-			//	checkbox.id = "o" & Name
-
-			//	Select Case Name
-
-			//		Case "CheckboxLogTimer"
-
-			//			checkbox.checked = plugin.Settings.LogTimerElapsed
-			//		Case "CheckboxDebugLogging"
-
-			//			checkbox.checked = plugin.Settings.DebugLog
-			//	End Select
+			var checkbox = new clsJQuery.jqCheckBox(name, label, this.PageName, true, false);
+			checkbox.id = "o" + name;
+			switch (name)
+			{
+				case "CheckboxLogTimer":
+					checkbox.@checked = _settings.LogTimerElapsed;
+					break;
+				case "CheckboxDebugLogging":
+					checkbox.@checked = _settings.DebugLog;
+					break;
+			}
 
 			var ret = String.Empty;
-
-			//	If Rebuilding Then
-			//		ret = checkbox.Build
-
-			//		Me.divToUpdate.Add(Name & "_div", ret)
-			//	Else
-			//		ret = "<div style='float: left;'  id='" & Name & "_div'>" & checkbox.Build & "</div>"
-			//	End If
+			if (rebuilding)
+			{
+				ret = checkbox.Build();
+				this.divToUpdate.Add(name + "_div", ret);
+			}
+			else
+			{
+				ret = "<div style='float: left;'  id='" + name + "_div'>" + checkbox.Build() + "</div>";
+			}
 			return ret;
 		}
 
@@ -432,7 +407,7 @@ namespace hspi_CsharpSample.Config
 			timespan.id = "o" + name;
 			timespan.showDays = false;
 
-			if(name=="TimespanTimer")
+			if (name == "TimespanTimer")
 			{
 				timespan.defaultTimeSpan = new TimeSpan(0, 0, _settings.TimerInterval / 1000);
 			}
