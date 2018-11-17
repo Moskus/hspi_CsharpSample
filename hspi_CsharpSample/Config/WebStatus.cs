@@ -149,70 +149,72 @@ namespace hspi_CsharpSample.Config
 		//End Function
 
 
-		//Function BuildContent() As String
+		private string BuildContent()
+		{
+			var stb = new StringBuilder();
+			stb.Append("<script>function userConfirm() {  confirm(\"hey - are you sure??\");  }</script>");
+			stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='1000'>");
+			stb.Append(
+				" <tr><td width='1000' align='center' style='color:#FF0000; font-size:14pt; height:30px;'><strong><div id='message'>&nbsp;</div></strong></tr>");
+			stb.Append("  <tr><td class='tablecolumn' width='270'>" + BuildTabs() + "</td></tr>");
+			stb.Append(" </table>");
+			return stb.ToString();
+		}
 
-		//	var stb =new StringBuilder();
-		//	stb.Append("<script>function userConfirm() {  confirm(""hey - are you sure??"");  }</script>")
 
-		//	stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='1000'>")
-		//       stb.Append(" <tr><td width='1000' align='center' style='color:#FF0000; font-size:14pt; height:30px;'><strong><div id='message'>&nbsp;</div></strong></tr>")
-		//       stb.Append("  <tr><td class='tablecolumn' width='270'>" & BuildTabs() & "</td></tr>")
-		//       stb.Append(" </table>")
-		//       Return stb.ToString
-
-		//End Function
+		public string BuildTabs()
+		{
 
 
-		//Public Function BuildTabs() As String
-		//	var stb =new StringBuilder();
+			var stb =new StringBuilder();
 
-		//	Dim tabs As clsJQuery.jqTabs = New clsJQuery.jqTabs("oTabs", Me.PageName)
+			var tabs = new clsJQuery.jqTabs("oTabs", this.PageName);
 
-		//	Dim tab=new clsJQuery.Tab
+			//	Dim tab=new clsJQuery.Tab
 
-		//	tabs.postOnTabClick = True
-		//	tab.tabTitle = "Listbox"
+			//	tabs.postOnTabClick = True
+			//	tab.tabTitle = "Listbox"
 
-		//	tab.tabDIVID = "oTabLB"
+			//	tab.tabDIVID = "oTabLB"
 
-		//	tab.tabContent = "<div id='TabLB_div'>" & BuildTabLB() & "</div>"
+			//	tab.tabContent = "<div id='TabLB_div'>" & BuildTabLB() & "</div>"
 
-		//	tabs.tabs.Add(tab)
-		//	tab = New clsJQuery.Tab
-		//	tab.tabTitle = "Checkbox"
+			//	tabs.tabs.Add(tab)
+			//	tab = New clsJQuery.Tab
+			//	tab.tabTitle = "Checkbox"
 
-		//	tab.tabDIVID = "oTabCB"
+			//	tab.tabDIVID = "oTabCB"
 
-		//	tab.tabContent = "<div id='TabCB_div'>" & BuildTabCB() & "</div>"
+			//	tab.tabContent = "<div id='TabCB_div'>" & BuildTabCB() & "</div>"
 
-		//	tabs.tabs.Add(tab)
-		//	tab = New clsJQuery.Tab
-		//	tab.tabTitle = "Drop Down"
+			//	tabs.tabs.Add(tab)
+			//	tab = New clsJQuery.Tab
+			//	tab.tabTitle = "Drop Down"
 
-		//	tab.tabDIVID = "oTabDD"
+			//	tab.tabDIVID = "oTabDD"
 
-		//	tab.tabContent = "<div id='TabDD_div'>" & BuildTabDD() & "</div>"
+			//	tab.tabContent = "<div id='TabDD_div'>" & BuildTabDD() & "</div>"
 
-		//	tabs.tabs.Add(tab)
-		//	tab = New clsJQuery.Tab
-		//	tab.tabTitle = "Slider"
+			//	tabs.tabs.Add(tab)
+			//	tab = New clsJQuery.Tab
+			//	tab.tabTitle = "Slider"
 
-		//	tab.tabDIVID = "oTabSL"
+			//	tab.tabDIVID = "oTabSL"
 
-		//	tab.tabContent = "<div id='TabSL_div'>" & BuildTabSL() & "</div>"
+			//	tab.tabContent = "<div id='TabSL_div'>" & BuildTabSL() & "</div>"
 
-		//	tabs.tabs.Add(tab)
-		//	tab = New clsJQuery.Tab
-		//	tab.tabTitle = "Sliding Tab"
+			//	tabs.tabs.Add(tab)
+			//	tab = New clsJQuery.Tab
+			//	tab.tabTitle = "Sliding Tab"
 
-		//	tab.tabDIVID = "oTabST"
+			//	tab.tabDIVID = "oTabST"
 
-		//	tab.tabContent = "<div id='TabST_div'>" & BuildTabST() & "</div>"
+			//	tab.tabContent = "<div id='TabST_div'>" & BuildTabST() & "</div>"
 
-		//	tabs.tabs.Add(tab)
+			//	tabs.tabs.Add(tab)
 
-		//	Return tabs.Build
-		//End Function
+			return tabs.Build();
+		}
 
 		private string BuildTabLB(bool rebuilding = false)
 		{
@@ -250,30 +252,28 @@ namespace hspi_CsharpSample.Config
 
 		}
 
-		//Function BuildTabCB() As String
-		//	var stb =new StringBuilder();
+		private string BuildTabCB()
+		{
+			var stb = new StringBuilder();
+			var cb1 = new clsJQuery.jqCheckBox("CB1", "check 1", this.PageName, true, false);
+			var cb2 = new clsJQuery.jqCheckBox("CB2", "check 2", this.PageName, true, true);
+			var cb3 = new clsJQuery.jqCheckBox("CB3", "check 3", this.PageName, false, true);
+			var cb4 = new clsJQuery.jqCheckBox("CB4", "check 4", this.PageName, false, false);
+			cb1.id = "oCB1";
+			cb2.id = "oCB2";
+			cb3.id = "oCB3";
+			cb4.id = "oCB4";
 
-		//	Dim cb1=new clsJQuery.jqCheckBox("CB1", "check 1", Me.PageName, True, False)
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("frmTab2", "checkbox", "Post"));
+			stb.Append(cb1.Build());
+			stb.Append(cb2.Build());
+			stb.Append(cb3.Build());
+			stb.Append(cb4.Build());
+			stb.Append(BuildButton("ButtonCB1") + " ");
+			stb.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd());
+			return stb.ToString();
 
-		//	Dim cb2=new clsJQuery.jqCheckBox("CB2", "check 2", Me.PageName, True, True)
-		//       Dim cb3=new clsJQuery.jqCheckBox("CB3", "check 3", Me.PageName, False, True)
-		//       Dim cb4=new clsJQuery.jqCheckBox("CB4", "check 4", Me.PageName, False, False)
-
-		//       cb1.id = "oCB1"
-		//       cb2.id = "oCB2"
-		//       cb3.id = "oCB3"
-		//       cb4.id = "oCB4"
-
-		//       stb.Append(PageBuilderAndMenu.clsPageBuilder.FormStart("frmTab2", "checkbox", "Post"))
-		//       stb.Append(cb1.Build())
-		//       stb.Append(cb2.Build())
-		//       stb.Append(cb3.Build())
-		//       stb.Append(cb4.Build())
-		//       stb.Append(BuildButton("ButtonCB1") & " ")
-		//       stb.Append(PageBuilderAndMenu.clsPageBuilder.FormEnd())
-		//       Return stb.ToString
-
-		//End Function
+		}
 
 
 		private string BuildTabDD(bool rebuilding = false)
@@ -291,48 +291,42 @@ namespace hspi_CsharpSample.Config
 			{
 				this.divToUpdate.Add("TabDD_div", stb.ToString());
 			}
-
 			return stb.ToString();
-
 		}
 
-		//Function BuildTabSL() As String
-		//	var stb =new StringBuilder();
+		private string BuildTabSL()
+		{
+			var stb = new StringBuilder();
+			stb.Append(BuildSlider("Slider"));
+			return stb.ToString();
+		}
 
-		//	stb.Append(BuildSlider("Slider"))
-		//       Return stb.ToString
+		private string BuildTabST(bool rebuilding = false)
+		{
+			var stb = new StringBuilder();
+			var st = new clsJQuery.jqSlidingTab("myslide1ID", this.PageName, false);
 
-		//End Function
+			st.initiallyOpen = true;
+			st.callGetOnOpenClose = false;
+			st.tab.AddContent("my sliding tab");
+			st.tab.name = "myslide_name";
+			st.tab.tabName.Unselected = "Unselected Tab Title";
+			st.tab.tabName.Selected = "Selected Tab Title";
 
-
-
-		//Function BuildTabST(Optional ByVal Rebuilding As Boolean = False) As String
-
-		//	var stb =new StringBuilder();
-		//	Dim st=new clsJQuery.jqSlidingTab("myslide1ID", Me.PageName, False)
-
-		//	st.initiallyOpen = True
-		//	st.callGetOnOpenClose = False
-		//	st.tab.AddContent("my sliding tab")
-
-		//	st.tab.name = "myslide_name"
-		//       st.tab.tabName.Unselected = "Unselected Tab Title"
-		//       st.tab.tabName.Selected = "Selected Tab Title"
-
-
-		//       stb.Append(st.Build)
-		//	If Rebuilding Then Me.divToUpdate.Add("TabST_div", stb.ToString)
-		//       Return stb.ToString
-
-		//End Function
+			stb.Append(st.Build());
+			if (rebuilding)
+				this.divToUpdate.Add("TabST_div", stb.ToString());
+			return stb.ToString();
+		}
 
 
-		//Function BuildSlider(ByVal Name As String, Optional ByVal value As Integer = 0) As String
-
-		//	Dim slider=new clsJQuery.jqSlider(Name, 0, 100, value, clsJQuery.jqSlider.jqSliderOrientation.horizontal, 200, Me.PageName, True)
-		//       slider.id = "o" & Name
-		//	Return slider.build
-		//End Function
+		private string BuildSlider(string name, int value = 0)
+		{
+			var slider = new clsJQuery.jqSlider(name, 0, 100, value, clsJQuery.jqSlider.jqSliderOrientation.horizontal,
+				200, this.PageName, true);
+			slider.id = "o" + name;
+			return slider.build();
+		}
 
 		private string BuildTextbox(string name)
 		{
@@ -406,37 +400,28 @@ namespace hspi_CsharpSample.Config
 			return b.Build();
 		}
 
-		//Public Function DDText(ByVal DDName As String, DDValue As String) As String
+		public string DDText(string ddName, string ddValue)
+		{
+			var returnValue = "";
+			var rows = _ddTable.Select("ObjectName='" + ddName + "' AND OptionValue='" + ddValue + "'");
+			foreach (var dataRow in rows)
+			{
+				returnValue = (string)dataRow["OptionName"];
+			}
+			return returnValue;
+		}
 
-		//	Dim Rows() As DataRow
+		public string DDValue(string ddName, string ddText)
+		{
+			var returnValue = "";
 
-		//	Dim Row As DataRow
-
-		//	Dim ReturnValue As String = ""
-
-		//	Rows = ddTable.Select("ObjectName='" & DDName & "' AND OptionValue='" & DDValue & "'")
-		//       For Each Row In Rows
-		//		ReturnValue = Row.Item("OptionName")
-
-		//	Next
-		//	Return ReturnValue
-		//End Function
-
-		//Public Function DDValue(ByVal DDName As String, DDText As String) As String
-
-		//	Dim Rows() As DataRow
-
-		//	Dim Row As DataRow
-
-		//	Dim ReturnValue As String = ""
-
-		//	Rows = ddTable.Select("ObjectName='" & DDName & "' AND OptionName='" & DDText & "'")
-		//       For Each Row In Rows
-		//		ReturnValue = Row.Item("OptionValue")
-
-		//	Next
-		//	Return ReturnValue
-		//End Function
+			var rows = _ddTable.Select("ObjectName='" + ddName + "' AND OptionName='" + ddText + "'");
+			foreach (var dataRow in rows)
+			{
+				returnValue = (string)dataRow["OptionValue"];
+			}
+			return returnValue;
+		}
 
 		private void PostMessage(string message)
 		{
@@ -444,8 +429,5 @@ namespace hspi_CsharpSample.Config
 			this.pageCommands.Add("starttimer", "");
 			_timerEnabled = true;
 		}
-
-
-
 	}
 }
