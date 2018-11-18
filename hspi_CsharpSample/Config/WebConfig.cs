@@ -4,7 +4,6 @@ using HomeSeerAPI;
 using Scheduler;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;

@@ -279,7 +279,7 @@ namespace hspi_CsharpSample
 				MethodInfo methodInfo = pluginType.GetMethod(procName);
 				if (methodInfo == null)
 				{
-					//Log("Method " & proc & " does not exist in this plugin.", LogType.Error)
+					_utils.Log("Method " + procName + " does not exist in this plugin.", LogType.Error);
 					return null;
 				}
 				return (methodInfo.Invoke(this, parms));
@@ -307,7 +307,7 @@ namespace hspi_CsharpSample
 				PropertyInfo propertyInfo = pluginType.GetProperty(propertyName);
 				if (propertyInfo == null)
 				{
-					//Log("Property " & proc & " does not exist in this plugin.", LogType.Error)
+					_utils.Log("Property " + propertyName + " does not exist in this plugin.", LogType.Error);
 					return null;
 				}
 				return propertyInfo.GetValue(this, parms);

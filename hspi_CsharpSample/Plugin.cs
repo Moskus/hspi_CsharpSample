@@ -88,7 +88,7 @@ namespace hspi_CsharpSample
 
 		public Timer UpdateTimer => _updateTimer;
 
-		public string Name => Utils.PluginName;
+		
 
 		public Utils Utils
 		{
@@ -108,11 +108,7 @@ namespace hspi_CsharpSample
 			get => _settings;
 			set => _settings = value;
 		}
-		public int AccessLevel
-		{
-			get { return 1;}
-		} 
-
+		
 		#region "Init"
 
 		public string InitIO(string port)
@@ -151,165 +147,54 @@ namespace hspi_CsharpSample
 			return "";
 		}
 
+		public void ShutDownIo()
+		{
+			try
+			{
+				// * *********************
+				//For debugging only, this will delete all devices accociated by the plugin at shutdown, so new devices will be created on startup:
+				//DeleteDevices()
+				// * *********************
+
+				//Setting a flag that states that we are shutting down, this can be used to abort ongoing commands
+				Utils.IsShuttingDown = true;
+
+				//Write any changes in the settings to the ini file
+
+				//_utils.SaveSettings();
+				//2018-11-11 Removed since I got error when doing a disconnect due to HS-object not available any more and giving an error 
+
+				//Stopping the timer if it exists and runs
+				if (_updateTimer != null)
+				{
+					_updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+					_updateTimer.Dispose();
+				}
+
+				//Save all device changes on plugin shutdown
+				//2018-11-11 Removed since it will always fail on disconnect. HS connection gone so no way to save
+				//try
+				//{
+				//	Utils.Hs.SaveEventsDevices();
+				//}
+				//catch (Exception ex)
+				//{
+				//	_utils.Log("could not save devices :"+ex.Message, LogType.Error);
+
+				//}
+			}
+			catch (Exception ex)
+			{
+				//_utils.Log("Error ending " + Utils.PluginName + " Plug-In :"+ex.Message, LogType.Error);
+				Console.WriteLine("Error ending " + Utils.PluginName + " Plug-In :" + ex.Message);
+			}
+
+			Console.WriteLine("ShutdownIO complete.");
+		}
+
 		#endregion
 
-		///<summary>
-		///Generate a new random value, check which triggers should be triggered, and update device values.
-		///</summary>
-		///<remarks>By Moskus</remarks>
-		private void UpdateRandomValue(Object obj)
-		{
-			//************
-			//Random value
-			//************
-			//We need some data. So we're just creating a random value
-
-			//Let's make a nice random number between 0 and 100
-			Random rnd = new Random(DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second +
-									DateTime.Now.Millisecond);
-
-			var randomValue = rnd.Next(100);
-
-			//The triggers can be used as an Condition, so we need to store the last value. "lastRandomNumber" is a class global variable.
-			_lastRandomNumber = randomValue;
-
-			//Let's write this random value to the log so that we can see what's going on, if the user has opted to do so
-			if (_settings.LogTimerElapsed)
-			{
-				_utils.Log("Timer elapsed. Huzza! New random value: " + randomValue);
-			}
-
-
-			//******
-			//Events
-			//******
-			//Getting all triggers for this plugin (this only returns triggers where it is the FIRST option in an event, not when it's used as a condition)
-			HomeSeerAPI.IPlugInAPI.strTrigActInfo[] triggers = _utils.Callback.GetTriggers(Utils.PluginName);
-			Console.WriteLine("UpdateTimer_Elapsed." + "\tTriggers found: " + triggers.Count() + "\tRandom value: " +
-							  randomValue);
-
-			//Checking reach event with triggers from our plugin if they should be triggered or not
-			foreach (var trigger in triggers)
-			{
-				//The name of the key we are looking for
-				string key = "SomeValue";
-
-				//Get the value from the trigger
-				int triggerValue = (int)GetTriggerValue(key, trigger);
-				//Console.WriteLine("Value found for " & key & ": " & triggervalue) '... for debugging
-
-				//Remember from TriggerBuildUI that if "someValue" is equal to "-1", we don't have a properly configured trigger, so we need to skip this if this(the current "t") value is -1
-				if (triggerValue == -1)
-				{
-					Console.WriteLine("Event with ref = " + trigger.evRef + " is not properly configured.");
-					continue; // For
-				}
-
-				//If not, we do have a working trigger, so let's continue
-				//We have the option to select between two triggers, so we need to check them both
-				switch (trigger.TANumber)
-				{
-					case (int)TriggerTypes.WithoutSubtriggers: //= 1. The trigger without subtriggers
-															   //If the test is true, then trig the Trigger
-
-						if (triggerValue >= randomValue)
-						{
-							Console.WriteLine("Trigging event with reference " + trigger.evRef);
-							TriggerFire(trigger);
-						}
-
-						break;
-
-
-					case (int)TriggerTypes.WithSubtriggers: //= 2. The trigger with subtriggers
-															//We have multiple options for checking for values, they are specified by the subtrigger number (1-based)
-						switch (trigger.SubTANumber)
-						{
-							case (int)SubTriggerTypes.LowerThan
-								: //The random value should be lower than the value specified in the event
-
-								if (triggerValue >= randomValue)
-								{
-									Console.WriteLine(
-										"Value is lower. Trigging event with reference " + trigger.evRef);
-									TriggerFire(trigger);
-								}
-
-								break;
-							case (int)SubTriggerTypes.EqualTo
-								: //The random value should be equal to the value specified in the event
-								if (triggerValue == randomValue)
-								{
-									Console.WriteLine("Value is equal. Trigging event with reference " + trigger.evRef);
-									TriggerFire(trigger);
-								}
-
-								break;
-							case (int)SubTriggerTypes.HigherThan
-								: //The random value should be higher than the value specified in the event
-								if (triggerValue <= randomValue)
-								{
-									Console.WriteLine("Value is higher. Trigging event with reference " +
-													  trigger.evRef);
-
-									TriggerFire(trigger);
-								}
-
-								break;
-							default:
-								_utils.Log("Undefined subtrigger!");
-								break;
-						}
-
-						break;
-					default:
-						_utils.Log("Undefined trigger!");
-						break;
-				}
-			}
-
-
-
-
-
-
-
-			//*******
-			//DEVICES
-			//*******
-			//We get all the devices (and Linq is awesome!)
-			var devices = _utils.DevicesOnlyForPlugin();
-			//In this example there are not any external sources that should update devices, so we're just updating the device value of the basic device and setting it to the new random value.
-
-			//We do this for each "Basic" device we have (usually just one, but still...)
-			foreach (var device in devices.Where(x => x.get_Device_Type_String(_hs).Contains("Basic")))
-			{
-				_hs.SetDeviceValueByRef(device.get_Ref(_hs), randomValue, true);
-				_hs.SetDeviceString(device.get_Ref(_hs), "Last random value: " + randomValue, false);
-			}
-
-			//... but of course we can do cooler stuff with our devices than that. E.g. add the text stored in the "Advanced Device" to the device string, for example
-
-			//Again, for all "Advanced" devices
-			foreach (var device in devices.Where(x => x.get_Device_Type_String(_hs).Contains("Advanced")))
-			{
-				//Get the PlugExtraData class stored in the dev
-				PlugExtraData.clsPlugExtraData ped = device.get_PlugExtraData_Get(_hs);
-
-				//... but we can only do something if there actually IS some PlugExtraData
-
-				if (ped != null)
-				{
-					//Get the value belonging to our plugin from the devices PlugExtraData 
-
-					var savedString = _utils.PedGet(ref ped, Utils.PluginName);
-
-					//TODO: Do something with the saved string and the random value?
-					//hs.SetDeviceValueByRef(dev.Ref(hs), randomvalue, True)
-					//hs.SetDeviceString(dev.Ref(hs), savedString & " - with value: " & randomvalue, True)
-				}
-			}
-		}
+		#region "Action/Trigger/DeviceConfig Processes"
 
 		#region "Device Config Interface"
 
@@ -607,6 +492,168 @@ namespace hspi_CsharpSample
 
 		#endregion
 
+		#region "Trigger Properties"
+ //   ''' <summary>
+ //   ''' Return True if your plugin contains any triggers, else return false.
+ //   ''' </summary>
+ //   ''' <returns>True/False</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
+ //   Public ReadOnly Property HasTriggers() As Boolean
+
+	//	Get
+	//		Return(TriggerCount() > 0)
+
+	//	End Get
+
+	//End Property
+
+ //   ''' <summary>
+ //   ''' Return True if the given trigger can also be used as a condition, for the given trigger number.
+ //   ''' </summary>
+ //   ''' <param name="TriggerNumber">The trigger number (1 based)</param>
+ //   ''' <returns>True/False</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
+
+	//Public ReadOnly Property HasConditions(TriggerNumber As Integer) As Boolean
+
+	//	Get
+	//		Return True
+	//	End Get
+	//End Property
+
+ //   ''' <summary>
+ //   ''' Return the number of triggers that the plugin supports.
+ //   ''' </summary>
+ //   ''' <returns>Integer</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
+ //   Public Function TriggerCount() As Integer
+
+	//	Return triggers.Count
+
+	//End Function
+
+ //   ''' <summary>
+ //   ''' Return the number of sub triggers your plugin supports.
+ //   ''' </summary>
+ //   ''' <param name="TriggerNumber">The trigger number</param>
+ //   ''' <returns>Integer</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
+
+	//Public ReadOnly Property SubTriggerCount(ByVal TriggerNumber As Integer) As Integer
+
+	//	Get
+	//		Dim trigger As Trigger
+	//		If IsValidTrigger(TriggerNumber) Then
+	//			trigger = triggers(TriggerNumber)
+
+	//			If Not(trigger Is Nothing) Then
+	//			   Return trigger.Count
+	//		   Else
+
+	//				Return 0
+ //               End If
+
+	//		Else
+	//			Return 0
+
+	//		End If
+
+	//	End Get
+
+	//End Property
+
+ //   ''' <summary>
+ //   ''' Return the name of the given trigger based on the trigger number passed.
+ //   ''' </summary>
+ //   ''' <param name="TriggerNumber">Integer</param>
+ //   ''' <returns>String</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
+
+	//Public ReadOnly Property TriggerName(ByVal TriggerNumber As Integer) As String
+
+	//	Get
+	//		If Not IsValidTrigger(TriggerNumber) Then
+	//			Return ""
+
+	//		Else
+	//			Return Me.Name & ": " & triggers.Keys(TriggerNumber - 1)
+ //           End If
+
+	//	End Get
+
+	//End Property
+
+ //   ''' <summary>
+ //   ''' Return the text name of the sub trigger given its trigger number and sub trigger number.
+ //   ''' </summary>
+ //   ''' <param name="TriggerNumber">Integer</param>
+ //   ''' <param name="SubTriggerNumber">Integer</param>
+ //   ''' <returns>SubTriggerName String</returns>
+ //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
+
+	//Public ReadOnly Property SubTriggerName(ByVal TriggerNumber As Integer, ByVal SubTriggerNumber As Integer) As String
+
+	//	Get
+	//		Dim trigger As Trigger
+	//		If IsValidSubTrigger(TriggerNumber, SubTriggerNumber) Then
+	//			trigger = triggers(TriggerNumber)
+
+	//			Return Me.Name & ": " & trigger.Keys(SubTriggerNumber - 1)
+
+	//		Else
+	//			Return ""
+
+	//		End If
+
+	//	End Get
+
+	//End Property
+
+ //   ''' <summary>
+ //   ''' Checking if the trigger number exists in the list of triggers
+ //   ''' </summary>
+ //   ''' <param name="TrigIn">The trigger number</param>
+ //   ''' <returns>True/False</returns>
+
+	//Friend Function IsValidTrigger(ByVal TrigIn As Integer) As Boolean
+
+	//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
+
+	//		Return True
+
+	//	End If
+
+	//	Return False
+
+	//End Function
+
+ //   ''' <summary>
+ //   ''' Checking if the trigger number exists in the list of triggers
+ //   ''' </summary>
+ //   ''' <param name="TrigIn">The trigger number to check</param>
+ //   ''' <param name="SubTrigIn">The sub trigger number to check</param>
+ //   ''' <returns>True/False</returns>
+
+	//Public Function IsValidSubTrigger(ByVal TrigIn As Integer, ByVal SubTrigIn As Integer) As Boolean
+
+	//	Dim trigger As Trigger = Nothing
+
+	//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
+
+	//		trigger = triggers(TrigIn)
+
+	//		If Not(trigger Is Nothing) Then
+	//		   If SubTrigIn > 0 AndAlso SubTrigIn <= trigger.Count Then Return True
+
+	//		End If
+
+	//	End If
+
+	//	Return False
+
+	//End Function
+
+		#endregion
 
 		#region "Trigger Interface"
 
@@ -906,111 +953,6 @@ namespace hspi_CsharpSample
 		}
 
 		#endregion
-
-		public void ShutDownIo()
-		{
-			try
-			{
-				// * *********************
-				//For debugging only, this will delete all devices accociated by the plugin at shutdown, so new devices will be created on startup:
-				//DeleteDevices()
-				// * *********************
-
-				//Setting a flag that states that we are shutting down, this can be used to abort ongoing commands
-				Utils.IsShuttingDown = true;
-
-				//Write any changes in the settings to the ini file
-
-				//_utils.SaveSettings();
-				//2018-11-11 Removed since I got error when doing a disconnect due to HS-object not available any more and giving an error 
-
-				//Stopping the timer if it exists and runs
-				if (_updateTimer != null)
-				{
-					_updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
-					_updateTimer.Dispose();
-				}
-
-				//Save all device changes on plugin shutdown
-				//2018-11-11 Removed since it will always fail on disconnect. HS connection gone so no way to save
-				//try
-				//{
-				//	Utils.Hs.SaveEventsDevices();
-				//}
-				//catch (Exception ex)
-				//{
-				//	_utils.Log("could not save devices :"+ex.Message, LogType.Error);
-
-				//}
-			}
-			catch (Exception ex)
-			{
-				//_utils.Log("Error ending " + Utils.PluginName + " Plug-In :"+ex.Message, LogType.Error);
-				Console.WriteLine("Error ending " + Utils.PluginName + " Plug-In :" + ex.Message);
-			}
-
-			Console.WriteLine("ShutdownIO complete.");
-		}
-
-
-
-
-		///<summary>
-		///Get the actual value to check from a trigger
-		///</summary>
-		///<param name = "key" > The key stored in the trigger, like "SomeValue"</param>
-		///<param name = "trigInfo" > The trigger information to check</param>
-		///<returns>Object of whatever is stored</returns>
-		///<remarks>By Moskus</remarks>
-		private object GetTriggerValue(string key, IPlugInAPI.strTrigActInfo trigInfo)
-		{
-
-			var trigger = new HsTrigger();
-
-			//Loads the trigger from the serialized object (if it exists, and it should)
-			if (!(trigInfo.DataIn == null))
-			{
-				object deserializedTrigger = null;
-				_utils.DeSerializeObject(ref trigInfo.DataIn, ref deserializedTrigger);
-				if (deserializedTrigger != null)
-				{
-					trigger = (HsTrigger)deserializedTrigger;
-				}
-			}
-
-			//A trigger has "keys" with different stored values, let's go through them all.
-			//In my sample we only have one key, which is "SomeValue"
-			var foundKey = trigger.GetAllKeys().SingleOrDefault(x => x.Contains(key + "_" + trigInfo.UID));
-			if (foundKey != null) return trigger[foundKey];
-			//Apparently we didn't find any matching keys in the trigger, so that's all we have to return
-			return null;
-
-		}
-
-
-		///<summary>
-		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
-		///</summary>
-		///<remarks>By Moskus</remarks>
-		public void RestartTimer()
-		{
-			//Get now time
-			var timeNow = DateTime.Now.TimeOfDay;
-
-			//Round time to the nearest whole trigger (if Me.Settings.TimerInterval is set to 5 minutes, the trigger will be exectued 10:00, 10:05, 10:10, etc
-			var nextWhole = TimeSpan.FromMilliseconds(
-				Math.Ceiling((timeNow.TotalMilliseconds) / _settings.TimerInterval) *
-				_settings.TimerInterval);
-
-			//Find the difference in milliseconds
-			var diff = (int)nextWhole.Subtract(timeNow).TotalMilliseconds;
-			Console.WriteLine("RestartTimer, timeNow: " + timeNow.ToString());
-			Console.WriteLine("RestartTimer, nextWhole: " + nextWhole.ToString());
-			Console.WriteLine("RestartTimer, diff: " + diff);
-
-			_updateTimer.Change(diff, _settings.TimerInterval);
-		}
-
 
 		#region "Action Properties"
 
@@ -1329,8 +1271,281 @@ namespace hspi_CsharpSample
 		}
 
 		#endregion
+		#endregion
+
+		#region "HomeSeer-Required Functions"
+
+		///<summary>
+		///Returns the name of the plugin
+		///</summary>
+		///<returns></returns>
+		///<remarks></remarks>
+		public string Name => Utils.PluginName;
+
+		///<summary>
+		///Return the access level of this plug-in. Access level is the licensing mode.
+		///</summary>
+		///<returns>
+		///1 = Plug-in is not licensed and may be enabled and run without purchasing a license. Use this value for free plug-ins.
+		///2 = Plug-in is licensed and a user must purchase a license in order to use this plug-in. When the plug-in is first enabled, it will will run as a trial for 30 days.</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/accesslevel.htm</remarks>
+		public int AccessLevel
+		{
+			get { return 1; }
+		}
 
 
+#endregion
+
+		#region "Web Page Processing"
+		//private object SelectPage(ByVal pageName As String)
+		//{
+
+		//	switch (pageName)
+		//	{
+		//case configPage.PageName:
+		//			return _configPage;
+		//			break;
+		//case statusPage.PageName:
+		//			return _statusPage;
+		//			break;
+		//		default:
+		//			return _configPage;
+		//			break;
+		//	}
+
+		//	return null;
+		//}
+
+		public string PostBackProc(string pageName, string data, string user, int userRights)
+		{
+			if (pageName == _statusPage.PageName)
+			{
+				return _statusPage.postBackProc(pageName, data, user, userRights);
+			}
+			//Default choice
+			return _configPage.postBackProc(pageName, data, user, userRights);
+		}
+
+		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
+		{
+			if (pageName == _statusPage.PageName)
+			{
+				return _statusPage.GetPagePlugin(pageName, user, userRights, queryString);
+			}
+			//Default choice
+			return _configPage.GetPagePlugin(pageName, user, userRights, queryString);
+
+		}
+		#endregion
+
+		#region "Timers, trigging triggers"
+		///<summary>
+		///Generate a new random value, check which triggers should be triggered, and update device values.
+		///</summary>
+		///<remarks>By Moskus</remarks>
+		private void UpdateRandomValue(Object obj)
+		{
+			//************
+			//Random value
+			//************
+			//We need some data. So we're just creating a random value
+
+			//Let's make a nice random number between 0 and 100
+			Random rnd = new Random(DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second +
+									DateTime.Now.Millisecond);
+
+			var randomValue = rnd.Next(100);
+
+			//The triggers can be used as an Condition, so we need to store the last value. "lastRandomNumber" is a class global variable.
+			_lastRandomNumber = randomValue;
+
+			//Let's write this random value to the log so that we can see what's going on, if the user has opted to do so
+			if (_settings.LogTimerElapsed)
+			{
+				_utils.Log("Timer elapsed. Huzza! New random value: " + randomValue);
+			}
+
+
+			//******
+			//Events
+			//******
+			//Getting all triggers for this plugin (this only returns triggers where it is the FIRST option in an event, not when it's used as a condition)
+			HomeSeerAPI.IPlugInAPI.strTrigActInfo[] triggers = _utils.Callback.GetTriggers(Utils.PluginName);
+			Console.WriteLine("UpdateTimer_Elapsed." + "\tTriggers found: " + triggers.Count() + "\tRandom value: " +
+							  randomValue);
+
+			//Checking reach event with triggers from our plugin if they should be triggered or not
+			foreach (var trigger in triggers)
+			{
+				//The name of the key we are looking for
+				string key = "SomeValue";
+
+				//Get the value from the trigger
+				int triggerValue = (int)GetTriggerValue(key, trigger);
+				//Console.WriteLine("Value found for " & key & ": " & triggervalue) '... for debugging
+
+				//Remember from TriggerBuildUI that if "someValue" is equal to "-1", we don't have a properly configured trigger, so we need to skip this if this(the current "t") value is -1
+				if (triggerValue == -1)
+				{
+					Console.WriteLine("Event with ref = " + trigger.evRef + " is not properly configured.");
+					continue; // For
+				}
+
+				//If not, we do have a working trigger, so let's continue
+				//We have the option to select between two triggers, so we need to check them both
+				switch (trigger.TANumber)
+				{
+					case (int)TriggerTypes.WithoutSubtriggers: //= 1. The trigger without subtriggers
+															   //If the test is true, then trig the Trigger
+
+						if (triggerValue >= randomValue)
+						{
+							Console.WriteLine("Trigging event with reference " + trigger.evRef);
+							TriggerFire(trigger);
+						}
+
+						break;
+
+
+					case (int)TriggerTypes.WithSubtriggers: //= 2. The trigger with subtriggers
+															//We have multiple options for checking for values, they are specified by the subtrigger number (1-based)
+						switch (trigger.SubTANumber)
+						{
+							case (int)SubTriggerTypes.LowerThan
+								: //The random value should be lower than the value specified in the event
+
+								if (triggerValue >= randomValue)
+								{
+									Console.WriteLine(
+										"Value is lower. Trigging event with reference " + trigger.evRef);
+									TriggerFire(trigger);
+								}
+
+								break;
+							case (int)SubTriggerTypes.EqualTo
+								: //The random value should be equal to the value specified in the event
+								if (triggerValue == randomValue)
+								{
+									Console.WriteLine("Value is equal. Trigging event with reference " + trigger.evRef);
+									TriggerFire(trigger);
+								}
+
+								break;
+							case (int)SubTriggerTypes.HigherThan
+								: //The random value should be higher than the value specified in the event
+								if (triggerValue <= randomValue)
+								{
+									Console.WriteLine("Value is higher. Trigging event with reference " +
+													  trigger.evRef);
+
+									TriggerFire(trigger);
+								}
+
+								break;
+							default:
+								_utils.Log("Undefined subtrigger!");
+								break;
+						}
+
+						break;
+					default:
+						_utils.Log("Undefined trigger!");
+						break;
+				}
+			}
+			//*******
+			//DEVICES
+			//*******
+			//We get all the devices (and Linq is awesome!)
+			var devices = _utils.DevicesOnlyForPlugin();
+			//In this example there are not any external sources that should update devices, so we're just updating the device value of the basic device and setting it to the new random value.
+
+			//We do this for each "Basic" device we have (usually just one, but still...)
+			foreach (var device in devices.Where(x => x.get_Device_Type_String(_hs).Contains("Basic")))
+			{
+				_hs.SetDeviceValueByRef(device.get_Ref(_hs), randomValue, true);
+				_hs.SetDeviceString(device.get_Ref(_hs), "Last random value: " + randomValue, false);
+			}
+
+			//... but of course we can do cooler stuff with our devices than that. E.g. add the text stored in the "Advanced Device" to the device string, for example
+
+			//Again, for all "Advanced" devices
+			foreach (var device in devices.Where(x => x.get_Device_Type_String(_hs).Contains("Advanced")))
+			{
+				//Get the PlugExtraData class stored in the dev
+				PlugExtraData.clsPlugExtraData ped = device.get_PlugExtraData_Get(_hs);
+
+				//... but we can only do something if there actually IS some PlugExtraData
+
+				if (ped != null)
+				{
+					//Get the value belonging to our plugin from the devices PlugExtraData 
+
+					var savedString = _utils.PedGet(ref ped, Utils.PluginName);
+
+					//TODO: Do something with the saved string and the random value?
+					//hs.SetDeviceValueByRef(dev.Ref(hs), randomvalue, True)
+					//hs.SetDeviceString(dev.Ref(hs), savedString & " - with value: " & randomvalue, True)
+				}
+			}
+		}
+
+		///<summary>
+		///Get the actual value to check from a trigger
+		///</summary>
+		///<param name = "key" > The key stored in the trigger, like "SomeValue"</param>
+		///<param name = "trigInfo" > The trigger information to check</param>
+		///<returns>Object of whatever is stored</returns>
+		///<remarks>By Moskus</remarks>
+		private object GetTriggerValue(string key, IPlugInAPI.strTrigActInfo trigInfo)
+		{
+
+			var trigger = new HsTrigger();
+
+			//Loads the trigger from the serialized object (if it exists, and it should)
+			if (!(trigInfo.DataIn == null))
+			{
+				object deserializedTrigger = null;
+				_utils.DeSerializeObject(ref trigInfo.DataIn, ref deserializedTrigger);
+				if (deserializedTrigger != null)
+				{
+					trigger = (HsTrigger)deserializedTrigger;
+				}
+			}
+
+			//A trigger has "keys" with different stored values, let's go through them all.
+			//In my sample we only have one key, which is "SomeValue"
+			var foundKey = trigger.GetAllKeys().SingleOrDefault(x => x.Contains(key + "_" + trigInfo.UID));
+			if (foundKey != null) return trigger[foundKey];
+			//Apparently we didn't find any matching keys in the trigger, so that's all we have to return
+			return null;
+		}
+
+		///<summary>
+		///A routine to restart the timer. Should be used when the user has chosen a different timer interval.
+		///</summary>
+		///<remarks>By Moskus</remarks>
+		public void RestartTimer()
+		{
+			//Get now time
+			var timeNow = DateTime.Now.TimeOfDay;
+
+			//Round time to the nearest whole trigger (if Me.Settings.TimerInterval is set to 5 minutes, the trigger will be exectued 10:00, 10:05, 10:10, etc
+			var nextWhole = TimeSpan.FromMilliseconds(
+				Math.Ceiling((timeNow.TotalMilliseconds) / _settings.TimerInterval) *
+				_settings.TimerInterval);
+
+			//Find the difference in milliseconds
+			var diff = (int)nextWhole.Subtract(timeNow).TotalMilliseconds;
+			Console.WriteLine("RestartTimer, timeNow: " + timeNow.ToString());
+			Console.WriteLine("RestartTimer, nextWhole: " + nextWhole.ToString());
+			Console.WriteLine("RestartTimer, diff: " + diff);
+
+			_updateTimer.Change(diff, _settings.TimerInterval);
+		}
+
+		#endregion
 
 		#region "Device creation and management"
 
@@ -1609,370 +1824,5 @@ namespace hspi_CsharpSample
 
 		#endregion
 
-
-
-		#region "Device creation and management"
-
-		//   ''' <summary>
-		//   ''' Checking if the devices have created by the plugin still exists. If not, let's create them.
-		//   ''' </summary>
-		//   ''' <remarks>By Moskus</remarks>
-		//   Private Sub CheckAndCreateDevices()
-		//       'Here we wil check if we have all the devices we want or if they should be created.
-		//       'In this example I have said that we want to have:
-		//       ' - One "Basic" device
-		//       ' - One "Advanced" device with some controls
-		//       ' - One "Root" (or Master) device with two child devices
-
-		//       'HS usually use the deviceenumerator for this kind of stuff, but I prefer to use Linq.
-		//       'As HS haven't provided a way to get a list(or "queryable method") for devices, I've made one (Check the function "Devices()" in utils.vb).
-		//       'Here we are only interessted in the plugin devices for this plugin, so let's do some first hand filtering
-
-		//	Dim devs = (From d In Devices()
-
-		//				Where d.Interface(hs) = Me.Name).ToList
-
-
-		//       'First let's see if we can find any devices belonging to the plugin with device type = "Basic".The device type string should contain "Basic".
-		//       If(From d In devs Where d.Device_Type_String(hs).Contains("Basic")).Count = 0 Then
-		//           'Apparently we don't have a basic device, so we create one with the name "Test basic device"
-		//           CreateBasicDevice("Test basic device")
-
-		//	End If
-
-
-		//       'Then let's see if we can find the "Advanced" device, and create it if not
-		//	If(From d In devs Where d.Device_Type_String(hs).Contains("Advanced")).Count = 0 Then
-		//	   CreateAdvancedDevice("Test advanced device")
-
-		//	End If
-
-
-		//       'Checking root devices and child devices
-		//       If(From d In devs Where d.Device_Type_String(hs).Contains("Root")).Count = 0 Then
-
-		//           'There are no root device so let's create one, and keep the device reference
-		//		Dim rootDeviceReference As Integer = CreateRootDevice("Test Root device")
-
-		//		Dim root As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(rootDeviceReference)
-
-		//           'The point of a root/parent device is to have children, so let's have some fun creating them *badam tish*
-
-		//		For i As Integer = 1 To 2
-		//               'Let's create the child devivce
-		//			Dim childDeviceReference As Integer = CreateChildDevice("Child " & i)
-
-		//               '... and associate it with the root
-
-		//			If childDeviceReference > 0 Then root.AssociatedDevice_Add(hs, childDeviceReference)
-		//		Next
-
-
-		//	Else
-		//           'We have a root device or more, but do we have child devices?
-
-		//		Dim roots = From d In devs
-		//					Where d.Device_Type_String(hs).Contains("Root")
-
-
-		//		For Each root In roots
-		//               'If we don't have two root devices...
-		//			If root.AssociatedDevices_Count(hs) <> 2 Then
-
-		//                   '...we delete them all
-		//                   For Each child In root.AssociatedDevices(hs)
-		//					hs.DeleteDevice(child)
-
-		//				Next
-
-		//                   '... and recreate them
-		//                   For i As Integer = 1 To 2
-		//                       'First create the device and get the reference
-		//                       Dim childDeviceReference As Integer = CreateChildDevice("Child " & i)
-
-		//                       'Then associated that child reference with the root.
-		//                       If childDeviceReference > 0 Then root.AssociatedDevice_Add(hs, childDeviceReference)
-
-		//				Next
-
-		//                   'NOTE: This could be handled more elegantly, like checking which child devices are missing, and creating only those.
-		//               End If
-
-		//		Next
-
-
-		//	End If
-
-		//End Sub
-
-		//   ''' <summary>
-		//   ''' Creates a basic device without controls. It can show values, though.
-		//   ''' </summary>
-		//   ''' <param name="name">The name of the device</param>
-		//   ''' <remarks>By Moskus and http://www.homeseer.com/support/homeseer/HS3/HS3Help/scripting_devices_deviceclass1.htm </remarks>
-		//   Private Function CreateBasicDevice(ByVal name As String) As Integer
-
-		//	Try
-		//           'Creating a brand new device, and get the actual device from the device reference
-		//           Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(hs.NewDeviceRef(name))
-
-		//		Dim reference As Integer = device.Ref(hs)
-
-		//           'Setting the type to plugin device
-		//           Dim typeInfo=new DeviceTypeInfo
-		//		typeInfo.Device_Type = DeviceTypeInfo.eDeviceAPI.Plug_In
-		//		device.DeviceType_Set(hs) = typeInfo
-
-		//		device.Can_Dim(hs) = False
-
-
-		//		device.Interface(hs) = Me.Name          'Don't change this, or the device won't be associated with your plugin
-
-		//		device.InterfaceInstance(hs) = instance 'Don't change this, or the device won't be associated with that particular instance
-
-
-		//		device.Device_Type_String(hs) = Me.Name & " " & "Basic" ' This you can change to something suitable, though. :)
-
-		//           'Setting the name and locations
-
-		//		device.Name(hs) = name 'as approved by input variable
-
-		//		device.Location(hs) = Settings.Location
-
-		//		device.Location2(hs) = Settings.Location2
-
-		//           'Misc options
-
-		//		device.Status_Support(hs) = False               'Set to True if the devices can be polled, False if not. (See PollDevice in hspi.vb)
-
-		//		device.MISC_Set(hs, Enums.dvMISC.SHOW_VALUES)   'If not set, device control options will not be displayed.
-
-		//		device.MISC_Set(hs, Enums.dvMISC.NO_LOG)        'As default, we don't want to log every device value change to the log
-
-		//           'Committing to the database, clear value-status-pairs and graphic-status pairs
-
-		//		hs.SaveEventsDevices()
-
-		//		hs.DeviceVSP_ClearAll(reference, True)
-		//		hs.DeviceVGP_ClearAll(reference, True)
-
-
-		//           'Return the reference
-
-		//		Return reference
-
-
-		//	Catch ex As Exception
-
-		//		Log("Unable to create basic device. Error: " & ex.Message, LogType.Warning)
-
-		//	End Try
-
-		//	Return 0 'if anything fails.
-		//   End Function
-
-		//   ''' <summary>
-		//   ''' Creates a "advanced" device with some control examples.
-		//   ''' Based on the device from CreateBasicDevice
-		//   ''' </summary>
-		//   ''' <param name="name">The name of the device</param>
-		//   ''' <remarks>By Moskus and http://www.homeseer.com/support/homeseer/HS3/HS3Help/scripting_devices_deviceclass1.htm </remarks>
-		//   Private Function CreateAdvancedDevice(ByVal name As String) As Integer
-		//       'Creating BASIC device and getting its device reference
-		//       Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CreateBasicDevice(name))
-
-		//	Dim reference As Integer = device.Ref(hs)
-
-		//       'This device type is not Basic, it's Advanced
-
-		//	device.Device_Type_String(hs) = Me.Name & " " & "Advanced"
-
-		//       'Commit to the database
-		//       hs.SaveEventsDevices()
-
-		//       'We'll create three controls, a button with the value 0, a slider for values 1 to 9, and yet another button for the value 10
-
-		//       ' =========
-		//       ' Value = 0
-		//       ' =========
-		//       'Status pair
-		//       Dim SVpair=new HomeSeerAPI.VSPair(HomeSeerAPI.ePairStatusControl.Both)
-		//	SVpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
-		//	SVpair.Value = 0
-
-		//	SVpair.Status = "Value " & SVpair.Value
-
-		//	SVpair.ControlUse = ePairControlUse._Off 'For IFTTT/HStouch support
-
-		//	SVpair.Render = Enums.CAPIControlType.Button
-
-		//	SVpair.IncludeValues = True
-
-		//	hs.DeviceVSP_AddPair(reference, SVpair)
-
-		//       '... and some graphics
-
-		//	Dim VGpair=new HomeSeerAPI.VGPair
-		//	VGpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
-
-		//	VGpair.Set_Value = 0
-
-		//	VGpair.Graphic = "images/checkbox_disabled_on.png"
-
-		//	hs.DeviceVGP_AddPair(reference, VGpair)
-
-		//       ' ============
-		//       ' Value 1 to 9
-		//       ' ============
-		//       'Status pair
-
-		//	SVpair = New HomeSeerAPI.VSPair(HomeSeerAPI.ePairStatusControl.Both)
-		//	SVpair.PairType = HomeSeerAPI.VSVGPairType.Range
-
-		//	SVpair.RangeStart = 1
-
-		//	SVpair.RangeEnd = 9
-
-		//	SVpair.RangeStatusPrefix = "Value "
-
-		//	SVpair.ControlUse = ePairControlUse._Dim 'For HStouch support
-
-		//	SVpair.Render = Enums.CAPIControlType.ValuesRangeSlider
-
-		//	SVpair.IncludeValues = True
-
-		//	hs.DeviceVSP_AddPair(reference, SVpair)
-
-		//       '... and some graphics
-
-		//	VGpair = New HomeSeerAPI.VGPair
-		//	VGpair.PairType = HomeSeerAPI.VSVGPairType.Range
-
-		//	VGpair.RangeStart = 1
-
-		//	VGpair.RangeEnd = 9
-
-		//	VGpair.Graphic = "images/checkbox_on.png"
-
-		//	hs.DeviceVGP_AddPair(reference, VGpair)
-
-		//       ' ==========
-		//       ' Value = 10
-		//       ' ==========
-		//       'Status pair
-
-		//	SVpair = New HomeSeerAPI.VSPair(HomeSeerAPI.ePairStatusControl.Both)
-		//	SVpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
-
-		//	SVpair.Value = 10
-
-		//	SVpair.Status = "Value " & SVpair.Value
-
-		//	SVpair.ControlUse = ePairControlUse._On 'For IFTTT/HStouch support
-
-		//	SVpair.Render = Enums.CAPIControlType.Button
-
-		//	SVpair.IncludeValues = True
-
-		//	hs.DeviceVSP_AddPair(reference, SVpair)
-
-		//       '... and some graphics
-
-		//	VGpair = New HomeSeerAPI.VGPair
-		//	VGpair.PairType = HomeSeerAPI.VSVGPairType.SingleValue
-
-		//	VGpair.Set_Value = 10
-
-		//	VGpair.Graphic = "images/checkbox_hvr.png"
-
-		//	hs.DeviceVGP_AddPair(reference, VGpair)
-
-
-		//       'return the reference
-
-		//	Return reference
-
-		//End Function
-
-		//   ''' <summary>
-		//   ''' Creates a root/parent device based on the basic device
-		//   ''' </summary>
-		//   ''' <param name="name"></param>
-		//   ''' <returns></returns>
-		//   ''' <remarks></remarks>
-
-		//Private Function CreateRootDevice(ByVal name As String) As Integer
-		//       'Creating BASIC device and getting its device reference
-		//       Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CreateBasicDevice(name))
-
-		//       'This device type is not Basic, it's Advanced
-
-		//	device.Device_Type_String(hs) = Me.Name & " " & "Root"
-
-		//       'Setting it as a root device
-		//       device.Relationship(hs) = HomeSeerAPI.Enums.eRelationship.Parent_Root
-
-		//       'Committing to the database and return the reference
-		//       hs.SaveEventsDevices()
-		//	Return device.Ref(hs)
-		//End Function
-
-		//Private Function CreateChildDevice(ByVal name As String) As Integer
-		//       'Creating BASIC device and getting its device reference
-		//       Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CreateBasicDevice(name))
-
-		//       'This device type is not Basic, it's Advanced
-
-		//	device.Device_Type_String(hs) = Me.Name & " " & "Child"
-
-		//       'Setting it as a child device
-		//       device.Relationship(hs) = HomeSeerAPI.Enums.eRelationship.Child
-
-		//       'Committing to the database and return the reference
-		//       hs.SaveEventsDevices()
-		//	Return device.Ref(hs)
-		//End Function
-		#endregion
-
-		#region "Web Page Processing"
-		//private object SelectPage(ByVal pageName As String)
-		//{
-
-		//	switch (pageName)
-		//	{
-		//case configPage.PageName:
-		//			return _configPage;
-		//			break;
-		//case statusPage.PageName:
-		//			return _statusPage;
-		//			break;
-		//		default:
-		//			return _configPage;
-		//			break;
-		//	}
-
-		//	return null;
-		//}
-
-		public string PostBackProc(string pageName , string data , string user , int userRights ) {
-			if (pageName==_statusPage.PageName)
-			{
-				return _statusPage.postBackProc(pageName, data, user, userRights);
-			}
-			//Default choice
-			return _configPage.postBackProc(pageName, data, user, userRights);
-		}
-
-		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
-		{
-			if (pageName == _statusPage.PageName)
-			{
-				return _statusPage.GetPagePlugin(pageName, user, userRights, queryString);
-			}
-			//Default choice
-			return _configPage.GetPagePlugin(pageName, user, userRights, queryString);
-
-		}
-		#endregion
 	}
 }
