@@ -51,7 +51,7 @@ namespace hspi_CsharpSample
 					linkText = link;
 				}
 
-				linkText = linkText.Replace("_", " ").Replace(Utils.PluginName, "");
+				linkText = linkText.Replace(Utils.PluginName, "").Replace("_", " ");
 
 				if (string.IsNullOrEmpty(pageTitle))
 				{

@@ -5,6 +5,8 @@ using Scheduler;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using Scheduler.Classes;
 
@@ -16,18 +18,19 @@ namespace hspi_CsharpSample.Config
 		private Plugin _plugin;
 		private Settings _settings;
 		private IHSApplication _hs;
-
+		private Utils _utils;
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
 		///<param name="settings"></param>
 		///<param name="hs"></param>
-		public WebConfig(string pageName, Settings settings, IHSApplication hs, Plugin plugin) : base(pageName)
+		public WebConfig(string pageName, Settings settings, IHSApplication hs, Plugin plugin, Utils utils) : base(pageName)
 		{
 			_plugin = plugin;
 			_settings = settings;
 			_hs = hs;
+			_utils = utils;
 		}
 
 		///<summary>
@@ -156,40 +159,47 @@ namespace hspi_CsharpSample.Config
 			{
 				this.reset();
 
-				//		currentPage = Me
+				//Todo Not sure about the current page business
+				//currentPage = this;
+				// handle any queries like mode=something
+				NameValueCollection parts = null;
+				if (!string.IsNullOrEmpty(queryString))
+				{
+					parts = HttpUtility.ParseQueryString(queryString);
+				}
 
-				//           ' handle any queries like mode=something
-				//           Dim parts As Collections.Specialized.NameValueCollection = Nothing
-				//		If queryString<> String.Empty Then parts = HttpUtility.ParseQueryString(queryString)
+				if (!string.IsNullOrEmpty(Utils.PluginInstance))
+				{
+					instanceText = " - " + Utils.PluginInstance;
+				}
 
-				//		If instance <> "" Then instancetext = " - " & instance
+				//For some reason, I can't get the sample to add the title. So let's add it here.
+				stb.Append("<title>" + Utils.PluginName + " " + pageName.Replace(Utils.PluginName, "") + "</title>");
 
-				//           'For some reason, I can't get the sample to add the title. So let's add it here.
+				//Add menus and headers
+				stb.Append(_hs.GetPageHeader(pageName,
+					Utils.PluginName + " " + pageName.Replace(Utils.PluginName, "") + instanceText, "",
+					"", false, false));
 
-				//		stb.Append("<title>" & plugin.Name & " " & pageName.Replace(plugin.Name, "") & "</title>")
+				//Adds the div for the plugin page
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""));
 
-				//           'Add menus and headers
-				//           stb.Append(hs.GetPageHeader(pageName, plugin.Name & " " & pageName.Replace(plugin.Name, "") & instancetext, "", "", False, False))
+				// a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"));
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd());
 
-				//           'Adds the div for the plugin page
-				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("pluginpage", ""))
+				//Configures the timer that all pages apparently has
+				this.RefreshIntervalMilliSeconds = 3000;
+				stb.Append(this.AddAjaxHandlerPost("id=timer", pageName)); //This is so we can control it in postback
 
-				//           ' a message area for error messages from jquery ajax postback (optional, only needed if using AJAX calls to get data)
-				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivStart("errormessage", "class='errormessage'"))
-				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
+				// specific page starts here
+				stb.Append(BuildContent());
 
-				//           'Configures the timer that all pages apparently has
-				//           Me.RefreshIntervalMilliSeconds = 3000
-				//           stb.Append(Me.AddAjaxHandlerPost("id=timer", pageName)) 'This is so we can control it in postback
+				//Ends the div end tag for the plugin page
+				stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd());
 
-				//           ' specific page starts here
-				//           stb.Append(BuildContent)
-
-				//           'Ends the div end tag for the plugin page
-				//           stb.Append(PageBuilderAndMenu.clsPageBuilder.DivEnd)
-
-				//           ' add the body html to the page
-				//           Me.AddBody(stb.ToString)
+				// add the body html to the page
+				this.AddBody(stb.ToString());
 
 				//           ' return the full page
 				return this.BuildPage();
@@ -250,126 +260,105 @@ namespace hspi_CsharpSample.Config
 			var textBox = new clsJQuery.jqTextBox(name, "", text, this.PageName, 20, false);
 			var ret = "";
 
-			//	textBox.id = "o" & Name
+			textBox.id = "o" + name;
+			//If it's a location textbox, we want it to be "filled! with the current setting
 
-			//       'If it's a location textbox, we want it to be "filled! with the current setting
+			switch (name)
+			{
+				case "TextboxLocation":
+					textBox.defaultText = _settings.Location;
+					break;
+				case "TextboxLocation2":
+					textBox.defaultText = _settings.Location2;
+					break;
+			}
 
-			//	Select Case Name
-			//		Case "TextboxLocation"
-
-			//			textBox.defaultText = plugin.Settings.Location
-			//		Case "TextboxLocation2"
-
-			//			textBox.defaultText = plugin.Settings.Location2
-			//	End Select
-
-			//	If Rebuilding Then
-
-			//		ret = textBox.Build
-			//		Me.divToUpdate.Add(Name & "_div", ret)
-
-			//	Else
-			//		ret = "<div style='float: left;'  id='" & Name & "_div'>" & textBox.Build & "</div>"
-
-			//	End If
-
-
+			if (rebuilding)
+			{
+				ret = textBox.Build();
+				this.divToUpdate.Add(name + "_div", ret);
+			}
+			else
+			{
+				ret = "<div style='float: left;'  id='" + name + "_div'>" + textBox.Build() + "</div>";
+			}
 			return ret;
-
 		}
 
 
 		private string BuildButton(string name, bool rebuilding = false)
 		{
-
 			var button = new clsJQuery.jqButton(name, "", this.PageName, false);
 			var buttonText = "Submit";
 
-			var ret = String.Empty;
+			var ret = string.Empty;
 
-			//       'Handles the text for different buttons, based on the button name
+			//'Handles the text for different buttons, based on the button name
+			switch (name)
+			{
+				case "Button1":
+					buttonText = "Go To Status Page";
+					button.submitForm = false;
+					break;
+			}
 
-			//	Select Case Name
-			//		Case "Button1"
+			button.id = "o" + name;
+			button.label = buttonText;
+			ret = button.Build();
 
-			//			buttonText = "Go To Status Page"
-			//               button.submitForm = False
-			//	End Select
-
-			//	button.id = "o" & Name
-			//	button.label = buttonText
-
-
-			//	ret = button.Build
-
-
-			//	If Rebuilding Then
-			//		Me.divToUpdate.Add(Name & "_div", ret)
-
-			//	Else
-			//		ret = "<div style='float: left;' id='" & Name & "_div'>" & ret & "</div>"
-
-			//	End If
+			if (rebuilding)
+			{
+				this.divToUpdate.Add(name + "_div", ret);
+			}
+			else
+			{
+				ret = "<div style='float: left;' id='" + name + "_div'>" + ret + "</div>";
+			}
 
 			return ret;
-
 		}
 
 
 		public string BuildDropList(string name, bool rebuilding = false)
 		{
-
 			var ddl = new clsJQuery.jqDropList(name, this.PageName, false);
 			ddl.id = "o" + name;
 			ddl.autoPostBack = true;
 
 			//Get the items we want to have in the drop down list
+			var items = new List<string>();
+			var selectedItem = string.Empty;
 
-			//	Dim items=new List(Of String)
-			//	Dim selecteditem As String = String.Empty
+			switch (name)
+			{
+				case "DropListLocation":
+					items = _utils.Devices().Select(x => x.get_Location(_hs)).Distinct().OrderBy(x => x).ToList();
+					selectedItem = _settings.Location;
+					break;
 
-			//	Select Case Name
-			//		Case "DropListLocation"
+				case "DropListLocation2":
+					items = _utils.Devices().Select(x => x.get_Location2(_hs)).Distinct().OrderBy(x => x).ToList();
+					selectedItem = _settings.Location2;
+					break;
+			}
 
-			//			items = (From d In Devices()
-			//					 Select Value = d.Location(hs)
-
-			//					 Order By Value Ascending
-
-			//					 Distinct).ToList
-			//			selecteditem = plugin.Settings.Location
-
-
-			//		Case "DropListLocation2"
-			//               items = (From d In Devices()
-
-			//					 Select Value = d.Location2(hs)
-
-			//					 Order By Value Ascending
-
-			//					 Distinct).ToList
-			//			selecteditem = plugin.Settings.Location2
-
-			//	End Select
-
-			//       '... and add them to the control with a blank on top
-
-			//	ddl.AddItem("", "", True)
-			//       For Each s In items
-			//		ddl.AddItem(s, s, (s = selecteditem))
-			//       Next
-
+			//... and add them to the control with a blank on top
+			ddl.AddItem("", "", true);
+			foreach (var item in items)
+			{
+				ddl.AddItem(item, item, (item == selectedItem));
+			}
 
 			string ret = string.Empty;
-			//	If Rebuilding Then
-
-			//		ret = ddl.Build
-			//		Me.divToUpdate.Add(Name & "_div", ret)
-
-			//	Else
-			//		ret = "<div style='float: left;'  id='" & Name & "_div'>" & ddl.Build & "</div>"
-
-			//	End If
+			if (rebuilding)
+			{
+				ret = ddl.Build();
+				this.divToUpdate.Add(name + "_div", ret);
+			}
+			else
+			{
+				ret = "<div style='float: left;'  id='" + name + "_div'>" + ddl.Build() + "</div>";
+			}
 			return ret;
 		}
 
@@ -388,7 +377,7 @@ namespace hspi_CsharpSample.Config
 					break;
 			}
 
-			var ret = String.Empty;
+			var ret = string.Empty;
 			if (rebuilding)
 			{
 				ret = checkbox.Build();
@@ -406,13 +395,12 @@ namespace hspi_CsharpSample.Config
 			var timespan = new clsJQuery.jqTimeSpanPicker(name, label, this.PageName, false);
 			timespan.id = "o" + name;
 			timespan.showDays = false;
-
 			if (name == "TimespanTimer")
 			{
 				timespan.defaultTimeSpan = new TimeSpan(0, 0, _settings.TimerInterval / 1000);
 			}
 
-			var ret = String.Empty;
+			var ret = string.Empty;
 			if (rebuilding)
 			{
 				ret = timespan.Build();
@@ -422,7 +410,6 @@ namespace hspi_CsharpSample.Config
 			{
 				ret = "<div style='float: left;'  id='" + name + "_div'>" + timespan.Build() + "</div>";
 			}
-
 			return ret;
 		}
 	}

@@ -98,7 +98,7 @@ namespace hspi_CsharpSample
 				_utils = value;
 				_hs = Utils.Hs;
 
-				_configPage = new WebConfig(ConfigPageName, _settings,_hs,this);
+				_configPage = new WebConfig(ConfigPageName, _settings,_hs,this,_utils);
 				_statusPage = new WebStatus(StatusPageName, _settings,_hs);
 			}
 		}
