@@ -290,7 +290,7 @@ namespace hspi_CsharpSample
 					{
 						return "ConfigDevice ERROR: " + ex.Message; //Original is too old school: "Return Err.Description"
 					}
-					//break;
+				//break;
 
 
 				case "Basic":
@@ -298,14 +298,15 @@ namespace hspi_CsharpSample
 					stb.Append("Nothing special to configure for the basic device. :-)");
 					stb.Append("</form>");
 					return stb.ToString();
-					//break;
+				//break;
 
 				case "Advanced":
-					var savedString = (string) _utils.PedGet(ref ped, pedName);
-								if (string.IsNullOrEmpty(savedString)) {
-									//The pluginextradata is not configured for this device
-									savedString = "The text in this textbox is saved with the actual device";
-								}
+					var savedString = (string)_utils.PedGet(ref ped, pedName);
+					if (string.IsNullOrEmpty(savedString))
+					{
+						//The pluginextradata is not configured for this device
+						savedString = "The text in this textbox is saved with the actual device";
+					}
 					var savedTextbox = new clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, false);
 					saveButton = new clsJQuery.jqButton("Save", "Done", "DeviceUtility", true);
 					stb.Append("<form id='frmSample' name='SampleTab' method='Post'>");
@@ -424,58 +425,55 @@ namespace hspi_CsharpSample
 		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/setio.htm</remarks>
 		public void SetIOMulti(List<CAPI.CAPIControl> colSend)
 		{
-			//       'Multiple CAPIcontrols might be sent at the same time, so we need to check each one
-			//       For Each CC In colSend
-			//console.WriteLine("SetIOMulti triggered, checking CAPI '" + CC.Label + "' on device " + CC.Ref);
+			//Multiple CAPIcontrols might be sent at the same time, so we need to check each one
+			foreach (var cc in colSend)
+			{
+				Console.WriteLine("SetIOMulti triggered, checking CAPI '" + cc.Label + "' on device " + cc.Ref);
 
-			//           'CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
-			//           '  The status of the device migth depend on some hardware giving the response that it has received the command,
-			//           '  and perhaps with an other value (indicating a status equal to "Error" or whatever). In that case; send the command,
-			//           '  wait for the answer (in a new thread, for example) and THEN update the device value
-			//           'But here, we just update the value for the device
+				//CAPI doesn't magically store the new devicevalue, and I believe there's good reason for that:
+				//  The status of the device migth depend on some hardware giving the response that it has received the command,
+				//  and perhaps with an other value (indicating a status equal to "Error" or whatever). In that case; send the command,
+				//  wait for the answer (in a new thread, for example) and THEN update the device value
+				//But here, we just update the value for the device
+				_hs.SetDeviceValueByRef(cc.Ref, cc.ControlValue, false);
 
-			//		hs.SetDeviceValueByRef(CC.Ref, CC.ControlValue, False)
+				//Get the device sending the CAPIcontrol
+				var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(cc.Ref);
 
-			//           'Get the device sending the CAPIcontrol
-			//           Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(CC.Ref)
+				//We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
+				var switchValue = device.get_Device_Type_String(_hs).Replace(Utils.PluginName, "").Trim();
+				switch (switchValue)
+				{
+					case "":
+						//****************************************************************
+						//Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
+						//****************************************************************
+						var ped = (PlugExtraData.clsPlugExtraData)device.get_PlugExtraData_Get(_hs);
+						var sample = (SampleClass)_utils.PedGet(ref ped, "Sample");
+						if (sample == null)
+						{
+							var houseCode = sample.HouseCode;
+							var devicecode = sample.DeviceCode;
+							_utils.SendCommand(houseCode,
+								devicecode); //The HSPI_SAMPE control, in utils.vb as an example (but it doesn't do anything)
 
-			//           'We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
+						}
+						break;
 
-			//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
-			//			Case ""
-			//                   '****************************************************************
-			//                   'Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
-			//                   '****************************************************************
+					case "Basic":
+						//There's nothing stored in the basic device
+						break;
 
-			//				Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+					case "Advanced":
+						//Here we could choose to do something with the text string stored in the device
+						break;
 
-			//				Dim sample As SampleClass = PEDGet(PED, "Sample")
-
-			//				If sample IsNot Nothing Then
-			//					Dim houseCode As String = sample.houseCode
-			//					Dim Devicecode As String = sample.deviceCode
-			//					SendCommand(houseCode, Devicecode) 'The HSPI_SAMPE control, in utils.vb as an example (but it doesn't do anything)
-			//                   End If
-
-
-
-			//			Case "Basic"
-			//                   'There's nothing stored in the basic device
-
-			//			Case "Advanced"
-			//                   'Here we could choose to do something with the text string stored in the device
-
-
-			//			Case Else
-			//                   'Nothing to do at the moment
-
-			//		End Select
-
-
-			//	Next
-			//End Sub
+					default:
+						//Nothing to do at the moment
+						break;
+				}
+			}
 		}
-
 
 		#endregion
 
