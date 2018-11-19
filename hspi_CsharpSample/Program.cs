@@ -65,6 +65,7 @@ namespace hspi_CsharpSample
 					case "instance":
 						try
 						{
+							//Not in use as it is now
 							_instance = parts[1];
 						}
 						catch (Exception ex)
@@ -76,11 +77,8 @@ namespace hspi_CsharpSample
 				}
 			}
 
-			//var settings = new Settings();
-			//_utils = new Utils(settings);
-
-			//var plugin = new Plugin(_utils);
 			var plugin = new Plugin();
+			plugin.PluginInstance = _instance;
 			_appApi = new Hspi(plugin);
 			Console.WriteLine("Connecting to server at " + _ip + ":" + _port + "...");
 
@@ -135,6 +133,7 @@ namespace hspi_CsharpSample
 				_appApi.Utils = _utils;
 				plugin.Settings = settings;
 				plugin.Utils= _utils;
+				
 				// connect to HS so it can register a callback to us
 				_host.Connect(Utils.PluginName, "");
 				Console.WriteLine("Connected, waiting to be initialized...");

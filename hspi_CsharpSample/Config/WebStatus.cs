@@ -6,6 +6,7 @@ using System.Web;
 using System.Collections.Specialized;
 using System.Data;
 using System.Text;
+using Scheduler.Classes;
 
 namespace hspi_CsharpSample.Config
 {
@@ -16,15 +17,17 @@ namespace hspi_CsharpSample.Config
 		private DataTable _ddTable = null;
 		private Settings _settings;
 		private IHSApplication _hs;
+		private Plugin _plugin;
 
 		///<summary>
 		///This creates a new instance of this page
 		///</summary>
 		///<param name="pagename"></param>
-		public WebStatus(string pageName, Settings settings,IHSApplication hs) : base(pageName)
+		public WebStatus(string pageName, Settings settings,IHSApplication hs,Plugin plugin) : base(pageName)
 		{
 			_settings = settings;
 			_hs = hs;
+			_plugin = plugin;
 		}
 		
 		public override string postBackProc(string page, string data, string user, int userRights)
@@ -110,9 +113,9 @@ namespace hspi_CsharpSample.Config
 					parts = HttpUtility.ParseQueryString(queryString);
 				}
 
-				if (!string.IsNullOrEmpty(Utils.PluginInstance))
+				if (!string.IsNullOrEmpty(_plugin.PluginInstance))
 				{
-					instancetext = " - " + Utils.PluginInstance;
+					instancetext = " - " + _plugin.PluginInstance;
 				}
 
 				stb.Append(_hs.GetPageHeader(pageName, Utils.PluginName + instancetext, "", "", false, false));

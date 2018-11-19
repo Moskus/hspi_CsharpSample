@@ -78,7 +78,7 @@ namespace hspi_CsharpSample.Config
 					bool log = (parts["CheckboxDebugLogging"] == "checked") ? true : false;
 					_settings.DebugLog = log;
 					BuildCheckbox("CheckboxDebugLogging", true);
-					PostMessage("Log timer: " + log);
+					PostMessage("Debug logging: " + log);
 					break;
 
 				case "oDropListLocation":
@@ -167,9 +167,9 @@ namespace hspi_CsharpSample.Config
 					parts = HttpUtility.ParseQueryString(queryString);
 				}
 
-				if (!string.IsNullOrEmpty(Utils.PluginInstance))
+				if (!string.IsNullOrEmpty(_plugin.PluginInstance))
 				{
-					instanceText = " - " + Utils.PluginInstance;
+					instanceText = " - " + _plugin.PluginInstance;
 				}
 
 				//For some reason, I can't get the sample to add the title. So let's add it here.

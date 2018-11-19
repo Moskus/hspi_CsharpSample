@@ -12,7 +12,7 @@ namespace hspi_CsharpSample
 	public class Utils
 	{
 		public static string PluginName = "Hspi_CsharpSample";
-		public static string PluginInstance = "";
+		private string _pluginInstance="";
 		public static string IniFile = "Hspi_CsharpSample.ini";
 
 		private static bool _isShuttingDown = false;
@@ -27,6 +27,26 @@ namespace hspi_CsharpSample
 		{
 			get => _isShuttingDown;
 			set => _isShuttingDown = value;
+		}
+
+		public string PluginInstance
+		{
+			get
+			{
+				return _pluginInstance;
+			}
+			set
+			{
+				if (value == null)
+				{
+					_pluginInstance = "";
+				}
+				else
+				{
+					_pluginInstance = value;
+				}
+				
+			}
 		}
 
 		public IAppCallbackAPI Callback { get; set; }
@@ -44,7 +64,7 @@ namespace hspi_CsharpSample
 			try
 			{
 				var theLink = link;
-				Hs.RegisterPage(theLink, Utils.PluginName, Utils.PluginInstance);
+				Hs.RegisterPage(theLink, Utils.PluginName, _pluginInstance);
 
 				if (string.IsNullOrEmpty(linkText))
 				{
@@ -63,8 +83,8 @@ namespace hspi_CsharpSample
 
 				webPageDescription.link = theLink;
 
-				webPageDescription.linktext = linkText + Utils.PluginInstance;
-				webPageDescription.page_title = pageTitle + Utils.PluginInstance;
+				webPageDescription.linktext = linkText + _pluginInstance;
+				webPageDescription.page_title = pageTitle + _pluginInstance;
 				Callback.RegisterLink(webPageDescription);
 
 			}
@@ -351,7 +371,7 @@ namespace hspi_CsharpSample
 			dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In;
 			dv.set_DeviceType_Set(Hs, dt);
 			dv.set_Interface(Hs, Utils.PluginName);
-			dv.set_InterfaceInstance(Hs, Utils.PluginInstance);
+			dv.set_InterfaceInstance(Hs, _pluginInstance);
 			dv.set_Last_Change(Hs, DateTime.Now);
 			dv.set_Name(Hs, name);
 			dv.set_Location(Hs, Utils.PluginName);

@@ -80,6 +80,7 @@ namespace hspi_CsharpSample
 		private HsTrigger _trigger = new HsTrigger();
 		private HsAction _action = new HsAction();
 		private IHSApplication _hs;
+		private string _instance;
 		private const string Pagename = "Events";
 
 		public Plugin()
@@ -97,9 +98,9 @@ namespace hspi_CsharpSample
 			{
 				_utils = value;
 				_hs = Utils.Hs;
-
+				_utils.PluginInstance = _instance;
 				_configPage = new WebConfig(ConfigPageName, _settings, _hs, this, _utils);
-				_statusPage = new WebStatus(StatusPageName, _settings, _hs);
+				_statusPage = new WebStatus(StatusPageName, _settings, _hs, this);
 			}
 		}
 
@@ -1269,6 +1270,12 @@ namespace hspi_CsharpSample
 			get { return 1; }
 		}
 
+		public string PluginInstance
+		{
+			get { return _instance; }
+			set { _instance = value; }
+		}
+
 
 		#endregion
 
@@ -1635,7 +1642,7 @@ namespace hspi_CsharpSample
 
 				device.set_Interface(_hs, Utils.PluginName);//Don't change this, or the device won't be associated with your plugin
 															//Todo: Checkout pluginInstance handling. Should be for each instance. Now for all instances
-				device.set_InterfaceInstance(_hs, Utils.PluginInstance);//Don't change this, or the device won't be associated with that particular instance
+				device.set_InterfaceInstance(_hs, _instance);//Don't change this, or the device won't be associated with that particular instance
 
 				device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Basic");//This you can change to something suitable, though. :)
 
