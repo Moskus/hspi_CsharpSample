@@ -40,7 +40,7 @@ namespace hspi_CsharpSample.Config
 		///<param name="user"></param>
 		///<param name="userRights"></param>
 		///<returns></returns>
-		public string PostBackProc(string page, string data, string user, int userRights)
+		public override string postBackProc(string page, string data, string user, int userRights)
 		{
 			NameValueCollection parts = HttpUtility.ParseQueryString(data);
 
