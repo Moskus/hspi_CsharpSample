@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using hspi_CsharpSample.Config;
-using System.Net.Mime;
+using System.Web;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -344,75 +344,65 @@ namespace hspi_CsharpSample
 		//   ''' CallbackTimer = 5          Your plugin ConfigDevice is called and a page timer is called so ConfigDevicePost is called back every 2 seconds
 		//   ''' </returns>
 		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevicepost.htm</remarks>
-
 		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data, string user, int userRights)
 		{
-			//	Dim ReturnValue As Integer = Enums.ConfigDevicePostReturn.CallbackOnce
+			var returnValue = Enums.ConfigDevicePostReturn.CallbackOnce;
+			try
+			{
 
+				var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(reference);
+				var ped = (PlugExtraData.clsPlugExtraData)device.get_PlugExtraData_Get(_hs);
+				var pedName = Utils.PluginName;
+				NameValueCollection parts = HttpUtility.ParseQueryString(data);
 
-			//	Try
-			//		Dim device As Scheduler.Classes.DeviceClass = hs.GetDeviceByRef(ref)
+				//We'll use the device type string to determine how we should handle the device in the plugin
+				var switchValue = device.get_Device_Type_String(_hs).Replace(Utils.PluginName, "").Trim();
+				switch (switchValue)
+				{
+					case "":
+						//===============================================================================
+						//It's a device created by HSPI_SAMPLE_BASIC(the old code), kept as a reference.
+						//===============================================================================
+						var sample = (SampleClass)_utils.PedGet(ref ped, pedName);
+						if (sample == null)
+						{
+							_utils.InitHSDevice(ref device);
+						}
 
-			//		Dim PED As clsPlugExtraData = device.PlugExtraData_Get(hs)
+						sample.HouseCode = (string)parts["HouseCode"];
+						sample.DeviceCode = (string)parts["DeviceCode"];
 
-			//		Dim PEDname As String = Me.Name
+						ped = device.get_PlugExtraData_Get(_hs);
+						_utils.PedAdd(ref ped, pedName, sample);
+						device.set_PlugExtraData_Set(_hs, ped);
+						_hs.SaveEventsDevices();
+						break;
+					case "Basic":
+						//Nothing to store as this device doesn't have any extra data to save
+						break;
+					case "Advanced":
+						//We'll get the string to save from the postback values
+						var savedString = (string)parts["savedTextbox"];
 
-			//		Dim parts As Collections.Specialized.NameValueCollection = HttpUtility.ParseQueryString(data)
+						//We'll save this to the pluginextradata storage
+						ped = device.get_PlugExtraData_Get(_hs);
+						_utils.PedAdd(ref ped, pedName, savedString); //Adds the saveString to the plugin if it doesn't exist, and removes and adds it if it does.
+						device.set_PlugExtraData_Set(_hs, ped);
 
-			//           'We'll use the device type string to determine how we should handle the device in the plugin
+						//And then finally save the device
+						_hs.SaveEventsDevices();
+						break;
+				}
 
-			//		Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
-			//			Case ""
-			//                   '===============================================================================
-			//                   'It's a device created by HSPI_SAMPLE_BASIC(the old code), kept as a reference.
-			//                   '===============================================================================
-			//                   Dim sample As SampleClass = PEDGet(PED, PEDname)
+				return returnValue;
+			}
+			catch (Exception ex)
+			{
+				_utils.Log("ConfigDevicePost: " + ex.Message, LogType.Error);
 
-			//			   If sample Is Nothing Then
-			//				   InitHSDevice(device)
-			//			   End If
+			}
 
-			//			   sample.houseCode = parts("HouseCode")
-
-			//			   sample.deviceCode = parts("DeviceCode")
-
-
-			//			   PED = device.PlugExtraData_Get(hs)
-
-			//			   PEDAdd(PED, PEDname, sample)
-			//			   device.PlugExtraData_Set(hs) = PED
-
-			//			   hs.SaveEventsDevices()
-
-			//		   Case "Basic"
-			//                   'Nothing to store as this device doesn't have any extra data to save
-
-			//		   Case "Advanced"
-			//                   'We'll get the string to save from the postback values
-			//			   Dim savedString As String = parts("savedTextbox")
-
-			//                   'We'll save this to the pluginextradata storage
-
-			//			   PED = device.PlugExtraData_Get(hs)
-
-			//			   PEDAdd(PED, PEDname, savedString) 'Adds the saveString to the plugin if it doesn't exist, and removes and adds it if it does.
-
-			//			   device.PlugExtraData_Set(hs) = PED
-
-			//                   'And then finally save the device
-
-			//			   hs.SaveEventsDevices()
-
-			//	   End Select
-
-			//	   Return ReturnValue
-			//   Catch ex As Exception
-			//	   Log("ConfigDevicePost: " & ex.Message, LogType.Error)
-
-			//	End Try
-
-			//	Return ReturnValue
-			return Enums.ConfigDevicePostReturn.DoneAndSave;
+			return returnValue;
 		}
 
 		//   ''' <summary>
