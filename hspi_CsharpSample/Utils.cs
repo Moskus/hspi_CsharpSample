@@ -345,7 +345,7 @@ namespace hspi_CsharpSample
 		///</summary>
 		///<param name="dv"></param>
 		///<param name="Name"></param>
-		private void InitHSDevice(ref Scheduler.Classes.DeviceClass dv, string name = "Optional_Sample_device_name")
+		public void InitHSDevice(ref Scheduler.Classes.DeviceClass dv, string name = "Optional_Sample_device_name")
 		{
 			var dt = new DeviceTypeInfo_m.DeviceTypeInfo();
 			dt.Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In;

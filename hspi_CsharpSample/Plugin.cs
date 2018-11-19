@@ -88,7 +88,7 @@ namespace hspi_CsharpSample
 
 		public Timer UpdateTimer => _updateTimer;
 
-		
+
 
 		public Utils Utils
 		{
@@ -98,8 +98,8 @@ namespace hspi_CsharpSample
 				_utils = value;
 				_hs = Utils.Hs;
 
-				_configPage = new WebConfig(ConfigPageName, _settings,_hs,this,_utils);
-				_statusPage = new WebStatus(StatusPageName, _settings,_hs);
+				_configPage = new WebConfig(ConfigPageName, _settings, _hs, this, _utils);
+				_statusPage = new WebStatus(StatusPageName, _settings, _hs);
 			}
 		}
 
@@ -108,7 +108,7 @@ namespace hspi_CsharpSample
 			get => _settings;
 			set => _settings = value;
 		}
-		
+
 		#region "Init"
 
 		public string InitIO(string port)
@@ -215,129 +215,116 @@ namespace hspi_CsharpSample
 		{
 
 			Scheduler.Classes.DeviceClass device = null;
-			var stb =new StringBuilder();
+			var stb = new StringBuilder();
 
 			device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(reference);
 
 			var ped = device.get_PlugExtraData_Get(_hs);
 			var pedName = Utils.PluginName;
 
+			var saveButton = new clsJQuery.jqButton("Save", "Done", "DeviceUtility", true);
+
 			//We'll use the device type string to determine how we should handle the device in the plugin
+			var caseString = device.get_Device_Type_String(_hs).Replace(Utils.PluginName, "").Trim();
+			switch (caseString)
+			{
+				case "":
+					//======================================================
+					//It's a device created by the HSPI_SAMPLE_BASIC setting, and is included for reference only.
+					//Its not used by this sample. See further down for "Basic" and "Advanced".
+					//======================================================
 
-			//	Select Case device.Device_Type_String(hs).Replace(Me.Name, "").Trim
-			//case ""
-			//               '======================================================
-			//               'It's a device created by the HSPI_SAMPLE_BASIC setting, and is included for reference only.
-			//               'Its not used by this sample. See further down for "Basic" and "Advanced".
-			//               '======================================================
+					var sample = (SampleClass)Utils.PedGet(ref ped, pedName);
+					var houseCodeDropDownList = new clsJQuery.jqDropList("HouseCode", "", false);
+					var unitCodeDropDownList = new clsJQuery.jqDropList("DeviceCode", "", false);
+					var houseCode = "";
+					var deviceCode = "";
 
-			//               Dim sample As SampleClass = PEDGet(PED, PEDname)
+					if (sample == null)
+					{
+						Console.WriteLine("ConfigDevice, sample is nothing");
+						// Set the defaults
+						sample = new SampleClass();
+						_utils.InitHSDevice(ref device, device.get_Name(_hs));
+						sample.HouseCode = "A";
+						sample.DeviceCode = "1";
+						_utils.PedAdd(ref ped, pedName, sample);
+						device.set_PlugExtraData_Set(_hs, ped);
+					}
+					houseCode = sample.HouseCode;
+					deviceCode = sample.DeviceCode;
 
-			//			Dim houseCodeDropDownList=new clsJQuery.jqDropList("HouseCode", "", False)
+					foreach (var l in "ABCDEFGHIJKLMNOP".ToCharArray())
+					{
+						houseCodeDropDownList.AddItem(l.ToString(), l.ToString(), l.ToString() == houseCode);
+					}
 
-			//			Dim unitCodeDropDownList=new clsJQuery.jqDropList("DeviceCode", "", False)
-			//               Dim saveButton=new clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
-			//               Dim houseCode As String = ""
+					for (int i = 1; i < 16; i++)
+					{
+						unitCodeDropDownList.AddItem(i.ToString(), i.ToString(), i.ToString() == deviceCode);
+					}
 
-			//			Dim deviceCode As String = ""
+					try
+					{
+						stb.Append("<form id='frmSample' name='SampleTab' method='Post'>");
+						stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>");
+						stb.Append(
+							"  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Select a houseCode and Unitcode that matches one of the devices HomeSeer will be communicating with.</td></tr>");
+						stb.Append("  <tr>");
+						stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>House<br>Code</td>");
+						stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Unit<br>Code</td>");
+						stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>");
+						stb.Append("  </tr>");
+						stb.Append("  <tr>");
+						stb.Append("   <td class='tablerowodd' align='center'>" + houseCodeDropDownList.Build() +
+								   "</td>");
+						stb.Append("   <td class='tablerowodd' align='center'>" + unitCodeDropDownList.Build() + "</td>");
+						stb.Append("   <td class='tablerowodd' align='left'>" + saveButton.Build() + "</td>");
+						stb.Append("  </tr>");
+						stb.Append(" </table>");
+						stb.Append("</form>");
+						return stb.ToString();
 
-
-
-			//			If sample Is Nothing Then
-			//				Console.WriteLine("ConfigDevice, sample is nothing")
-			//                   ' Set the defaults
-			//                   sample = New SampleClass
-
-			//				InitHSDevice(device, device.Name(hs))
-
-			//				sample.houseCode = "A"
-			//                   sample.deviceCode = "1"
-			//                   PEDAdd(PED, PEDname, sample)
-
-			//				device.PlugExtraData_Set(hs) = PED
-			//			End If
-
-			//			houseCode = sample.houseCode
-
-			//			deviceCode = sample.deviceCode
-
-			//			For Each l In "ABCDEFGHIJKLMNOP"
-			//                   houseCodeDropDownList.AddItem(l, l, l = houseCode)
-			//               Next
-			//			For i = 1 To 16
-			//                   unitCodeDropDownList.AddItem(i.ToString, i.ToString, i.ToString = deviceCode)
-			//               Next
-
-			//			Try
-
-			//				stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
-			//                   stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>")
-			//                   stb.Append("  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Select a houseCode and Unitcode that matches one of the devices HomeSeer will be communicating with.</td></tr>")
-			//                   stb.Append("  <tr>")
-			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>House<br>Code</td>")
-			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Unit<br>Code</td>")
-			//                   stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>")
-			//                   stb.Append("  </tr>")
-			//                   stb.Append("  <tr>")
-			//                   stb.Append("   <td class='tablerowodd' align='center'>" & houseCodeDropDownList.Build & "</td>")
-			//                   stb.Append("   <td class='tablerowodd' align='center'>" & unitCodeDropDownList.Build & "</td>")
-			//                   stb.Append("   <td class='tablerowodd' align='left'>" & saveButton.Build & "</td>")
-			//                   stb.Append("  </tr>")
-			//                   stb.Append(" </table>")
-			//                   stb.Append("</form>")
-			//                   Return stb.ToString
-
-			//			Catch ex As Exception
-
-			//				Return "ConfigDevice ERROR: " & ex.Message 'Original is too old school: "Return Err.Description"
-
-			//			End Try
+					}
+					catch (Exception ex)
+					{
+						return "ConfigDevice ERROR: " + ex.Message; //Original is too old school: "Return Err.Description"
+					}
+					//break;
 
 
+				case "Basic":
+					stb.Append("<form id='frmSample' name='SampleTab' method='Post'>");
+					stb.Append("Nothing special to configure for the basic device. :-)");
+					stb.Append("</form>");
+					return stb.ToString();
+					//break;
 
-			//case "Basic"
-
-			//			stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
-
-			//			stb.Append("Nothing special to configure for the basic device. :-)")
-			//               stb.Append("</form>")
-			//               Return stb.ToString
-
-
-			//case "Advanced"
-
-			//			Dim savedString As String = PEDGet(PED, PEDname)
-
-			//			If savedString = String.Empty Then 'The pluginextradata is not configured for this device
-
-			//				savedString = "The text in this textbox is saved with the actual device"
-
-			//			End If
-
-
-			//			Dim savedTextbox=new clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, False)
-
-			//			Dim saveButton=new clsJQuery.jqButton("Save", "Done", "DeviceUtility", True)
-
-			//               stb.Append("<form id='frmSample' name='SampleTab' method='Post'>")
-			//               stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>")
-			//               stb.Append("  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Text to be saved with the device.</td></tr>")
-			//               stb.Append("  <tr>")
-			//               stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Text:</td>")
-			//               stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>")
-			//               stb.Append("  </tr>")
-			//               stb.Append("  <tr>")
-			//               stb.Append("   <td class='tablerowodd' align='center'>" & savedTextbox.Build & "</td>")
-			//               stb.Append("   <td class='tablerowodd' align='left'>" & saveButton.Build & "</td>")
-			//               stb.Append("  </tr>")
-			//               stb.Append(" </table>")
-			//               stb.Append("</form>")
-
-			//               Return stb.ToString
-
-			//	End Select
-
-
+				case "Advanced":
+					var savedString = (string) _utils.PedGet(ref ped, pedName);
+								if (string.IsNullOrEmpty(savedString)) {
+									//The pluginextradata is not configured for this device
+									savedString = "The text in this textbox is saved with the actual device";
+								}
+					var savedTextbox = new clsJQuery.jqTextBox("savedTextbox", "", savedString, "", 100, false);
+					saveButton = new clsJQuery.jqButton("Save", "Done", "DeviceUtility", true);
+					stb.Append("<form id='frmSample' name='SampleTab' method='Post'>");
+					stb.Append(" <table border='0' cellpadding='0' cellspacing='0' width='610'>");
+					stb.Append(
+						"  <tr><td colspan='4' align='Center' style='font-size:10pt; height:30px;' nowrap>Text to be saved with the device.</td></tr>");
+					stb.Append("  <tr>");
+					stb.Append("   <td nowrap class='tablecolumn' align='center' width='70'>Text:</td>");
+					stb.Append("   <td nowrap class='tablecolumn' align='center' width='200'>&nbsp;</td>");
+					stb.Append("  </tr>");
+					stb.Append("  <tr>");
+					stb.Append("   <td class='tablerowodd' align='center'>" + savedTextbox.Build() + "</td>");
+					stb.Append("   <td class='tablerowodd' align='left'>" + saveButton.Build() + "</td>");
+					stb.Append("  </tr>");
+					stb.Append(" </table>");
+					stb.Append("</form>");
+					return stb.ToString();
+					//break;
+			}
 			return string.Empty;
 		}
 
@@ -493,165 +480,165 @@ namespace hspi_CsharpSample
 		#endregion
 
 		#region "Trigger Properties"
- //   ''' <summary>
- //   ''' Return True if your plugin contains any triggers, else return false.
- //   ''' </summary>
- //   ''' <returns>True/False</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
- //   Public ReadOnly Property HasTriggers() As Boolean
+		//   ''' <summary>
+		//   ''' Return True if your plugin contains any triggers, else return false.
+		//   ''' </summary>
+		//   ''' <returns>True/False</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
+		//   Public ReadOnly Property HasTriggers() As Boolean
 
-	//	Get
-	//		Return(TriggerCount() > 0)
+		//	Get
+		//		Return(TriggerCount() > 0)
 
-	//	End Get
+		//	End Get
 
-	//End Property
+		//End Property
 
- //   ''' <summary>
- //   ''' Return True if the given trigger can also be used as a condition, for the given trigger number.
- //   ''' </summary>
- //   ''' <param name="TriggerNumber">The trigger number (1 based)</param>
- //   ''' <returns>True/False</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
+		//   ''' <summary>
+		//   ''' Return True if the given trigger can also be used as a condition, for the given trigger number.
+		//   ''' </summary>
+		//   ''' <param name="TriggerNumber">The trigger number (1 based)</param>
+		//   ''' <returns>True/False</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
 
-	//Public ReadOnly Property HasConditions(TriggerNumber As Integer) As Boolean
+		//Public ReadOnly Property HasConditions(TriggerNumber As Integer) As Boolean
 
-	//	Get
-	//		Return True
-	//	End Get
-	//End Property
+		//	Get
+		//		Return True
+		//	End Get
+		//End Property
 
- //   ''' <summary>
- //   ''' Return the number of triggers that the plugin supports.
- //   ''' </summary>
- //   ''' <returns>Integer</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
- //   Public Function TriggerCount() As Integer
+		//   ''' <summary>
+		//   ''' Return the number of triggers that the plugin supports.
+		//   ''' </summary>
+		//   ''' <returns>Integer</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
+		//   Public Function TriggerCount() As Integer
 
-	//	Return triggers.Count
+		//	Return triggers.Count
 
-	//End Function
+		//End Function
 
- //   ''' <summary>
- //   ''' Return the number of sub triggers your plugin supports.
- //   ''' </summary>
- //   ''' <param name="TriggerNumber">The trigger number</param>
- //   ''' <returns>Integer</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
+		//   ''' <summary>
+		//   ''' Return the number of sub triggers your plugin supports.
+		//   ''' </summary>
+		//   ''' <param name="TriggerNumber">The trigger number</param>
+		//   ''' <returns>Integer</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
 
-	//Public ReadOnly Property SubTriggerCount(ByVal TriggerNumber As Integer) As Integer
+		//Public ReadOnly Property SubTriggerCount(ByVal TriggerNumber As Integer) As Integer
 
-	//	Get
-	//		Dim trigger As Trigger
-	//		If IsValidTrigger(TriggerNumber) Then
-	//			trigger = triggers(TriggerNumber)
+		//	Get
+		//		Dim trigger As Trigger
+		//		If IsValidTrigger(TriggerNumber) Then
+		//			trigger = triggers(TriggerNumber)
 
-	//			If Not(trigger Is Nothing) Then
-	//			   Return trigger.Count
-	//		   Else
+		//			If Not(trigger Is Nothing) Then
+		//			   Return trigger.Count
+		//		   Else
 
-	//				Return 0
- //               End If
+		//				Return 0
+		//               End If
 
-	//		Else
-	//			Return 0
+		//		Else
+		//			Return 0
 
-	//		End If
+		//		End If
 
-	//	End Get
+		//	End Get
 
-	//End Property
+		//End Property
 
- //   ''' <summary>
- //   ''' Return the name of the given trigger based on the trigger number passed.
- //   ''' </summary>
- //   ''' <param name="TriggerNumber">Integer</param>
- //   ''' <returns>String</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
+		//   ''' <summary>
+		//   ''' Return the name of the given trigger based on the trigger number passed.
+		//   ''' </summary>
+		//   ''' <param name="TriggerNumber">Integer</param>
+		//   ''' <returns>String</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
 
-	//Public ReadOnly Property TriggerName(ByVal TriggerNumber As Integer) As String
+		//Public ReadOnly Property TriggerName(ByVal TriggerNumber As Integer) As String
 
-	//	Get
-	//		If Not IsValidTrigger(TriggerNumber) Then
-	//			Return ""
+		//	Get
+		//		If Not IsValidTrigger(TriggerNumber) Then
+		//			Return ""
 
-	//		Else
-	//			Return Me.Name & ": " & triggers.Keys(TriggerNumber - 1)
- //           End If
+		//		Else
+		//			Return Me.Name & ": " & triggers.Keys(TriggerNumber - 1)
+		//           End If
 
-	//	End Get
+		//	End Get
 
-	//End Property
+		//End Property
 
- //   ''' <summary>
- //   ''' Return the text name of the sub trigger given its trigger number and sub trigger number.
- //   ''' </summary>
- //   ''' <param name="TriggerNumber">Integer</param>
- //   ''' <param name="SubTriggerNumber">Integer</param>
- //   ''' <returns>SubTriggerName String</returns>
- //   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
+		//   ''' <summary>
+		//   ''' Return the text name of the sub trigger given its trigger number and sub trigger number.
+		//   ''' </summary>
+		//   ''' <param name="TriggerNumber">Integer</param>
+		//   ''' <param name="SubTriggerNumber">Integer</param>
+		//   ''' <returns>SubTriggerName String</returns>
+		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
 
-	//Public ReadOnly Property SubTriggerName(ByVal TriggerNumber As Integer, ByVal SubTriggerNumber As Integer) As String
+		//Public ReadOnly Property SubTriggerName(ByVal TriggerNumber As Integer, ByVal SubTriggerNumber As Integer) As String
 
-	//	Get
-	//		Dim trigger As Trigger
-	//		If IsValidSubTrigger(TriggerNumber, SubTriggerNumber) Then
-	//			trigger = triggers(TriggerNumber)
+		//	Get
+		//		Dim trigger As Trigger
+		//		If IsValidSubTrigger(TriggerNumber, SubTriggerNumber) Then
+		//			trigger = triggers(TriggerNumber)
 
-	//			Return Me.Name & ": " & trigger.Keys(SubTriggerNumber - 1)
+		//			Return Me.Name & ": " & trigger.Keys(SubTriggerNumber - 1)
 
-	//		Else
-	//			Return ""
+		//		Else
+		//			Return ""
 
-	//		End If
+		//		End If
 
-	//	End Get
+		//	End Get
 
-	//End Property
+		//End Property
 
- //   ''' <summary>
- //   ''' Checking if the trigger number exists in the list of triggers
- //   ''' </summary>
- //   ''' <param name="TrigIn">The trigger number</param>
- //   ''' <returns>True/False</returns>
+		//   ''' <summary>
+		//   ''' Checking if the trigger number exists in the list of triggers
+		//   ''' </summary>
+		//   ''' <param name="TrigIn">The trigger number</param>
+		//   ''' <returns>True/False</returns>
 
-	//Friend Function IsValidTrigger(ByVal TrigIn As Integer) As Boolean
+		//Friend Function IsValidTrigger(ByVal TrigIn As Integer) As Boolean
 
-	//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
+		//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
 
-	//		Return True
+		//		Return True
 
-	//	End If
+		//	End If
 
-	//	Return False
+		//	Return False
 
-	//End Function
+		//End Function
 
- //   ''' <summary>
- //   ''' Checking if the trigger number exists in the list of triggers
- //   ''' </summary>
- //   ''' <param name="TrigIn">The trigger number to check</param>
- //   ''' <param name="SubTrigIn">The sub trigger number to check</param>
- //   ''' <returns>True/False</returns>
+		//   ''' <summary>
+		//   ''' Checking if the trigger number exists in the list of triggers
+		//   ''' </summary>
+		//   ''' <param name="TrigIn">The trigger number to check</param>
+		//   ''' <param name="SubTrigIn">The sub trigger number to check</param>
+		//   ''' <returns>True/False</returns>
 
-	//Public Function IsValidSubTrigger(ByVal TrigIn As Integer, ByVal SubTrigIn As Integer) As Boolean
+		//Public Function IsValidSubTrigger(ByVal TrigIn As Integer, ByVal SubTrigIn As Integer) As Boolean
 
-	//	Dim trigger As Trigger = Nothing
+		//	Dim trigger As Trigger = Nothing
 
-	//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
+		//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
 
-	//		trigger = triggers(TrigIn)
+		//		trigger = triggers(TrigIn)
 
-	//		If Not(trigger Is Nothing) Then
-	//		   If SubTrigIn > 0 AndAlso SubTrigIn <= trigger.Count Then Return True
+		//		If Not(trigger Is Nothing) Then
+		//		   If SubTrigIn > 0 AndAlso SubTrigIn <= trigger.Count Then Return True
 
-	//		End If
+		//		End If
 
-	//	End If
+		//	End If
 
-	//	Return False
+		//	Return False
 
-	//End Function
+		//End Function
 
 		#endregion
 
@@ -1295,7 +1282,7 @@ namespace hspi_CsharpSample
 		}
 
 
-#endregion
+		#endregion
 
 		#region "Web Page Processing"
 		//private object SelectPage(ByVal pageName As String)
