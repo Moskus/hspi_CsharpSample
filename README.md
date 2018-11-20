@@ -1,5 +1,6 @@
 # hspi_CsharpSample
-C# sample for HomeSeer 3 plugins
+C# sample for HomeSeer 3 plugins. "Translated" from MoskusPlugin in vb.net.
+https://forums.homeseer.com/forum/developer-support/programming-plug-in-development/plug-in-development/90775-hspi_moskussample-an-easier-plugin-sample-vb-net
 
 The plugin is based on the samples from HomeSeer Tech, but  comments are added from the SDK and online help (and links to it so that it's easier accessible).
 
@@ -30,12 +31,12 @@ c. If you, like me, dont want the solution and project named "MoskusSample" you 
 4. Then look into the "Plugin.vb" file. A good place like any other is to start by finding the sub "InitIO", whats where the plugin is initialized.
 5. However, if you REALLY want to dive right in to it, find the "UpdateTimerTrigger" sub and read to the end.
 
-Here's a screenshot of the devices the plugin creates:
+Here's a screenshot of the devices the plugin creates (Image from the vb.net version):
 ![alt text](readmeimages/devices.png "Devices")
 
 The sample demonstrates a few different methods for creating devices and how to handle input and output of data.
 
-Here's a screenshot of Event triggers and actions:
+Here's a screenshot of Event triggers and actions (Image from the vb.net version):
 ![alt text](readmeimages/triggeraction.png "Triggers and actions")
 
 The sample has two Triggers. One without subtriggers and one with. Both can be used as a condition. See Enums "TriggerTypes" and "SubTriggerTypes" which I've added to make "(int) TrigInfo.TANumber" and "(int) TrigInfo.SubTANumber" more understandable.
