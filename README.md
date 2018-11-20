@@ -30,8 +30,13 @@ c. If you, like me, dont want the solution and project named "MoskusSample" you 
 4. Then look into the "Plugin.vb" file. A good place like any other is to start by finding the sub "InitIO", whats where the plugin is initialized.
 5. However, if you REALLY want to dive right in to it, find the "UpdateTimerTrigger" sub and read to the end.
 
+Here's a screenshot of the devices the plugin creates:
+![alt text](readmeimages/devices.png "Devices")
 
 The sample demonstrates a few different methods for creating devices and how to handle input and output of data.
+
+Here's a screenshot of Event triggers and actions:
+![alt text](readmeimages/triggeraction.png "Triggers and actions")
 
 The sample has two Triggers. One without subtriggers and one with. Both can be used as a condition. See Enums "TriggerTypes" and "SubTriggerTypes" which I've added to make "(int) TrigInfo.TANumber" and "(int) TrigInfo.SubTANumber" more understandable.
 
