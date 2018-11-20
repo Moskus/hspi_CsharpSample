@@ -43,8 +43,7 @@ The sample has two Triggers. One without subtriggers and one with. Both can be u
 
 The plugin have just one action, but most of the same logic applies also applies to actions.
 
-
 This sample doesn't magically make writing plugins super easy. It still requires some time to understand how it is pieced together. But hopefully it will get you started.
 
-If you know what you are doing and have comments of what I can do better, then please feel free to let me know. Share code if you can. 
+If you know what you are doing and have comments of what can do done better, then please feel free to create a pull request. Share code if you can. 
 
