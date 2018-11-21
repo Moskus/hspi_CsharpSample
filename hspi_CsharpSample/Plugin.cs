@@ -77,8 +77,8 @@ namespace hspi_CsharpSample
 		private HsCollection _triggers = new HsCollection();
 
 
-		private HsTrigger _trigger = new HsTrigger();
-		private HsAction _action = new HsAction();
+		//private HsTrigger _trigger = new HsTrigger();
+		//private HsAction _action = new HsAction();
 		private IHSApplication _hs;
 		private string _instance;
 		private const string Pagename = "Events";
@@ -469,165 +469,130 @@ namespace hspi_CsharpSample
 		#endregion
 
 		#region "Trigger Properties"
-		//   ''' <summary>
-		//   ''' Return True if your plugin contains any triggers, else return false.
-		//   ''' </summary>
-		//   ''' <returns>True/False</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
-		//   Public ReadOnly Property HasTriggers() As Boolean
+		///<summary>
+		///Return True if your plugin contains any triggers, else return false.
+		///</summary>
+		///<returns>True/False</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
+		public bool HasTriggers()
+		{
+			return (_triggers.Count > 0);
+		}
 
-		//	Get
-		//		Return(TriggerCount() > 0)
+		///<summary>
+		///Return True if the given trigger can also be used as a condition, for the given trigger number.
+		///</summary>
+		///<param name="TriggerNumber">The trigger number (1 based)</param>
+		///<returns>True/False</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
+		public bool HasConditions(int triggerNumber)
+		{
+			return true;
+		}
 
-		//	End Get
+		///<summary>
+		///Return the number of triggers that the plugin supports.
+		///</summary>
+		///<returns>Integer</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
+		public int TriggerCount()
+		{
+			return _triggers.Count();
+		}
 
-		//End Property
+		///<summary>
+		///Return the number of sub triggers your plugin supports.
+		///</summary>
+		///<param name="TriggerNumber">The trigger number</param>
+		///<returns>Integer</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
+		public int SubTriggerCount(int triggerNumber )
+		{
+			HsTrigger trigger;
+			if (IsValidTrigger(triggerNumber))
+			{
+				trigger = (HsTrigger)_triggers.GetItem(triggerNumber);
+				if (trigger != null)
+				{
+					return trigger.Count();
+				}
+			}
+			return 0;
+		}
 
-		//   ''' <summary>
-		//   ''' Return True if the given trigger can also be used as a condition, for the given trigger number.
-		//   ''' </summary>
-		//   ''' <param name="TriggerNumber">The trigger number (1 based)</param>
-		//   ''' <returns>True/False</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
+		////<summary>
+		////Return the name of the given trigger based on the trigger number passed.
+		////</summary>
+		////<param name="TriggerNumber">Integer</param>
+		////<returns>String</returns>
+		////<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
 
-		//Public ReadOnly Property HasConditions(TriggerNumber As Integer) As Boolean
+		public string TriggerName(int triggerNumber )
+		{
 
-		//	Get
-		//		Return True
-		//	End Get
-		//End Property
+			if (!IsValidTrigger(triggerNumber))
+				return string.Empty;
 
-		//   ''' <summary>
-		//   ''' Return the number of triggers that the plugin supports.
-		//   ''' </summary>
-		//   ''' <returns>Integer</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
-		//   Public Function TriggerCount() As Integer
+			return $"{Utils.PluginName} : {(string)_triggers.Keys(triggerNumber - 1)}";
 
-		//	Return triggers.Count
+		}
 
-		//End Function
+		///<summary>
+		///Return the text name of the sub trigger given its trigger number and sub trigger number.
+		///</summary>
+		///<param name="TriggerNumber">Integer</param>
+		///<param name="SubTriggerNumber">Integer</param>
+		///<returns>SubTriggerName String</returns>
+		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
+		public string SubTriggerName(int triggerNumber, int subtriggerNumber)
+		{
+			HsTrigger trigger;
+			if (IsValidSubTrigger(triggerNumber, subtriggerNumber))
+			{
+				trigger = (HsTrigger)_triggers.GetItem(triggerNumber);
+				return $"{Utils.PluginName} : {(string)trigger.Keys(subtriggerNumber- 1)}";
+			}
+			return string.Empty;
 
-		//   ''' <summary>
-		//   ''' Return the number of sub triggers your plugin supports.
-		//   ''' </summary>
-		//   ''' <param name="TriggerNumber">The trigger number</param>
-		//   ''' <returns>Integer</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
+		}
 
-		//Public ReadOnly Property SubTriggerCount(ByVal TriggerNumber As Integer) As Integer
 
-		//	Get
-		//		Dim trigger As Trigger
-		//		If IsValidTrigger(TriggerNumber) Then
-		//			trigger = triggers(TriggerNumber)
+		///<summary>
+		///Checking if the trigger number exists in the list of triggers
+		///</summary>
+		///<param name="TrigIn">The trigger number</param>
+		///<returns>True/False</returns>
+		private bool IsValidTrigger(int triggerNumber) {
 
-		//			If Not(trigger Is Nothing) Then
-		//			   Return trigger.Count
-		//		   Else
+			if (triggerNumber > 0 && triggerNumber <= _triggers.Count())
+			{
+				return true;
+			}
+			return false;
+		}
 
-		//				Return 0
-		//               End If
+		///<summary>
+		///Checking if the trigger number exists in the list of triggers
+		///</summary>
+		///<param name="TrigIn">The trigger number to check</param>
+		///<param name="SubTrigIn">The sub trigger number to check</param>
+		///<returns>True/False</returns>
+		public bool IsValidSubTrigger(int triggerNumber, int subtriggerNumber)
+		{
+			HsTrigger trigger = null;
+			if (triggerNumber > 0 && triggerNumber <= _triggers.Count())
+			{
+				trigger = (HsTrigger)_triggers.GetItem(triggerNumber);
 
-		//		Else
-		//			Return 0
+				if (trigger != null)
+				{
+					if (subtriggerNumber > 0 && subtriggerNumber <= trigger.Count())
+						return true;
+				}
+			}
+			return false;
+		}
 
-		//		End If
-
-		//	End Get
-
-		//End Property
-
-		//   ''' <summary>
-		//   ''' Return the name of the given trigger based on the trigger number passed.
-		//   ''' </summary>
-		//   ''' <param name="TriggerNumber">Integer</param>
-		//   ''' <returns>String</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
-
-		//Public ReadOnly Property TriggerName(ByVal TriggerNumber As Integer) As String
-
-		//	Get
-		//		If Not IsValidTrigger(TriggerNumber) Then
-		//			Return ""
-
-		//		Else
-		//			Return Me.Name & ": " & triggers.Keys(TriggerNumber - 1)
-		//           End If
-
-		//	End Get
-
-		//End Property
-
-		//   ''' <summary>
-		//   ''' Return the text name of the sub trigger given its trigger number and sub trigger number.
-		//   ''' </summary>
-		//   ''' <param name="TriggerNumber">Integer</param>
-		//   ''' <param name="SubTriggerNumber">Integer</param>
-		//   ''' <returns>SubTriggerName String</returns>
-		//   ''' <remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
-
-		//Public ReadOnly Property SubTriggerName(ByVal TriggerNumber As Integer, ByVal SubTriggerNumber As Integer) As String
-
-		//	Get
-		//		Dim trigger As Trigger
-		//		If IsValidSubTrigger(TriggerNumber, SubTriggerNumber) Then
-		//			trigger = triggers(TriggerNumber)
-
-		//			Return Me.Name & ": " & trigger.Keys(SubTriggerNumber - 1)
-
-		//		Else
-		//			Return ""
-
-		//		End If
-
-		//	End Get
-
-		//End Property
-
-		//   ''' <summary>
-		//   ''' Checking if the trigger number exists in the list of triggers
-		//   ''' </summary>
-		//   ''' <param name="TrigIn">The trigger number</param>
-		//   ''' <returns>True/False</returns>
-
-		//Friend Function IsValidTrigger(ByVal TrigIn As Integer) As Boolean
-
-		//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
-
-		//		Return True
-
-		//	End If
-
-		//	Return False
-
-		//End Function
-
-		//   ''' <summary>
-		//   ''' Checking if the trigger number exists in the list of triggers
-		//   ''' </summary>
-		//   ''' <param name="TrigIn">The trigger number to check</param>
-		//   ''' <param name="SubTrigIn">The sub trigger number to check</param>
-		//   ''' <returns>True/False</returns>
-
-		//Public Function IsValidSubTrigger(ByVal TrigIn As Integer, ByVal SubTrigIn As Integer) As Boolean
-
-		//	Dim trigger As Trigger = Nothing
-
-		//	If TrigIn > 0 AndAlso TrigIn <= triggers.Count Then
-
-		//		trigger = triggers(TrigIn)
-
-		//		If Not(trigger Is Nothing) Then
-		//		   If SubTrigIn > 0 AndAlso SubTrigIn <= trigger.Count Then Return True
-
-		//		End If
-
-		//	End If
-
-		//	Return False
-
-		//End Function
 
 		#endregion
 

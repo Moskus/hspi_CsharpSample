@@ -29,7 +29,7 @@ namespace hspi_CsharpSample.HomeSeerClasses
 
 		public void Add(object value, string key)
 		{
-			if (base.ContainsKey(key))
+			if (!base.ContainsKey(key))
 			{
 				base.Add(key, value);
 				KeyIndex.Add(key);

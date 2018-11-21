@@ -570,7 +570,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionname.htm</remarks>
 		public string get_ActionName(int ActionNumber)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.ActionName(ActionNumber);
 		}
 
 		///<summary>
@@ -581,7 +581,7 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
 		public bool get_HasConditions(int TriggerNumber)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.HasConditions(TriggerNumber);
 		}
 
 		///<summary>
@@ -589,75 +589,85 @@ namespace hspi_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
-		public bool HasTriggers { get; }
+		public bool HasTriggers
+		{
+			get { return _plugin.HasTriggers(); }
+		}
 
 		///<summary>
 		///Return the number of triggers that the plugin supports.
 		///</summary>
 		///<returns>Integer</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
-		public int TriggerCount { get; }
+		public int TriggerCount
+		{
+			get
+			{
+				return _plugin.TriggerCount();
+			}
+		}
 
 
 		///<summary>
 		///Return the name of the given trigger based on the trigger number passed.
 		///</summary>
-		///<param name="TriggerNumber">Integer</param>
+		///<param name="triggerNumber">Integer</param>
 		///<returns>String</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
-		public string get_TriggerName(int TriggerNumber)
+		public string get_TriggerName(int triggerNumber)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerName(triggerNumber);
 		}
 
 		///<summary>
 		///Return the number of sub triggers your plugin supports.
 		///</summary>
-		///<param name="TriggerNumber">The trigger number</param>
+		///<param name="triggerNumber">The trigger number</param>
 		///<returns>Integer</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
-		public int get_SubTriggerCount(int TriggerNumber)
+		public int get_SubTriggerCount(int triggerNumber)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.SubTriggerCount(triggerNumber);
 		}
 
 		///<summary>
 		///Return the text name of the sub trigger given its trigger number and sub trigger number.
 		///</summary>
-		///<param name="TriggerNumber">Integer</param>
-		///<param name="SubTriggerNumber">Integer</param>
+		///<param name="triggerNumber">Integer</param>
+		///<param name="subtriggerNumber">Integer</param>
 		///<returns>SubTriggerName String</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
-		public string get_SubTriggerName(int TriggerNumber, int SubTriggerNumber)
+		public string get_SubTriggerName(int triggerNumber, int subtriggerNumber)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.SubTriggerName(triggerNumber, subtriggerNumber);
 		}
 
 		///<summary>
 		///Given a strTrigActInfo object detect if this this trigger is configured properly, if so, return True, else False.
 		///</summary>
-		///<param name="TrigInfo">The trigger information</param>
+		///<param name="trigInfo">The trigger information</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerconfigured.htm</remarks>
-		public bool get_TriggerConfigured(IPlugInAPI.strTrigActInfo TrigInfo)
+		public bool get_TriggerConfigured(IPlugInAPI.strTrigActInfo trigInfo)
 		{
-			throw new System.NotImplementedException();
+			return _plugin.TriggerConfigured(trigInfo);
 		}
 
 		///<summary>
 		///HomeSeer will set this to TRUE if the trigger is being used as a CONDITION.  Check this value in BuildUI and other procedures to change how the trigger is rendered if it is being used as a condition or a trigger.
 		///</summary>
-		///<param name="TrigInfo">The trigger information</param>
+		///<param name="trigInfo">The trigger information</param>
 		///<value>True/False</value>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/condition.htm</remarks>
-		public bool get_Condition(IPlugInAPI.strTrigActInfo TrigInfo)
+		public bool get_Condition(IPlugInAPI.strTrigActInfo trigInfo)
 		{
-			throw new System.NotImplementedException();
+			return _condition;
 		}
-		public void set_Condition(IPlugInAPI.strTrigActInfo TrigInfo, bool Value)
+		private bool _condition;
+		public void set_Condition(IPlugInAPI.strTrigActInfo trigInfo, bool value)
 		{
-			throw new System.NotImplementedException();
+			_condition = value;
 		}
 	}
 }
