@@ -1,4 +1,6 @@
 # hspi_CsharpSample
+--Work in progress - Not 100% done since stuff is not working as it should --
+
 C# sample for HomeSeer 3 plugins. "Translated" from the hspi_moskussample plugin in vb.net.
 https://forums.homeseer.com/forum/developer-support/programming-plug-in-development/plug-in-development/90775-hspi_moskussample-an-easier-plugin-sample-vb-net
 
