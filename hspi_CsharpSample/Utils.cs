@@ -11,9 +11,9 @@ namespace hspi_CsharpSample
 {
 	public class Utils
 	{
-		public static string PluginName = "Hspi_CsharpSample";
+		public static string PluginName = "CsharpSample";
 		private string _pluginInstance="";
-		public static string IniFile = "Hspi_CsharpSample.ini";
+		public static string IniFile = "CsharpSample.ini";
 
 		private static bool _isShuttingDown = false;
 		private readonly Settings _settings;

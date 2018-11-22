@@ -506,7 +506,7 @@ namespace hspi_CsharpSample
 		///<param name="TriggerNumber">The trigger number</param>
 		///<returns>Integer</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
-		public int SubTriggerCount(int triggerNumber )
+		public int SubTriggerCount(int triggerNumber)
 		{
 			HsTrigger trigger;
 			if (IsValidTrigger(triggerNumber))
@@ -527,7 +527,7 @@ namespace hspi_CsharpSample
 		////<returns>String</returns>
 		////<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
 
-		public string TriggerName(int triggerNumber )
+		public string TriggerName(int triggerNumber)
 		{
 
 			if (!IsValidTrigger(triggerNumber))
@@ -550,7 +550,7 @@ namespace hspi_CsharpSample
 			if (IsValidSubTrigger(triggerNumber, subtriggerNumber))
 			{
 				trigger = (HsTrigger)_triggers.GetItem(triggerNumber);
-				return $"{Utils.PluginName} : {(string)trigger.Keys(subtriggerNumber- 1)}";
+				return $"{Utils.PluginName} : {(string)trigger.Keys(subtriggerNumber - 1)}";
 			}
 			return string.Empty;
 
@@ -562,7 +562,8 @@ namespace hspi_CsharpSample
 		///</summary>
 		///<param name="TrigIn">The trigger number</param>
 		///<returns>True/False</returns>
-		private bool IsValidTrigger(int triggerNumber) {
+		private bool IsValidTrigger(int triggerNumber)
+		{
 
 			if (triggerNumber > 0 && triggerNumber <= _triggers.Count())
 			{
@@ -727,7 +728,7 @@ namespace hspi_CsharpSample
 			dd.autoPostBack = true;
 			dd.AddItem("--Please Select--", "-1", false);//A selected option with the default value (-1) means that the trigger isn't configured
 			HsTrigger trigger = null;
-			object triggerObject = null;
+			object triggerObject =new object();
 			if (trigInfo.DataIn != null)
 			{
 				_utils.DeSerializeObject(ref trigInfo.DataIn, ref triggerObject);
@@ -744,7 +745,7 @@ namespace hspi_CsharpSample
 			var foundKey = trigger.GetAllKeys().SingleOrDefault(x => x.Contains("SomeValue_" + uid));
 			if (!string.IsNullOrEmpty(foundKey))
 			{
-				someValue = (int)trigger[foundKey];
+				someValue = int.Parse((string)trigger[foundKey]);
 			}
 
 			//We'll add all the different selectable values(numbers from 0 to 100 with 10 in increments)
@@ -795,6 +796,12 @@ namespace hspi_CsharpSample
 				}
 			}
 
+			if (trigger == null)
+			{
+				//No trigger in the trigInfo input. Create a new one to use for storing
+				trigger=new HsTrigger();
+			}
+
 			System.Collections.Specialized.NameValueCollection parts;
 			parts = postData;
 			try
@@ -827,6 +834,8 @@ namespace hspi_CsharpSample
 			return ret;
 
 		}
+
+		
 
 
 		///<summary>
@@ -1040,63 +1049,63 @@ namespace hspi_CsharpSample
 			var uid = actInfo.UID.ToString();
 			var stb = new StringBuilder();
 
-			//		Dim Housecode As String = ""
+					Dim Housecode As String = ""
 
-			//		Dim DeviceCode As String = ""
+					Dim DeviceCode As String = ""
 
-			//		Dim dd=new clsJQuery.jqDropList("HouseCodes_" & UID & sUnique, Pagename, True)
-			//        Dim dd1=new clsJQuery.jqDropList("DeviceCodes_" & UID & sUnique, Pagename, True)
-			//        Dim key As String
-
-
-
-			//		dd.autoPostBack = True
-			//		dd.AddItem("--Please Select--", "", False)
-
-			//		dd1.autoPostBack = True
-			//		dd1.AddItem("--Please Select--", "", False)
+					Dim dd=new clsJQuery.jqDropList("HouseCodes_" & UID & sUnique, Pagename, True)
+			        Dim dd1=new clsJQuery.jqDropList("DeviceCodes_" & UID & sUnique, Pagename, True)
+			        Dim key As String
 
 
-			//		If Not(ActInfo.DataIn Is Nothing) Then
-			//		   DeSerializeObject(ActInfo.DataIn, action)
 
-			//		Else 'new event, so clean out the action object
-			//            action = New Action
+					dd.autoPostBack = True
+					dd.AddItem("--Please Select--", "", False)
 
-			//		End If
+					dd1.autoPostBack = True
+					dd1.AddItem("--Please Select--", "", False)
 
 
-			//		For Each key In action.Keys
-			//			Select Case True
+					If Not(ActInfo.DataIn Is Nothing) Then
+					   DeSerializeObject(ActInfo.DataIn, action)
 
-			//				Case key.Contains("HouseCodes_" & UID)
+					Else 'new event, so clean out the action object
+			            action = New Action
 
-			//					Housecode = action(key)
+					End If
 
-			//				Case key.Contains("DeviceCodes_" & UID)
 
-			//					DeviceCode = action(key)
+					For Each key In action.Keys
+						Select Case True
 
-			//			End Select
+							Case key.Contains("HouseCodes_" & UID)
 
-			//		Next
+								Housecode = action(key)
 
-			//		For Each C In "ABCDEFGHIJKLMNOP"
-			//            dd.AddItem(C, C, (C = Housecode))
-			//        Next
+							Case key.Contains("DeviceCodes_" & UID)
 
-			//		stb.Append("Select House Code:")
+								DeviceCode = action(key)
 
-			//		stb.Append(dd.Build)
+						End Select
 
-			//		dd1.AddItem("All", "All", ("All" = DeviceCode))
-			//        For i = 1 To 16
-			//            dd1.AddItem(i.ToString, i.ToString, (i.ToString = DeviceCode))
-			//        Next
+					Next
 
-			//		stb.Append("Select Unit Code:")
+					For Each C In "ABCDEFGHIJKLMNOP"
+			            dd.AddItem(C, C, (C = Housecode))
+			        Next
 
-			//		stb.Append(dd1.Build)
+					stb.Append("Select House Code:")
+
+					stb.Append(dd.Build)
+
+					dd1.AddItem("All", "All", ("All" = DeviceCode))
+			        For i = 1 To 16
+			            dd1.AddItem(i.ToString, i.ToString, (i.ToString = DeviceCode))
+			        Next
+
+					stb.Append("Select Unit Code:")
+
+					stb.Append(dd1.Build)
 
 			return stb.ToString();
 		}
@@ -1322,14 +1331,19 @@ namespace hspi_CsharpSample
 			Console.WriteLine("UpdateTimer_Elapsed." + "\tTriggers found: " + triggers.Count() + "\tRandom value: " +
 							  randomValue);
 
-			//Checking reach event with triggers from our plugin if they should be triggered or not
+			//Checking each event with triggers from our plugin if they should be triggered or not
 			foreach (var trigger in triggers)
 			{
 				//The name of the key we are looking for
 				string key = "SomeValue";
+				int triggerValue = -1;
 
 				//Get the value from the trigger
-				int triggerValue = (int)GetTriggerValue(key, trigger);
+				var valueObject = GetTriggerValue(key, trigger);
+				if (valueObject != null)
+				{
+					triggerValue = (int)valueObject;
+				}
 				//Console.WriteLine("Value found for " & key & ": " & triggervalue) '... for debugging
 
 				//Remember from TriggerBuildUI that if "someValue" is equal to "-1", we don't have a properly configured trigger, so we need to skip this if this(the current "t") value is -1

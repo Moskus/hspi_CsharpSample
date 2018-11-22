@@ -78,7 +78,7 @@ namespace hspi_CsharpSample.HomeSeerClasses
 
 		public object GetItem(int index)
 		{
-			return base[KeyIndex[index]];
+			return base[KeyIndex[index-1]];
 		}
 
 		public void SetItem(int index, object value)
