@@ -430,7 +430,7 @@ namespace hspi_CsharpSample
 
 				//Get the device sending the CAPIcontrol
 				var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(cc.Ref);
-
+				var pedName = Utils.PluginName;
 				//We can get the PlugExtraData, if anything is stored in the device itself. What is stored is based on the device type.
 				var switchValue = device.get_Device_Type_String(_hs).Replace(Utils.PluginName, "").Trim();
 				switch (switchValue)
@@ -440,8 +440,8 @@ namespace hspi_CsharpSample
 						//Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
 						//****************************************************************
 						var ped = (PlugExtraData.clsPlugExtraData)device.get_PlugExtraData_Get(_hs);
-						var sample = (SampleClass)_utils.PedGet(ref ped, "Sample");
-						if (sample == null)
+						var sample = (SampleClass)_utils.PedGet(ref ped,pedName);
+						if (sample != null)
 						{
 							var houseCode = sample.HouseCode;
 							var devicecode = sample.DeviceCode;
@@ -686,15 +686,16 @@ namespace hspi_CsharpSample
 
 			if (trigInfo.DataIn != null)
 			{
+				triggerObject = new object();
 				_utils.DeSerializeObject(ref trigInfo.DataIn, ref triggerObject);
 			}
 
 			if (triggerObject == null) return false;
 			HsTrigger trigger = (HsTrigger)triggerObject;
-			var foundKey = trigger.GetAllKeys().FirstOrDefault(x => x == "SomeValue_" + uid);
+			var foundKey = trigger.GetAllKeys().FirstOrDefault(x => x.Contains("SomeValue_" + uid));
 
 			//todo double check the logic here
-			if (!string.IsNullOrEmpty((string)trigger[foundKey]))
+			if (foundKey != null && !string.IsNullOrEmpty((string)trigger[foundKey]) && ((string)trigger[foundKey]) != "-1")
 				return true;
 
 			//	For Each key As String In trigger.Keys
@@ -850,7 +851,7 @@ namespace hspi_CsharpSample
 			//string key;
 			string someValue = "";
 			string uid = trigInfo.UID.ToString();
-			object triggerObject = null;
+			object triggerObject = new object();
 			HsTrigger trigger = null;
 			if (trigInfo.DataIn != null)
 			{
@@ -861,8 +862,12 @@ namespace hspi_CsharpSample
 			{
 				trigger = (HsTrigger)triggerObject;
 			}
+			else
+			{
+				trigger = new HsTrigger();
+			}
 
-			var foundKey = trigger.GetAllKeys().FirstOrDefault(x => x == "SomeValue_" + uid);
+			var foundKey = trigger.GetAllKeys().FirstOrDefault(x => x.Contains("SomeValue_" + uid));
 			if (string.IsNullOrEmpty(foundKey)) return string.Empty;
 
 			someValue = (string)trigger[foundKey];
@@ -982,9 +987,9 @@ namespace hspi_CsharpSample
 					{
 						houseCode = (string)hsAction[key];
 					}
-					else if (key.Contains($"HouseCodes_{uid}"))
+					else if (key.Contains($"DeviceCodes_{uid}"))
 					{
-						houseCode = (string)hsAction[key];
+						deviceCode = (string)hsAction[key];
 					}
 				}
 				Console.WriteLine("HandleAction, Command received with data: " + houseCode + ", " + deviceCode);
@@ -1006,32 +1011,36 @@ namespace hspi_CsharpSample
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionconfigured.htm</remarks>
 		public bool ActionConfigured(IPlugInAPI.strTrigActInfo actInfo)
 		{
+			var deviceCodeConfigured = false;
+			var houseCodeConfigured = false;
+			var uid = actInfo.UID.ToString();
+			object hsActionObject = null;
+			HsAction hsAction = null;
 
-			var configured = false;
+			if (actInfo.DataIn != null)
+			{
+				hsActionObject = new object();
+				_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
+				if (hsActionObject != null)
+				{
+					hsAction = (HsAction)hsActionObject;
+				}
+			}
+			if (hsAction == null) hsAction = new HsAction();
+			foreach (var key in hsAction.GetAllKeys())
+			{
+				if (key.Contains("HouseCodes_" + uid) && !string.IsNullOrEmpty((string)hsAction[key]))
+				{
+					houseCodeConfigured = true;
+				}
 
-			//		Dim itemsConfigured As Integer = 0
+				if (key.Contains("DeviceCodes_" + uid) && !string.IsNullOrEmpty((string)hsAction[key]))
+				{
+					deviceCodeConfigured = true;
+				}
+			}
 
-			//		Dim itemsToConfigure As Integer = 2
-
-			//		Dim UID As String = ActInfo.UID.ToString
-
-
-			//		If Not(ActInfo.DataIn Is Nothing) Then
-			//		   DeSerializeObject(ActInfo.DataIn, action)
-
-			//			For Each key In action.Keys
-			//				Select Case True
-
-			//					Case key.Contains("HouseCodes_" & UID) AndAlso action(key) <> ""
-			//                        itemsConfigured += 1
-			//                    Case key.Contains("DeviceCodes_" & UID) AndAlso action(key) <> ""
-			//                        itemsConfigured += 1
-			//                End Select
-
-			//			Next
-			//			If itemsConfigured = itemsToConfigure Then Configured = True
-			//		End If
-			return configured;
+			return (houseCodeConfigured && deviceCodeConfigured);
 		}
 
 		///<summary>
@@ -1070,10 +1079,10 @@ namespace hspi_CsharpSample
 					hsAction = (HsAction)hsActionObject;
 				}
 
-			
+
 			}
-			if(hsAction==null)
-				hsAction =new HsAction();
+			if (hsAction == null)
+				hsAction = new HsAction();
 
 			foreach (var key in hsAction.GetAllKeys())
 			{
