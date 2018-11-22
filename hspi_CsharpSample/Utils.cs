@@ -394,8 +394,8 @@ namespace hspi_CsharpSample
 			//Send a command somewhere, but for now,
 			//	just log it
 
-			Hs.WriteLog("MoskusSample",
-				"utils.vb -> SendCommand. HouseCode: " + houseCode + " - DeviceCode: " + deviceCode);
+			Hs.WriteLog(Utils.PluginName,
+				"utils.cs -> SendCommand. HouseCode: " + houseCode + " - DeviceCode: " + deviceCode);
 
 		}
 

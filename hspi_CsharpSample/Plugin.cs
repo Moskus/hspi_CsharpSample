@@ -728,7 +728,7 @@ namespace hspi_CsharpSample
 			dd.autoPostBack = true;
 			dd.AddItem("--Please Select--", "-1", false);//A selected option with the default value (-1) means that the trigger isn't configured
 			HsTrigger trigger = null;
-			object triggerObject =new object();
+			object triggerObject = new object();
 			if (trigInfo.DataIn != null)
 			{
 				_utils.DeSerializeObject(ref trigInfo.DataIn, ref triggerObject);
@@ -799,7 +799,7 @@ namespace hspi_CsharpSample
 			if (trigger == null)
 			{
 				//No trigger in the trigInfo input. Create a new one to use for storing
-				trigger=new HsTrigger();
+				trigger = new HsTrigger();
 			}
 
 			System.Collections.Specialized.NameValueCollection parts;
@@ -835,7 +835,7 @@ namespace hspi_CsharpSample
 
 		}
 
-		
+
 
 
 		///<summary>
@@ -957,7 +957,7 @@ namespace hspi_CsharpSample
 			try
 			{
 				HsAction hsAction = null;
-				object hsActionObject = null;
+				object hsActionObject = new object();
 				if (actInfo.DataIn != null)
 				{
 					_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
@@ -1048,64 +1048,60 @@ namespace hspi_CsharpSample
 
 			var uid = actInfo.UID.ToString();
 			var stb = new StringBuilder();
+			string houseCode = "";
+			string deviceCode = "";
 
-					Dim Housecode As String = ""
+			var dd = new clsJQuery.jqDropList("HouseCodes_" + uid + uniqueString, Pagename, true);
+			var dd1 = new clsJQuery.jqDropList("DeviceCodes_" + uid + uniqueString, Pagename, true);
 
-					Dim DeviceCode As String = ""
+			dd.autoPostBack = true;
+			dd.AddItem("--Please Select--", "", false);
 
-					Dim dd=new clsJQuery.jqDropList("HouseCodes_" & UID & sUnique, Pagename, True)
-			        Dim dd1=new clsJQuery.jqDropList("DeviceCodes_" & UID & sUnique, Pagename, True)
-			        Dim key As String
+			dd1.autoPostBack = true;
+			dd1.AddItem("--Please Select--", "", false);
 
+			HsAction hsAction = null;
+			object hsActionObject = new object();
+			if (actInfo.DataIn != null)
+			{
+				_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
+				if (hsActionObject != null)
+				{
+					hsAction = (HsAction)hsActionObject;
+				}
 
+			
+			}
+			if(hsAction==null)
+				hsAction =new HsAction();
 
-					dd.autoPostBack = True
-					dd.AddItem("--Please Select--", "", False)
+			foreach (var key in hsAction.GetAllKeys())
+			{
+				if (key.Contains("HouseCodes_" + uid))
+				{
+					houseCode = (string)hsAction[key];
+				}
+				if (key.Contains("DeviceCodes_" + uid))
+				{
+					deviceCode = (string)hsAction[key];
+				}
+			}
 
-					dd1.autoPostBack = True
-					dd1.AddItem("--Please Select--", "", False)
+			foreach (var character in "ABCDEFGHIJKLMNOP".ToCharArray())
+			{
+				dd.AddItem(character.ToString(), character.ToString(), (character.ToString() == houseCode));
+			}
 
+			stb.Append("Select House Code:");
+			stb.Append(dd.Build());
 
-					If Not(ActInfo.DataIn Is Nothing) Then
-					   DeSerializeObject(ActInfo.DataIn, action)
-
-					Else 'new event, so clean out the action object
-			            action = New Action
-
-					End If
-
-
-					For Each key In action.Keys
-						Select Case True
-
-							Case key.Contains("HouseCodes_" & UID)
-
-								Housecode = action(key)
-
-							Case key.Contains("DeviceCodes_" & UID)
-
-								DeviceCode = action(key)
-
-						End Select
-
-					Next
-
-					For Each C In "ABCDEFGHIJKLMNOP"
-			            dd.AddItem(C, C, (C = Housecode))
-			        Next
-
-					stb.Append("Select House Code:")
-
-					stb.Append(dd.Build)
-
-					dd1.AddItem("All", "All", ("All" = DeviceCode))
-			        For i = 1 To 16
-			            dd1.AddItem(i.ToString, i.ToString, (i.ToString = DeviceCode))
-			        Next
-
-					stb.Append("Select Unit Code:")
-
-					stb.Append(dd1.Build)
+			dd1.AddItem("All", "All", ("All" == deviceCode));
+			for (int i = 1; i < 16; i++)
+			{
+				dd1.AddItem(i.ToString(), i.ToString(), (i.ToString() == deviceCode));
+			}
+			stb.Append("Select Unit Code:");
+			stb.Append(dd1.Build());
 
 			return stb.ToString();
 		}
@@ -1121,60 +1117,69 @@ namespace hspi_CsharpSample
 		{
 			var ret = new HomeSeerAPI.IPlugInAPI.strMultiReturn();
 			var uid = actInfo.UID.ToString();
+			HsAction hsAction = null;
 
+			ret.sResult = "";
 
-			//		ret.sResult = ""
-			//        'HS: We cannot be passed info ByRef from HomeSeer, so turn right around and return this same value so that if we want, 
-			//        '   we can exit here by returning 'Ret', all ready to go.  If in this procedure we need to change DataOut or TrigInfo,
-			//        '   we can still do that.
+			//HS: We cannot be passed info ByRef from HomeSeer, so turn right around and return this same value so that if we want, 
+			//   we can exit here by returning 'Ret', all ready to go.  If in this procedure we need to change DataOut or TrigInfo,
+			//   we can still do that.
 
-			//		ret.DataOut = ActInfo.DataIn
+			ret.DataOut = actInfo.DataIn;
+			ret.TrigActInfo = actInfo;
+			if (postData == null)
+			{ return ret; }
 
-			//		ret.TrigActInfo = ActInfo
+			if (postData.Count < 1)
+			{
+				return ret;
+			}
 
+			var hsActionObject = new object();
 
-			//		If PostData Is Nothing Then Return ret
-			//		If PostData.Count< 1 Then Return ret
+			if (actInfo.DataIn != null)
+			{
+				_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
+				if (hsActionObject != null)
+				{
+					hsAction = (HsAction)hsActionObject;
+				}
+			}
+			if (hsAction == null)
+				hsAction = new HsAction();
 
+			NameValueCollection parts = postData;
 
-			//		If Not (ActInfo.DataIn Is Nothing) Then
-			//			DeSerializeObject(ActInfo.DataIn, action)
+			try
+			{
+				foreach (string key in parts.Keys)
+				{
+					//				If key Is Nothing Then Continue For
+					if (key != null && !string.IsNullOrEmpty(key))
+					{
+						if (key.Contains("HouseCodes_" + uid) || key.Contains("DeviceCodes_" + uid))
+						{
+							hsAction.Add((object)parts[key], key);
+						}
+					}
 
-			//		End If
+				}
+				//			For Each key As String In parts.Keys
+				//			Next
 
-
-			//		Dim parts As Collections.Specialized.NameValueCollection = PostData
-
-			//		Try
-
-			//			For Each key As String In parts.Keys
-			//				If key Is Nothing Then Continue For
-
-			//				If String.IsNullOrEmpty(key.Trim) Then Continue For
-
-			//				Select Case True
-			//					Case key.Contains("HouseCodes_" & UID), key.Contains("DeviceCodes_" & UID)
-			//                        action.Add(CObj(parts(key)), key)
-			//                End Select
-
-			//			Next
-			//			If Not SerializeObject(action, ret.DataOut) Then
-			//				ret.sResult = Me.Name & " Error, Serialization failed. Signal Action not added."
-
-			//				Return ret
-
-			//			End If
-
-			//catch (Exception ex )
-			//			ret.sResult = "ERROR, Exception in Action UI of " & Me.Name & ": " & ex.Message
-
-			//			Return ret
-
-			//		End Try
-
-			//        ' All OK
-
-			//		ret.sResult = ""
+				if (!_utils.SerializeObject(hsAction, ref ret.DataOut))
+				{
+					ret.sResult = Utils.PluginName + " Error, Serialization failed. Signal Action not added.";
+					return ret;
+				}
+			}
+			catch (Exception ex)
+			{
+				ret.sResult = "ERROR, Exception in Action UI of " + Utils.PluginName + ": " + ex.Message;
+				return ret;
+			}
+			// All OK
+			ret.sResult = "";
 
 			return ret;
 
@@ -1191,32 +1196,50 @@ namespace hspi_CsharpSample
 		{
 
 			var stb = new StringBuilder();
-			//		Dim houseCode As String = ""
-			//        Dim deviceCode As String = ""
-			//		Dim UID As String = ActInfo.UID.ToString
+			var houseCode = "";
+			var deviceCode = "";
+			var uid = actInfo.UID.ToString();
+			var actionObject = new object();
+			HsAction hsAction = null;
+
+			if (actInfo.DataIn != null)
+			{
+				_utils.DeSerializeObject(ref actInfo.DataIn, ref actionObject);
+				if (actionObject != null)
+				{
+					hsAction = (HsAction)actionObject;
+				}
+
+			}
 
 
-			//		If Not(ActInfo.DataIn Is Nothing) Then
-			//		   DeSerializeObject(ActInfo.DataIn, action)
-			//		End If
+			if (hsAction != null)
+			{
+				foreach (var key in hsAction.GetAllKeys())
+				{
+					if (key.Contains("HouseCodes_" + uid))
+					{
+						houseCode = (string)hsAction[key];
+					}
 
+					if (key.Contains("DeviceCodes_" + uid))
+					{
+						deviceCode = (string)hsAction[key];
+					}
 
-			//		For Each key As String In action.Keys
-			//			Select Case True
-			//				Case key.Contains("HouseCodes_" & UID)
-			//					houseCode = action(key)
-			//				Case key.Contains("DeviceCodes_" & UID)
-			//					deviceCode = action(key)
-			//			End Select
-			//		Next
+				}
+			}
 
-			//		stb.Append(" the system will do 'something' to a device with ")
-			//		stb.Append("HouseCode " & houseCode & " ")
-			//        If deviceCode = "ALL" Then
-			//			stb.Append("for all Unitcodes")
-			//		Else
-			//			stb.Append("and Unitcode " & deviceCode)
-			//		End If
+			stb.Append(" the system will do 'something' to a device with ");
+			stb.Append("HouseCode " + houseCode + " ");
+			if (deviceCode == "ALL")
+			{
+				stb.Append("for all Unitcodes");
+			}
+			else
+			{
+				stb.Append("and Unitcode " + deviceCode);
+			}
 			return stb.ToString();
 		}
 
@@ -1342,7 +1365,7 @@ namespace hspi_CsharpSample
 				var valueObject = GetTriggerValue(key, trigger);
 				if (valueObject != null)
 				{
-					triggerValue = (int)valueObject;
+					triggerValue = int.Parse((string)valueObject);
 				}
 				//Console.WriteLine("Value found for " & key & ": " & triggervalue) '... for debugging
 
@@ -1467,7 +1490,7 @@ namespace hspi_CsharpSample
 			//Loads the trigger from the serialized object (if it exists, and it should)
 			if (!(trigInfo.DataIn == null))
 			{
-				object deserializedTrigger = null;
+				object deserializedTrigger = new object();
 				_utils.DeSerializeObject(ref trigInfo.DataIn, ref deserializedTrigger);
 				if (deserializedTrigger != null)
 				{
