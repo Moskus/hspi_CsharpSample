@@ -31,18 +31,17 @@ namespace hspi_CsharpSample
 	class Program
 	{
 		private static string _instance;
-		private static int _port;
 		private static Hspi _appApi;
-		private static string _ip;
 		private static IHSApplication _host;
 		private static IAppCallbackAPI _callback;
 		private static Utils _utils;
 
 		static void Main(string[] args)
 		{
-			_ip = "127.0.0.1";//Default ip connecting to the local server
-			_port = 10400;//Default port
-			
+			var ip = "127.0.0.1";//Default ip connecting to the local server
+			var port = 10400;//Default port
+			var instance = "";
+
 			//Let's check the startup arguments.Here you can set the server
 			//location(IP) and port if you are running the plugin remotely,
 			//and set an optional instance name
@@ -52,21 +51,20 @@ namespace hspi_CsharpSample
 				switch (parts[0])
 				{
 					case "port":
-						_port = 10400;
 						int tempPort = 0;
 						if (int.TryParse(parts[1], out tempPort))
 						{
-							_port = tempPort;
+							port = tempPort;
 						}
 						break;
 					case "server":
-						_ip = parts[1];
+						ip = parts[1];
 						break;
 					case "instance":
 						try
 						{
 							//Not in use as it is now
-							_instance = parts[1];
+							instance = parts[1];
 						}
 						catch (Exception ex)
 						{
