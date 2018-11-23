@@ -158,8 +158,6 @@ namespace hspi_CsharpSample.Config
 			{
 				this.reset();
 
-				//Todo Not sure about the current page business
-				//currentPage = this;
 				// handle any queries like mode=something
 				NameValueCollection parts = null;
 				if (!string.IsNullOrEmpty(queryString))

@@ -89,8 +89,6 @@ namespace hspi_CsharpSample
 
 		public Timer UpdateTimer => _updateTimer;
 
-
-
 		public Utils Utils
 		{
 			get => _utils;
@@ -440,7 +438,7 @@ namespace hspi_CsharpSample
 						//Again, this is the basic device from HSPI_SAMPLE_BASIC from HST
 						//****************************************************************
 						var ped = (PlugExtraData.clsPlugExtraData)device.get_PlugExtraData_Get(_hs);
-						var sample = (SampleClass)_utils.PedGet(ref ped,pedName);
+						var sample = (SampleClass)_utils.PedGet(ref ped, pedName);
 						if (sample != null)
 						{
 							var houseCode = sample.HouseCode;
@@ -694,18 +692,9 @@ namespace hspi_CsharpSample
 			HsTrigger trigger = (HsTrigger)triggerObject;
 			var foundKey = trigger.GetAllKeys().FirstOrDefault(x => x.Contains("SomeValue_" + uid));
 
-			//todo double check the logic here
+			//Check if we have any keys set and that they are something different than -1
 			if (foundKey != null && !string.IsNullOrEmpty((string)trigger[foundKey]) && ((string)trigger[foundKey]) != "-1")
 				return true;
-
-			//	For Each key As String In trigger.Keys
-			//	Select Case True
-			//Case key.Contains("SomeValue_" & UID) AndAlso trigger(key) <> ""
-			//itemsConfigured += 1
-			//End Select
-			//Next
-			//	If itemsConfigured = itemsToConfigure Then Return True
-			//End If
 
 			return false;
 		}
@@ -828,16 +817,10 @@ namespace hspi_CsharpSample
 				ret.sResult = "ERROR, Exception in Trigger UI of " + Utils.PluginName + ": " + ex.Message;
 				return ret;
 			}
-
-
 			//All OK
 			ret.sResult = "";
 			return ret;
-
 		}
-
-
-
 
 		///<summary>
 		///After the trigger has been configured, this function is called in your plugin to display the configured trigger. Return text that describes the given trigger.
@@ -962,24 +945,19 @@ namespace hspi_CsharpSample
 			try
 			{
 				HsAction hsAction = null;
-				object hsActionObject = new object();
+				object hsActionObject = null;
 				if (actInfo.DataIn != null)
 				{
+					hsActionObject = new object();
 					_utils.DeSerializeObject(ref actInfo.DataIn, ref hsActionObject);
 					if (hsActionObject != null)
 					{
 						hsAction = (HsAction)hsActionObject;
 					}
-					else
-					{
-						//Todo - Fix this extra return
-						return false;
-					}
 				}
-				else
-				{
+
+				if (hsAction == null)
 					return false;
-				}
 
 				foreach (var key in hsAction.GetAllKeys())
 				{
@@ -1397,9 +1375,7 @@ namespace hspi_CsharpSample
 							Console.WriteLine("Trigging event with reference " + trigger.evRef);
 							TriggerFire(trigger);
 						}
-
 						break;
-
 
 					case (int)TriggerTypes.WithSubtriggers: //= 2. The trigger with subtriggers
 															//We have multiple options for checking for values, they are specified by the subtrigger number (1-based)
@@ -1652,7 +1628,6 @@ namespace hspi_CsharpSample
 				device.set_Can_Dim(_hs, false);
 
 				device.set_Interface(_hs, Utils.PluginName);//Don't change this, or the device won't be associated with your plugin
-															//Todo: Checkout pluginInstance handling. Should be for each instance. Now for all instances
 				device.set_InterfaceInstance(_hs, _instance);//Don't change this, or the device won't be associated with that particular instance
 
 				device.set_Device_Type_String(_hs, Utils.PluginName + " " + "Basic");//This you can change to something suitable, though. :)
