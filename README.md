@@ -9,7 +9,7 @@ The plugin is based on the samples from HomeSeer Tech, but  comments are added f
 
 **Q**: "What does this plugin do?"
 
-**A**: Nothing very useful, it just does "something" to get you started. Heres a quick summary:
+**A**: Nothing very useful, it just does "something" to get you started. Here is a quick summary:
 1. It generates a random value every X minutes or seconds (this Is user changeable by a settings page). This is used to show how triggers and conditions work. See the region "Trigger Interface".
 
 2. It generates different types of devices, just to show how that could be done and how the plugin reacts to usage of the different controls (CAPI). See the sub "CheckAndCreateDevices".
