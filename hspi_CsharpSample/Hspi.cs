@@ -266,6 +266,9 @@ namespace hspi_CsharpSample
 		/// <summary>
 		/// This will allow scripts to call any function in your plugin by name.
 		/// Used to allow scripting of your plugin functions.
+		/// If your are trying to make this return arrays of class the class must be serializable, in the plugin exe
+		/// and you must be running the plugin from HomeSeer. Running remote will not work since HomeSeer can not find
+		/// your serializable class.
 		/// </summary>
 		/// <param name="proc">The name of the process/sub/function to call</param>
 		/// <param name="parms">Parameters passed as an object array</param>
