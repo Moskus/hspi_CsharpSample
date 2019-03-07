@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace hspi_CsharpSample.HomeSeerClasses
+namespace HSPI_CsharpSample.HomeSeerClasses
 {
 	///<summary>
     ///HSPI_SAMPE_BASIC class
