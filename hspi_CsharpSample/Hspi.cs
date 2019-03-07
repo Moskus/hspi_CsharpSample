@@ -10,7 +10,7 @@ namespace HSPI_CsharpSample
 {
 	//IPlugInAPI - this API is required for ALL plugins
 	//IThermostatAPI   ' add this API if this plugin supports thermostats
-	public class HSPI : HspiBase
+	public class HSPI : IPlugInAPI
 	{
 		private Plugin _plugin;
 		private Utils _utils;
@@ -674,9 +674,5 @@ namespace HSPI_CsharpSample
 		{
 			_condition = value;
 		}
-	}
-
-	public class HspiBase: IPlugInAPI
-	{
 	}
 }
