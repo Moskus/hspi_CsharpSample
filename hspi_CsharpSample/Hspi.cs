@@ -6,11 +6,11 @@ using System.Threading;
 using HomeSeerAPI;
 using Scheduler.Classes;
 
-namespace hspi_CsharpSample
+namespace HSPI_CsharpSample
 {
 	//IPlugInAPI - this API is required for ALL plugins
 	//IThermostatAPI   ' add this API if this plugin supports thermostats
-	public class Hspi : IPlugInAPI
+	public class HSPI : IPlugInAPI
 	{
 		private Plugin _plugin;
 		private Utils _utils;
@@ -21,7 +21,9 @@ namespace hspi_CsharpSample
 			set => _utils = value;
 		}
 
-		public Hspi(Plugin plugin)
+
+
+		public HSPI(Plugin plugin)
 		{
 			_plugin = plugin;
 		}

@@ -7,7 +7,7 @@ using HomeSeerAPI;
 using Scheduler;
 using Scheduler.Classes;
 
-namespace hspi_CsharpSample
+namespace HSPI_CsharpSample
 {
 	public class Utils
 	{

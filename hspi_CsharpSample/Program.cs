@@ -26,12 +26,12 @@ using HSCF.Communication.ScsServices.Client;
 //********************************************************************
 //********************************************************************
 
-namespace hspi_CsharpSample
+namespace HSPI_CsharpSample
 {
 	class Program
 	{
 		private static string _instance;
-		private static Hspi _appApi;
+		private static HSPI _appApi;
 		private static IHSApplication _host;
 		private static IAppCallbackAPI _callback;
 		private static Utils _utils;
@@ -77,13 +77,13 @@ namespace hspi_CsharpSample
 
 			var plugin = new Plugin();
 			plugin.PluginInstance = _instance;
-			_appApi = new Hspi(plugin);
-			Console.WriteLine("Connecting to server at " + _ip + ":" + _port + "...");
+			_appApi = new HSPI(plugin);
+			Console.WriteLine("Connecting to server at " + ip + ":" + port + "...");
 
-			_client = ScsServiceClientBuilder.CreateClient<IHSApplication>(new ScsTcpEndPoint(_ip, _port),
+			_client = ScsServiceClientBuilder.CreateClient<IHSApplication>(new ScsTcpEndPoint(ip, port),
 					_appApi);
 			_clientCallback = ScsServiceClientBuilder.CreateClient<IAppCallbackAPI>(
-					new ScsTcpEndPoint(_ip, _port), _appApi);
+					new ScsTcpEndPoint(ip, port), _appApi);
 			_client.Disconnected += Client_Disconnected;
 
 			var retryAttempts = 1;

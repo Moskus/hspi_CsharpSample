@@ -9,7 +9,7 @@ using System.Linq;
 using System.Web;
 using Scheduler.Classes;
 
-namespace hspi_CsharpSample.Config
+namespace HSPI_CsharpSample.Config
 {
 	public class WebConfig : PageBuilderAndMenu.clsPageBuilder
 	{
