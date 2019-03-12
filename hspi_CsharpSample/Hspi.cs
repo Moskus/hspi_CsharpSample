@@ -4,13 +4,14 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Threading;
 using HomeSeerAPI;
+using Hspi;
 using Scheduler.Classes;
 
 namespace HSPI_CsharpSample
 {
 	//IPlugInAPI - this API is required for ALL plugins
 	//IThermostatAPI   ' add this API if this plugin supports thermostats
-	public class HSPI : IPlugInAPI
+	public class HSPI : HspiBase
 	{
 		private Plugin _plugin;
 		private Utils _utils;
@@ -21,19 +22,22 @@ namespace HSPI_CsharpSample
 			set => _utils = value;
 		}
 
-
-
-		public HSPI(Plugin plugin)
+		public HSPI()
 		{
-			_plugin = plugin;
+			_plugin = new Plugin();
 		}
+
+		//public HSPI(Plugin plugin)
+		//{
+		//	_plugin = plugin;
+		//}
 
 		/// <summary>
 		/// Return the API's that this plug-in supports.This is a bit field.All plug-ins must have bit 3 set for I/O.This value is 4.
 		/// </summary>
 		/// <returns>HomeSeerAPI.Enums.eCapabilities</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/capabilities.htm</remarks>
-		public int Capabilities()
+		public override int Capabilities()
 		{
 			return (int)Enums.eCapabilities.CA_IO;
 		}
@@ -45,7 +49,7 @@ namespace HSPI_CsharpSample
 		/// 1 = Plug-in is not licensed and may be enabled and run without purchasing a license. Use this value for free plug-ins.
 		/// 2 = Plug-in is licensed and a user must purchase a license in order to use this plug-in. When the plug-in is first enabled, it will will run as a trial for 30 days.</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/accesslevel.htm</remarks>
-		public int AccessLevel()
+		public override int AccessLevel()
 		{
 			return _plugin.AccessLevel;
 		}
@@ -56,7 +60,7 @@ namespace HSPI_CsharpSample
 		/// </summary>
 		/// <returns>True/False</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/supportsmultipleinstances.htm</remarks>
-		public bool SupportsMultipleInstances()
+		public override bool SupportsMultipleInstances()
 		{
 			return false;
 		}
@@ -66,7 +70,7 @@ namespace HSPI_CsharpSample
 		/// </summary>
 		/// <returns>True/False</returns>
 		/// <remarks></remarks>
-		public bool SupportsMultipleInstancesSingleEXE()
+		public override bool SupportsMultipleInstancesSingleEXE()
 		{
 			return false;
 		}
@@ -77,7 +81,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks></remarks>
-		public bool SupportsAddDevice()
+		public override bool SupportsAddDevice()
 		{
 			return true;
 		}
@@ -87,7 +91,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>The instance name</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/instancefriendlyname.htm</remarks>
-		public string InstanceFriendlyName()
+		public override string InstanceFriendlyName()
 		{
 			return "";
 		}
@@ -97,7 +101,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>The interface status as "strInterfaceStatus"</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/interfacestatus1.htm</remarks>
-		public IPlugInAPI.strInterfaceStatus InterfaceStatus()
+		public override IPlugInAPI.strInterfaceStatus InterfaceStatus()
 		{
 			var es = new IPlugInAPI.strInterfaceStatus();
 			es.intStatus = IPlugInAPI.enumInterfaceStatus.OK;
@@ -110,7 +114,7 @@ namespace HSPI_CsharpSample
 		///<param name="EventType">The EvenType (enums.HSEvent)</param>
 		///<param name="parms">See description link</param>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hsevent_%28registereventcb%29.htm</remarks>
-		public void HSEvent(Enums.HSEvent EventType, object[] parms)
+		public override void HSEvent(Enums.HSEvent EventType, object[] parms)
 		{
 			Console.WriteLine("HSEvent: " + EventType.ToString());
 			switch (EventType)
@@ -124,7 +128,7 @@ namespace HSPI_CsharpSample
 		///This function is available for the ease of converting older HS2 plugins, however, it is desirable to use the new clsPageBuilder class for all new development.
 		///</summary>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/genpage.htm</remarks>
-		public string GenPage(string link)
+		public override string GenPage(string link)
 		{
 			return null;
 		}
@@ -133,7 +137,7 @@ namespace HSPI_CsharpSample
 		///This function is available for the ease of converting older HS2 plugins, however, it is desirable to use the new clsPageBuilder class for all new development.
 		///</summary>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/pageput.htm</remarks>
-		public string PagePut(string data)
+		public override string PagePut(string data)
 		{
 			return null;
 		}
@@ -143,7 +147,7 @@ namespace HSPI_CsharpSample
 		///After you return from this function the plugin EXE will terminate and must be allowed to terminate cleanly.
 		///</summary>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/initialization_-_when_used.htm</remarks>
-		public void ShutdownIO()
+		public override void ShutdownIO()
 		{
 			_plugin.ShutDownIo();
 		}
@@ -154,7 +158,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/raisesgenericcallbacks.htm</remarks>
-		public bool RaisesGenericCallbacks()
+		public override bool RaisesGenericCallbacks()
 		{
 			return true;
 		}
@@ -167,7 +171,7 @@ namespace HSPI_CsharpSample
 		///A collection of CAPIControl objects, one object for each device that needs to be controlled.
 		///Look at the ControlValue property to get the value that device needs to be set to.</param>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/setio.htm</remarks>
-		public void SetIOMulti(List<CAPI.CAPIControl> colSend)
+		public override void SetIOMulti(List<CAPI.CAPIControl> colSend)
 		{
 			_plugin.SetIOMulti(colSend);
 		}
@@ -178,8 +182,15 @@ namespace HSPI_CsharpSample
 		///<param name="port">Optional COM port passed by HomeSeer, used if HSComPort is set to TRUE</param>
 		///<returns>(Empty string)</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/initialization_-_when_used.htm</remarks>
-		public string InitIO(string port)
+		public override string InitIO(string port)
 		{
+			
+			var settings = new Settings(HS);
+			_utils = new Utils(settings);
+			_utils.Callback = Callback;
+			Utils.Hs = HS;
+			_plugin.Settings = settings;
+			_plugin.Utils = _utils;
 			return _plugin.InitIO(port);
 		}
 
@@ -189,7 +200,7 @@ namespace HSPI_CsharpSample
 		///<param name="dvref">The device reference</param>
 		///<returns>new value of the device (but apparently not anymore) </returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/polldevice.htm</remarks>
-		public IPlugInAPI.PollResultInfo PollDevice(int dvref)
+		public override IPlugInAPI.PollResultInfo PollDevice(int dvref)
 		{
 			return new IPlugInAPI.PollResultInfo();
 		}
@@ -199,7 +210,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/supportsconfigdevice.htm</remarks>
-		public bool SupportsConfigDevice()
+		public override bool SupportsConfigDevice()
 		{
 			return true;
 		}
@@ -210,7 +221,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/supportsconfigdeviceall.htm</remarks>
-		public bool SupportsConfigDeviceAll()
+		public override bool SupportsConfigDeviceAll()
 		{
 			return false;
 		}
@@ -230,7 +241,7 @@ namespace HSPI_CsharpSample
 		/// CallbackTimer = 5          Your plugin ConfigDevice is called and a page timer is called so ConfigDevicePost is called back every 2 seconds
 		/// </returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevicepost.htm</remarks>
-		public Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data, string user, int userRights)
+		public override Enums.ConfigDevicePostReturn ConfigDevicePost(int reference, string data, string user, int userRights)
 		{
 			return _plugin.ConfigDevicePost(reference, data, user, userRights);
 		}
@@ -248,7 +259,7 @@ namespace HSPI_CsharpSample
 		/// <param name="newDevice">True if this a new device being created for the first time. In this case, the device configuration dialog may present different information than when simply editing an existing device.</param>
 		/// <returns>A string containing HTML to be displayed. Return an empty string if there is not configuration needed.</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/configdevice.htm</remarks>
-		public string ConfigDevice(int reference, string user, int userRights, bool newDevice)
+		public override string ConfigDevice(int reference, string user, int userRights, bool newDevice)
 		{
 			return _plugin.ConfigDevice(reference, user, userRights, newDevice);
 		}
@@ -260,7 +271,7 @@ namespace HSPI_CsharpSample
 		/// <param name="RegEx">True/False</param>
 		/// <returns>HomeSeerAPI.SearchReturn. See links in Remarks.</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/search.htm</remarks>
-		public SearchReturn[] Search(string SearchString, bool RegEx)
+		public override SearchReturn[] Search(string SearchString, bool RegEx)
 		{
 			return null;
 		}
@@ -276,7 +287,7 @@ namespace HSPI_CsharpSample
 		/// <param name="parms">Parameters passed as an object array</param>
 		/// <returns></returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/custom_functions.htm</remarks>
-		public object PluginFunction(string procName, object[] parms)
+		public override object PluginFunction(string procName, object[] parms)
 		{
 			try
 			{
@@ -304,7 +315,7 @@ namespace HSPI_CsharpSample
 		/// <param name="parms">Parameters passed as an object array</param>
 		/// <returns></returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/custom_functions.htm</remarks>
-		public object PluginPropertyGet(string propertyName, object[] parms)
+		public override object PluginPropertyGet(string propertyName, object[] parms)
 		{
 			try
 			{
@@ -332,7 +343,7 @@ namespace HSPI_CsharpSample
 		/// <param name="proc">The name of the property to set</param>
 		/// <param name="value">The new value for the property</param>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/custom_functions.htm</remarks>
-		public void PluginPropertySet(string procName, object value)
+		public override void PluginPropertySet(string procName, object value)
 		{
 			try
 			{
@@ -361,7 +372,7 @@ namespace HSPI_CsharpSample
 		/// <param name="w">Wait. This parameter tells HomeSeer whether to continue processing commands immediately or to wait until the speak command is finished - pass this parameter unchanged to SpeakProxy.</param>
 		/// <param name="host"> This is a list of host:instances to speak or play the WAV file on.  An empty string or a single asterisk (*) indicates all connected speaker clients on all hosts.  Normally this parameter is passed to SpeakProxy unchanged.</param>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/speakin.htm</remarks>
-		public void SpeakIn(int device, string txt, bool w, string host)
+		public override void SpeakIn(int device, string txt, bool w, string host)
 		{
 			//Nothing here
 		}
@@ -371,7 +382,7 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>The plugin count</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actioncount.htm</remarks>
-		public int ActionCount()
+		public override int ActionCount()
 		{
 			return _plugin.ActionCount();
 		}
@@ -382,7 +393,7 @@ namespace HSPI_CsharpSample
 		///<param name="ActInfo">Object that contains information about the action like current selections.</param>
 		///<returns>Return TRUE if the given action is configured properly.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionconfigured.htm</remarks>
-		public bool ActionConfigured(IPlugInAPI.strTrigActInfo ActInfo)
+		public override bool ActionConfigured(IPlugInAPI.strTrigActInfo ActInfo)
 		{
 			return _plugin.ActionConfigured(ActInfo);
 		}
@@ -396,7 +407,7 @@ namespace HSPI_CsharpSample
 		///<param name="ActInfo">Object that contains information about the action like current selections</param>
 		///<returns> HTML controls that need to be displayed so the user can select the action parameters.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionbuildui.htm</remarks>
-		public string ActionBuildUI(string sUnique, IPlugInAPI.strTrigActInfo ActInfo)
+		public override string ActionBuildUI(string sUnique, IPlugInAPI.strTrigActInfo ActInfo)
 		{
 			return _plugin.ActionBuildUI(sUnique, ActInfo);
 		}
@@ -408,7 +419,7 @@ namespace HSPI_CsharpSample
 		///<param name="TrigInfoIN">Object that contains information about the action as "strTrigActInfo" (which is funny, as it isn't a string at all)</param>
 		///<returns>Object the holds the parsed information for the action. HomeSeer will save this information for you in the database.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionprocesspostui.htm</remarks>
-		public IPlugInAPI.strMultiReturn ActionProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
+		public override IPlugInAPI.strMultiReturn ActionProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
 		{
 			return _plugin.ActionProcessPostUI(PostData, TrigInfoIN);
 		}
@@ -420,7 +431,7 @@ namespace HSPI_CsharpSample
 		///<param name="ActInfo">Information from the current activity as "strTrigActInfo" (which is funny, as it isn't a string at all)</param>
 		///<returns>Simple string. Possibly HTML-formated.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionformatui.htm</remarks>
-		public string ActionFormatUI(IPlugInAPI.strTrigActInfo ActInfo)
+		public override string ActionFormatUI(IPlugInAPI.strTrigActInfo ActInfo)
 		{
 			return _plugin.ActionFormatUI(ActInfo);
 		}
@@ -432,7 +443,7 @@ namespace HSPI_CsharpSample
 		///<param name="dvRef">The device reference to check</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionreferencesdevice.htm</remarks>
-		public bool ActionReferencesDevice(IPlugInAPI.strTrigActInfo ActInfo, int dvRef)
+		public override bool ActionReferencesDevice(IPlugInAPI.strTrigActInfo ActInfo, int dvRef)
 		{
 			return false;
 		}
@@ -443,7 +454,7 @@ namespace HSPI_CsharpSample
 		///<param name="ActInfo">Use the ActInfo parameter to determine what action needs to be executed then execute this action.</param>
 		///<returns>Return TRUE if the action was executed successfully, else FALSE if there was an error.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/handleaction.htm</remarks>
-		public bool HandleAction(IPlugInAPI.strTrigActInfo ActInfo)
+		public override bool HandleAction(IPlugInAPI.strTrigActInfo ActInfo)
 		{
 			return _plugin.HandleAction(ActInfo);
 		}
@@ -454,7 +465,7 @@ namespace HSPI_CsharpSample
 		///<param name="sUnique">An unique string</param>
 		///<param name="TrigInfo">The trigger information</param>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerbuildui.htm</remarks>
-		public string TriggerBuildUI(string sUnique, IPlugInAPI.strTrigActInfo TrigInfo)
+		public override string TriggerBuildUI(string sUnique, IPlugInAPI.strTrigActInfo TrigInfo)
 		{
 			return _plugin.TriggerBuildUI(sUnique, TrigInfo);
 		}
@@ -466,7 +477,7 @@ namespace HSPI_CsharpSample
 		///<param name="TrigInfoIn">The trigger information</param>
 		///<returns>A structure, which is used in the Trigger and Action ProcessPostUI procedures, which not only communications trigger and action information through TrigActInfo which is strTrigActInfo , but provides an array of Byte where an updated/serialized trigger or action object from your plug-in can be stored.  See TriggerProcessPostUI and ActionProcessPostUI for more details.</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerprocesspostui.htm</remarks>
-		public IPlugInAPI.strMultiReturn TriggerProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
+		public override IPlugInAPI.strMultiReturn TriggerProcessPostUI(NameValueCollection PostData, IPlugInAPI.strTrigActInfo TrigInfoIN)
 		{
 			return _plugin.TriggerProcessPostUI(PostData, TrigInfoIN);
 		}
@@ -477,7 +488,7 @@ namespace HSPI_CsharpSample
 		///<param name="TrigInfo">Information of the trigger</param>
 		///<returns>Text describing the trigger</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerformatui.htm</remarks>
-		public string TriggerFormatUI(IPlugInAPI.strTrigActInfo trigInfo)
+		public override string TriggerFormatUI(IPlugInAPI.strTrigActInfo trigInfo)
 		{
 			return _plugin.TriggerFormatUI(trigInfo);
 		}
@@ -489,7 +500,7 @@ namespace HSPI_CsharpSample
 		///<param name="TrigInfo">The trigger information</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggertrue.htm</remarks>
-		public bool TriggerTrue(IPlugInAPI.strTrigActInfo trigInfo)
+		public override bool TriggerTrue(IPlugInAPI.strTrigActInfo trigInfo)
 		{
 			return _plugin.TriggerTrue(trigInfo);
 		}
@@ -500,7 +511,7 @@ namespace HSPI_CsharpSample
 		///<param name="TrigInfo">The trigger information</param>
 		///<param name="dvRef">The device reference</param>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerreferencesdevice.htm</remarks>
-		public bool TriggerReferencesDevice(IPlugInAPI.strTrigActInfo TrigInfo, int dvRef)
+		public override bool TriggerReferencesDevice(IPlugInAPI.strTrigActInfo TrigInfo, int dvRef)
 		{
 			return false;
 		}
@@ -514,7 +525,7 @@ namespace HSPI_CsharpSample
 		///<param name="queryString">Extra URI queries (?)</param>
 		///<returns></returns>
 		///<remarks></remarks>
-		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
+		public override string GetPagePlugin(string pageName, string user, int userRights, string queryString)
 		{
 			return _plugin.GetPagePlugin(pageName, user, userRights, queryString);
 		}
@@ -529,7 +540,7 @@ namespace HSPI_CsharpSample
 		/// <param name="userRights">The associated user rights</param>
 		/// <returns></returns>
 		/// <remarks></remarks>
-		public string PostBackProc(string pageName, string data, string user, int userRights)
+		public override string PostBackProc(string pageName, string data, string user, int userRights)
 		{
 			return _plugin.PostBackProc(pageName, data, user, userRights);
 		}
@@ -541,9 +552,9 @@ namespace HSPI_CsharpSample
 		/// </summary>
 		/// <returns>Plugin name</returns>
 		/// <remarks>http://homeseer.com/support/homeseer/HS3/SDK/name.htm</remarks>
-		public string Name
+		protected override string GetName()
 		{
-			get { return Utils.PluginName; }
+			return Utils.PluginName; 
 		}
 
 		///<summary>
@@ -551,9 +562,9 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hscomport.htm</remarks>
-		public bool HSCOMPort
-		{
-			get { return false; }
+		protected override bool GetHscomPort()
+		{	
+			return false; 
 		}
 
 		///<summary>
@@ -573,7 +584,7 @@ namespace HSPI_CsharpSample
 		///<param name="ActionNumber">The number of the action. Each action is numbered, starting at 1. (BUT WHY 1?!)</param>
 		///<returns>The action name from the 1-based index</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/actionname.htm</remarks>
-		public string get_ActionName(int ActionNumber)
+		public override string get_ActionName(int ActionNumber)
 		{
 			return _plugin.ActionName(ActionNumber);
 		}
@@ -584,7 +595,7 @@ namespace HSPI_CsharpSample
 		///<param name="TriggerNumber">The trigger number (surely 1 based)</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hasconditions.htm</remarks>
-		public bool get_HasConditions(int TriggerNumber)
+		public override bool get_HasConditions(int TriggerNumber)
 		{
 			return _plugin.HasConditions(TriggerNumber);
 		}
@@ -594,9 +605,9 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/hastriggers.htm</remarks>
-		public bool HasTriggers
+		protected override bool GetHasTriggers()
 		{
-			get { return _plugin.HasTriggers(); }
+			return _plugin.HasTriggers(); 
 		}
 
 		///<summary>
@@ -604,12 +615,9 @@ namespace HSPI_CsharpSample
 		///</summary>
 		///<returns>Integer</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggercount.htm</remarks>
-		public int TriggerCount
+		protected override int GetTriggerCount()
 		{
-			get
-			{
-				return _plugin.TriggerCount();
-			}
+			return _plugin.TriggerCount();
 		}
 
 
@@ -619,7 +627,7 @@ namespace HSPI_CsharpSample
 		///<param name="triggerNumber">Integer</param>
 		///<returns>String</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggername.htm</remarks>
-		public string get_TriggerName(int triggerNumber)
+		public override string get_TriggerName(int triggerNumber)
 		{
 			return _plugin.TriggerName(triggerNumber);
 		}
@@ -630,7 +638,7 @@ namespace HSPI_CsharpSample
 		///<param name="triggerNumber">The trigger number</param>
 		///<returns>Integer</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggercount.htm</remarks>
-		public int get_SubTriggerCount(int triggerNumber)
+		public override int get_SubTriggerCount(int triggerNumber)
 		{
 			return _plugin.SubTriggerCount(triggerNumber);
 		}
@@ -642,7 +650,7 @@ namespace HSPI_CsharpSample
 		///<param name="subtriggerNumber">Integer</param>
 		///<returns>SubTriggerName String</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/subtriggername.htm</remarks>
-		public string get_SubTriggerName(int triggerNumber, int subtriggerNumber)
+		public override string get_SubTriggerName(int triggerNumber, int subtriggerNumber)
 		{
 			return _plugin.SubTriggerName(triggerNumber, subtriggerNumber);
 		}
@@ -653,7 +661,7 @@ namespace HSPI_CsharpSample
 		///<param name="trigInfo">The trigger information</param>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/triggerconfigured.htm</remarks>
-		public bool get_TriggerConfigured(IPlugInAPI.strTrigActInfo trigInfo)
+		public override bool get_TriggerConfigured(IPlugInAPI.strTrigActInfo trigInfo)
 		{
 			return _plugin.TriggerConfigured(trigInfo);
 		}
@@ -665,14 +673,21 @@ namespace HSPI_CsharpSample
 		///<value>True/False</value>
 		///<returns>True/False</returns>
 		///<remarks>http://homeseer.com/support/homeseer/HS3/SDK/condition.htm</remarks>
-		public bool get_Condition(IPlugInAPI.strTrigActInfo trigInfo)
+		public override bool get_Condition(IPlugInAPI.strTrigActInfo trigInfo)
 		{
 			return _condition;
 		}
+
 		private bool _condition;
-		public void set_Condition(IPlugInAPI.strTrigActInfo trigInfo, bool value)
+
+		public override void set_Condition(IPlugInAPI.strTrigActInfo trigInfo, bool value)
 		{
 			_condition = value;
 		}
+
+		public override void SetDeviceValue(int deviceId, double value, bool trigger = true)
+		{
+		}
+
 	}
 }

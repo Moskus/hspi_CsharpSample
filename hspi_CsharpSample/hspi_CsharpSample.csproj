@@ -76,8 +76,10 @@
     <Compile Include="HomeSeerClasses\HsCollection.cs" />
     <Compile Include="HomeSeerClasses\HsTrigger.cs" />
     <Compile Include="Hspi.cs" />
-    <Compile Include="HSPI\Class1.cs" />
     <Compile Include="HSPI\Connector.cs" />
+    <Compile Include="HSPI\Exceptions\HspiConnectionException.cs" />
+    <Compile Include="HSPI\Exceptions\HspiException.cs" />
+    <Compile Include="HSPI\HspiBase.cs" />
     <Compile Include="LogType.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Program.cs" />
