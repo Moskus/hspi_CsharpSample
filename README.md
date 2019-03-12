@@ -1,3 +1,6 @@
+# Sorry, but as it is it will only work when you run it remote (2019-03-12)
+This will be fixed as soon as I have enough time.
+
 # hspi_CsharpSample
 
 C# sample for HomeSeer 3 plugins. "Translated" from the hspi_moskussample plugin in vb.net.
