@@ -13,10 +13,6 @@ namespace Hspi
 		public static void Connect<TPlugin>(string[] args) where TPlugin : HspiBase, new()
 		{
 			var parsedArguments = ParseArguments(args);
-			//Parser.Default.ParseArguments<Options>(args)
-			//    .WithParsed(options =>
-			//    {
-			// create an instance of our plugin.
 			var myPlugin = new TPlugin();
 			Console.WriteLine(myPlugin.Name);
 
@@ -118,6 +114,7 @@ namespace Hspi
 
 		public ArgumentObject()
 		{
+			//Default arguments
 			Ip = "127.0.0.1";
 			Port = 10400;
 		}

@@ -27,10 +27,6 @@ namespace HSPI_CsharpSample
 			_plugin = new Plugin();
 		}
 
-		//public HSPI(Plugin plugin)
-		//{
-		//	_plugin = plugin;
-		//}
 
 		/// <summary>
 		/// Return the API's that this plug-in supports.This is a bit field.All plug-ins must have bit 3 set for I/O.This value is 4.
