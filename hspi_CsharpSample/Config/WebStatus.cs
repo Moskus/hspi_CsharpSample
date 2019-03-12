@@ -8,7 +8,7 @@ using System.Data;
 using System.Text;
 using Scheduler.Classes;
 
-namespace hspi_CsharpSample.Config
+namespace HSPI_CsharpSample.Config
 {
 	public class WebStatus : PageBuilderAndMenu.clsPageBuilder
 	{

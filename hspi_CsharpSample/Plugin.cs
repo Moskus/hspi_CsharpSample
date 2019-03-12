@@ -4,12 +4,12 @@ using System.Configuration;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
-using hspi_CsharpSample.Config;
+using HSPI_CsharpSample.Config;
 using System.Web;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using hspi_CsharpSample.HomeSeerClasses;
+using HSPI_CsharpSample.HomeSeerClasses;
 using HomeSeerAPI;
 using Scheduler;
 
@@ -59,7 +59,7 @@ using Scheduler;
 //***************************************************************
 
 
-namespace hspi_CsharpSample
+namespace HSPI_CsharpSample
 {
 	public class Plugin
 	{

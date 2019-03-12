@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace hspi_CsharpSample.HomeSeerClasses
+namespace HSPI_CsharpSample.HomeSeerClasses
 {
 	[Serializable()]
 	public class HsTrigger : HsCollection

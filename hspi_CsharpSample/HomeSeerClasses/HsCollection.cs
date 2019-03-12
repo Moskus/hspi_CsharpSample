@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace hspi_CsharpSample.HomeSeerClasses
+namespace HSPI_CsharpSample.HomeSeerClasses
 {
 	///<summary>
 	///A custom dictionary for storing serializable objects

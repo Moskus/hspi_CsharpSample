@@ -1,4 +1,4 @@
-﻿namespace hspi_CsharpSample
+﻿namespace HSPI_CsharpSample
 {
 	public enum LogType
 	{

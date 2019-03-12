@@ -1,6 +1,6 @@
 ﻿using HomeSeerAPI;
 
-namespace hspi_CsharpSample
+namespace HSPI_CsharpSample
 {
 	public class Settings
 	{
