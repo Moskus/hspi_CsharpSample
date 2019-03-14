@@ -5,6 +5,10 @@ https://forums.homeseer.com/forum/developer-support/programming-plug-in-developm
 
 The plugin is based on the samples from HomeSeer Tech, but  comments are added from the SDK and online help (and links to it so that it's easier accessible).
 
+** Remember to sett Plattform to x86 or set Platform target to Prefer 32-bit **
+Go into properties for hspi_CsharpSample (mark the project in the solution explorer and hit ALT+ENTER or right click the project and select Properties from the popup menu
+
+
 **FAQ below.**
 
 **Q**: "What does this plugin do?"
