@@ -31,12 +31,6 @@ namespace HSPI_CsharpSample
 {
 	class Program
 	{
-		private static string _instance;
-		private static HSPI _appApi;
-		private static IHSApplication _host;
-		private static IAppCallbackAPI _callback;
-		private static Utils _utils;
-
 		static void Main(string[] args)
 		{
 
