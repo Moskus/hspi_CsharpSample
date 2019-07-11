@@ -1650,8 +1650,9 @@ namespace HSPI_CsharpSample
 				//Setting the type to plugin device
 				var typeInfo = new DeviceTypeInfo_m.DeviceTypeInfo()
 				{
-					Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
-				};
+                    //Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
+                    Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
+                };
 				device.set_DeviceType_Set(_hs, typeInfo);
 				device.set_Can_Dim(_hs, false);
 
