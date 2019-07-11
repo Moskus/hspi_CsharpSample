@@ -52,14 +52,58 @@ namespace HSPI_CsharpSample
 		public IAppCallbackAPI Callback { get; set; }
 		public static IHSApplication Hs { get; set; }
 
-		///<summary>
-		///Registers the web page in HomeSeer
-		///</summary>
-		///<param name="link">A short link to the page</param>
-		///<param name="linktext">The text to be shown</param>
-		///<param name="page_title">The title of the page when loaded</param>
-		///<remarks>HSPI_SAMPLE_BASIC</remarks>
-		public void RegisterWebPage(string link, string linkText = "", string pageTitle = "")
+        ///<summary>
+        ///Registers the web page in HomeSeer
+        ///</summary>
+        ///<param name="link">A short link to the page</param>
+        ///<param name="linktext">The text to be shown</param>
+        ///<param name="page_title">The title of the page when loaded</param>
+        ///<remarks>HSPI_SAMPLE_BASIC</remarks>
+
+        public void RegisterWebPage(string link, string linkText = "", string pageTitle = "")
+            // Modified to add the option to hide a web page if wanted.  This is useful for registering
+            // a web page for use as a Web Hook receiver or other admin functions.
+        {
+            try
+            {
+                var theLink = link;
+                Hs.RegisterPage(theLink, Utils.PluginName, _pluginInstance);
+
+                if (linkText == "hidden")
+                {
+                    linkText = "";
+                }
+                else if (string.IsNullOrEmpty(linkText))
+                {
+                    linkText = link;
+                }
+
+                linkText = linkText.Replace(Utils.PluginName, "").Replace("_", " ");
+
+                if (pageTitle == "hidden")
+                {
+                    pageTitle = "";
+                }
+                else if (string.IsNullOrEmpty(pageTitle))
+                {
+                    pageTitle = linkText;
+                }
+
+                var webPageDescription = new HomeSeerAPI.WebPageDesc();
+                webPageDescription.plugInName = Utils.PluginName;
+
+                webPageDescription.link = theLink;
+
+                webPageDescription.linktext = linkText + _pluginInstance;
+                webPageDescription.page_title = pageTitle + _pluginInstance;
+                Callback.RegisterLink(webPageDescription);
+            }
+            catch (Exception ex)
+            {
+                Log("Registering Web Links (RegisterWebPage): " + ex.Message, LogType.Error);
+            }
+        }
+        public void RegisterConfigPage(string link, string linkText = "", string pageTitle = "")
 		{
 			try
 			{
@@ -85,8 +129,7 @@ namespace HSPI_CsharpSample
 
 				webPageDescription.linktext = linkText + _pluginInstance;
 				webPageDescription.page_title = pageTitle + _pluginInstance;
-				Callback.RegisterLink(webPageDescription);
-
+				Callback.RegisterConfigLink(webPageDescription);
 			}
 			catch (Exception ex)
 			{
@@ -94,13 +137,49 @@ namespace HSPI_CsharpSample
 			}
 		}
 
-		///<summary>
-		///Logging
-		///</summary>
-		///<param name="Message">The message to be logged</param>
-		///<param name="Log_Level">Normal, Warning or Error</param>
-		///<remarks>HSPI_SAMPLE_BASIC</remarks>
-		public void Log(string message, LogType logLevel = LogType.Normal)
+        public void RegisterHelpPage(string link, string linkText = "", string pageTitle = "")
+        {
+            try
+            {
+                var theLink = link;
+                Hs.RegisterPage(theLink, Utils.PluginName, _pluginInstance);
+
+                if (string.IsNullOrEmpty(linkText))
+                {
+                    linkText = link;
+                }
+
+                linkText = linkText.Replace(Utils.PluginName, "").Replace("_", " ");
+
+                if (string.IsNullOrEmpty(pageTitle))
+                {
+                    pageTitle = linkText;
+                }
+
+                var webPageDescription = new HomeSeerAPI.WebPageDesc();
+                webPageDescription.plugInName = Utils.PluginName;
+
+                webPageDescription.link = theLink;
+
+                webPageDescription.linktext = linkText + _pluginInstance;
+                webPageDescription.page_title = pageTitle + _pluginInstance;
+                Hs.RegisterHelpLink(webPageDescription);
+            }
+            catch (Exception ex)
+            {
+                Log("Registering Help Page Link (RegisterHelpPage): " + ex.Message, LogType.Error);
+            }
+        }
+
+
+
+        ///<summary>
+        ///Logging
+        ///</summary>
+        ///<param name="Message">The message to be logged</param>
+        ///<param name="Log_Level">Normal, Warning or Error</param>
+        ///<remarks>HSPI_SAMPLE_BASIC</remarks>
+        public void Log(string message, LogType logLevel = LogType.Normal)
 		{
 			switch (logLevel)
 			{
