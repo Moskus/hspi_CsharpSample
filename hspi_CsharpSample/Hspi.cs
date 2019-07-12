@@ -79,10 +79,9 @@ namespace HSPI_CsharpSample
 		///<remarks></remarks>
 		public override bool SupportsAddDevice()
 		{
-			return true;
+			return false;
 		}
 
-		///<summary>
 		///Returns the instance name of this instance of the plug-in. Only valid if SupportsMultipleInstances returns TRUE. The instance is set when the plug-in is started, it is passed as a command line parameter
 		///</summary>
 		///<returns>The instance name</returns>
