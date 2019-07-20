@@ -60,9 +60,7 @@ namespace HSPI_CsharpSample
         ///<param name="page_title">The title of the page when loaded</param>
         ///<remarks>HSPI_SAMPLE_BASIC</remarks>
 
-        public void RegisterWebPage(string link, string linkText = "", string pageTitle = "")
-            // Modified to add the option to hide a web page if wanted.  This is useful for registering
-            // a web page for use as a Web Hook receiver or other admin functions.
+        public void RegisterWebPage(string link, string linkText = "", string pageTitle = "")            
         {
             try
             {
@@ -103,6 +101,7 @@ namespace HSPI_CsharpSample
                 Log("Registering Web Links (RegisterWebPage): " + ex.Message, LogType.Error);
             }
         }
+
         public void RegisterConfigPage(string link, string linkText = "", string pageTitle = "")
 		{
 			try
@@ -524,5 +523,184 @@ namespace HSPI_CsharpSample
 			return allEvents;
 		}
 
-	}
+        ///<summary>
+		///Some common conversion methods
+		///</summary>	
+		///<remarks>By simplextech</remarks>
+        public double FtoC(double F)
+        {
+            var C = Math.Round((F - 32) * 5 / 9);
+
+            return C;
+        }
+
+        public double inHgTommHg(double inHg)
+        {
+            var mmHg = Math.Round(inHg * 25.4);
+
+            return mmHg;
+        }
+
+        public double inHgTohPa(double inHg)
+        {
+            var hPa = Math.Round(inHg * 3386.389);
+
+            return hPa;
+        }
+
+        public double mphToFtsec(double mph)
+        {
+            var ftSec = Math.Round(mph * 1.467);
+
+            return ftSec;
+        }
+
+        public double mphToMsec(double mph)
+        {
+            var mSec = Math.Round(mph / 2.237);
+
+            return mSec;
+        }
+
+        public double mphToKmHr(double mph)
+        {
+            var kmHr = Math.Round(mph * 1.609);
+
+            return kmHr;
+        }
+
+        public double mphToKnots(double mph)
+        {
+            var knots = Math.Round(mph / 1.151);
+
+            return knots;
+        }
+
+        public double inHrTommHr(double inHr)
+        {
+            var mmHr = Math.Round(inHr * 25.4);
+
+            return mmHr;
+        }
+
+        public double wm2ToLux(double wm2)
+        {
+            var lux = Math.Round(wm2 / 0.0079);
+
+            return lux;
+        }
+
+        public double percentToIndex(double percent)
+        {
+            double index = 0;
+
+            if (percent == 0)
+            {
+                index = 1;
+                return index;
+            }
+            else if (percent == 7)
+            {
+                index = 2;
+                return index;
+            }
+            else if (percent == 13)
+            {
+                index = 3;
+                return index;
+            }
+            else if (percent == 20)
+            {
+                index = 4;
+                return index;
+            }
+            else if (percent == 27)
+            {
+                index = 5;
+                return index;
+            }
+            else if (percent == 33)
+            {
+                index = 6;
+                return index;
+            }
+            else if (percent == 40)
+            {
+                index = 7;
+                return index;
+            }
+            else if (percent == 47)
+            {
+                index = 8;
+                return index;
+            }
+            else if (percent == 53)
+            {
+                index = 9;
+                return index;
+            }
+            else if (percent == 60)
+            {
+                index = 10;
+                return index;
+            }
+            else if (percent == 67)
+            {
+                index = 11;
+                return index;
+            }
+            else if (percent == 73)
+            {
+                index = 12;
+                return index;
+            }
+            else if (percent == 80)
+            {
+                index = 13;
+                return index;
+            }
+            else if (percent == 87)
+            {
+                index = 14;
+                return index;
+            }
+            else if (percent == 93)
+            {
+                index = 15;
+                return index;
+            }
+            else if (percent == 99)
+            {
+                index = 16;
+                return index;
+            }
+            else { return 0; }
+        }
+
+        public double kgToPound(double kg)
+        {
+            var pound = Math.Round(kg * 2.05);
+
+            return pound;
+        }
+
+        public double MeterToMile(double meter)
+        {
+            double mile = Math.Round(meter / 1609.344, 2);
+
+            return mile;
+        }
+
+        public string SecondsToTime(double seconds)
+        {
+            TimeSpan time = TimeSpan.FromSeconds(seconds);
+
+            //here backslash is must to tell that colon is
+            //not the part of format, it just a character that we want in output
+            //string str = time.ToString(@"hh\:mm\:ss\:fff");
+            string str = time.ToString(@"hh\:mm\:ss");
+
+            return str;
+        }
+    }
 }
