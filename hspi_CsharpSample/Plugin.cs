@@ -12,6 +12,7 @@ using System.Threading;
 using HSPI_CsharpSample.HomeSeerClasses;
 using HomeSeerAPI;
 using Scheduler;
+using Scheduler.Classes;
 
 //***************************************************************
 //***************************************************************
@@ -1591,7 +1592,7 @@ namespace HSPI_CsharpSample
 				for (int i = 0; i < 2; i++)
 				{
 					//Let's create the child device
-					var childDeviceReference = CreateChildDevice("Child " + i);
+					var childDeviceReference = CreateChildDevice("Child " + i,root);
 					//... and associate it with the root
 					if (childDeviceReference > 0)
 					{
@@ -1618,7 +1619,7 @@ namespace HSPI_CsharpSample
 						for (int y = 0; y < 2; y++)
 						{
 							//First create the device and get the reference
-							var childReference = CreateChildDevice("Child " + y);
+							var childReference = CreateChildDevice("Child " + y,foundRoot);
 							//Then associated that child reference with the root.
 							if (childReference > 0)
 							{
@@ -1802,7 +1803,7 @@ namespace HSPI_CsharpSample
 		///<param name="childName"></param>
 		///<returns></returns>
 		///<remarks></remarks>
-		private int CreateChildDevice(string childName)
+		private int CreateChildDevice(string childName,DeviceClass parent)
 		{
 			//Creating BASIC device and getting its device reference
 			var device = (Scheduler.Classes.DeviceClass)_hs.GetDeviceByRef(CreateBasicDevice(childName));
@@ -1812,6 +1813,10 @@ namespace HSPI_CsharpSample
 
 			//Setting it as a child device
 			device.set_Relationship(_hs, HomeSeerAPI.Enums.eRelationship.Child);
+
+			//Set its parent
+			device.AssociatedDevice_Add(_hs, parent.get_Ref(_hs));
+
 
 			//Committing to the database and return the reference
 			_hs.SaveEventsDevices();

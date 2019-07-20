@@ -85,8 +85,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\WebConfig.cs" />
-    <Compile Include="Config\WebHook.cs" />
     <Compile Include="Config\WebHelp.cs" />
+    <Compile Include="Config\WebHook.cs" />
     <Compile Include="Config\WebStatus.cs" />
     <Compile Include="HomeSeerClasses\SampleClass.cs" />
     <Compile Include="HomeSeerClasses\HsAction.cs" />
