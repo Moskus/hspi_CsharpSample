@@ -67,9 +67,13 @@ namespace HSPI_CsharpSample
 		private Settings _settings;
 		private readonly string ConfigPageName = Utils.PluginName + "Config";
 		private readonly string StatusPageName = Utils.PluginName + "Status";
+        private readonly string HelpPageName = Utils.PluginName + "Help";
+        private readonly string WebHookPageName = Utils.PluginName + "WebHook";
 
-		private WebConfig _configPage;
+        private WebConfig _configPage;
 		private WebStatus _statusPage;
+        private WebHelp _helpPage;
+        private WebHook _webHookPage;
 
 		private int _lastRandomNumber;
 		private Timer _updateTimer;
@@ -99,8 +103,11 @@ namespace HSPI_CsharpSample
 				_utils.PluginInstance = _instance;
 				_configPage = new WebConfig(ConfigPageName, _settings, _hs, this, _utils);
 				_statusPage = new WebStatus(StatusPageName, _settings, _hs, this);
-			}
-		}
+                _helpPage = new WebHelp(HelpPageName, _settings, _hs, this);
+                _webHookPage = new WebHook(WebHookPageName, _settings, _hs, this);
+
+            }
+        }
 
 		public Settings Settings
 		{
@@ -1285,23 +1292,44 @@ namespace HSPI_CsharpSample
 
 		public string PostBackProc(string pageName, string data, string user, int userRights)
 		{
-			if (pageName == _statusPage.PageName)
-			{
-				return _statusPage.postBackProc(pageName, data, user, userRights);
-			}
-			//Default choice
-			return _configPage.postBackProc(pageName, data, user, userRights);
-		}
+            if (pageName == _webHookPage.PageName)
+            {
+                return _webHookPage.postBackProc(pageName, data, user, userRights);
+            }
+            if (pageName == _statusPage.PageName)
+            {
+                return _statusPage.postBackProc(pageName, data, user, userRights);
+            }
+            else if (pageName == _helpPage.PageName)
+            {
+                return _helpPage.postBackProc(pageName, data, user, userRights);
+            }
+            else
+            {
+                //Default choice
+                return _configPage.postBackProc(pageName, data, user, userRights);
+            }
+        }
 
 		public string GetPagePlugin(string pageName, string user, int userRights, string queryString)
 		{
-			if (pageName == _statusPage.PageName)
-			{
-				return _statusPage.GetPagePlugin(pageName, user, userRights, queryString);
-			}
-			//Default choice
-			return _configPage.GetPagePlugin(pageName, user, userRights, queryString);
-
+            if (pageName == _webHookPage.PageName)
+            {
+                return _webHookPage.GetPagePlugin(pageName, user, userRights, queryString);
+            }            
+            else if (pageName == _statusPage.PageName)
+            {
+                return _statusPage.GetPagePlugin(pageName, user, userRights, queryString);
+            }
+            else if (pageName == _helpPage.PageName)
+            {
+                return _helpPage.GetPagePlugin(pageName, user, userRights, queryString);
+            }
+            else
+            {
+                //Default choice
+                return _configPage.GetPagePlugin(pageName, user, userRights, queryString);
+            }
 		}
 		#endregion
 
@@ -1622,8 +1650,9 @@ namespace HSPI_CsharpSample
 				//Setting the type to plugin device
 				var typeInfo = new DeviceTypeInfo_m.DeviceTypeInfo()
 				{
-					Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
-				};
+                    //Device_Type = (int)DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
+                    Device_API = DeviceTypeInfo_m.DeviceTypeInfo.eDeviceAPI.Plug_In
+                };
 				device.set_DeviceType_Set(_hs, typeInfo);
 				device.set_Can_Dim(_hs, false);
 
