@@ -534,63 +534,63 @@ namespace HSPI_CsharpSample
             return C;
         }
 
-        public double inHgTommHg(double inHg)
+        public double InHgTommHg(double inHg)
         {
             var mmHg = Math.Round(inHg * 25.4);
 
             return mmHg;
         }
 
-        public double inHgTohPa(double inHg)
+        public double InHgTohPa(double inHg)
         {
             var hPa = Math.Round(inHg * 3386.389);
 
             return hPa;
         }
 
-        public double mphToFtsec(double mph)
+        public double MphToFtsec(double mph)
         {
             var ftSec = Math.Round(mph * 1.467);
 
             return ftSec;
         }
 
-        public double mphToMsec(double mph)
+        public double MphToMsec(double mph)
         {
             var mSec = Math.Round(mph / 2.237);
 
             return mSec;
         }
 
-        public double mphToKmHr(double mph)
+        public double MphToKmHr(double mph)
         {
             var kmHr = Math.Round(mph * 1.609);
 
             return kmHr;
         }
 
-        public double mphToKnots(double mph)
+        public double MphToKnots(double mph)
         {
             var knots = Math.Round(mph / 1.151);
 
             return knots;
         }
 
-        public double inHrTommHr(double inHr)
+        public double InHrTommHr(double inHr)
         {
             var mmHr = Math.Round(inHr * 25.4);
 
             return mmHr;
         }
 
-        public double wm2ToLux(double wm2)
+        public double Wm2ToLux(double wm2)
         {
             var lux = Math.Round(wm2 / 0.0079);
 
             return lux;
         }
 
-        public double percentToIndex(double percent)
+        public double PercentToIndex(double percent)
         {
             double index = 0;
 
@@ -677,7 +677,7 @@ namespace HSPI_CsharpSample
             else { return 0; }
         }
 
-        public double kgToPound(double kg)
+        public double KgToPound(double kg)
         {
             var pound = Math.Round(kg * 2.05);
 
