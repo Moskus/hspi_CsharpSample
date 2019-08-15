@@ -1297,7 +1297,7 @@ namespace HSPI_CsharpSample
             {
                 return _webHookPage.postBackProc(pageName, data, user, userRights);
             }
-            if (pageName == _statusPage.PageName)
+            else if (pageName == _statusPage.PageName)
             {
                 return _statusPage.postBackProc(pageName, data, user, userRights);
             }
