@@ -53,5 +53,5 @@ The plugin have just one action, but most of the same logic applies also applies
 
 This sample doesn't magically make writing plugins super easy. It still requires some time to understand how it is pieced together. But hopefully it will get you started.
 
-If you know what you are doing and have comments of what can do done better, then please feel free to create a pull request. Share code if you can. 
+If you know what you are doing and have comments of what can be done better, then please feel free to create a pull request. Share code if you can. 
 
